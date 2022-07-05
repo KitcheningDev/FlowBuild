@@ -1,0 +1,10 @@
+{
+    "name": "Gnocchi",
+    "paths":
+    [
+        [ "START", "Zwiebel schneiden", "Zwiebel in Butter anbraten", "Für 5 min anbraten", "Brühe & Sahne hinzufügen", "Gorgonzola hinzufügen", "Kochen bis Spinat weich", "Abschmecken & servieren" ],
+        [ "START", "Knoblauch pressen", "Für 5 min anbraten" ],
+        [ "START", "Spinat waschen", "Kochen bis Spinat weich" ],
+        [ "START", "Wasser kochen", "Gnocchi für 3 min kochen", "Gnocchis abschöpfen", "Abschmecken & servieren" ]
+    ]
+}

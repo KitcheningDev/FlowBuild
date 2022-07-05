@@ -1,0 +1,51 @@
+#recipe-list {
+    position: absolute;
+    left: 60rem;
+    margin: 1rem 1rem;
+}
+
+#input-field {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    
+    font-size: 2rem;
+    text-align: center;
+
+    border: 0.2rem solid;
+    border-radius: 0.3rem;
+
+    color: var(--primary-col);
+    background-color: var(--fg-col);
+
+    margin: 1rem 1rem;
+    padding: 0.1rem 0.3rem;
+
+    z-index: 2;
+}
+
+.recipe-head {
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-align: center;
+    
+    margin: 1rem 1rem;
+
+    padding: 0.1rem 0.3rem;
+    
+    user-select: none;
+}
+
+.recipe-btn {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    
+    margin: 1rem 1rem;
+
+    padding: 0.1rem 0.3rem;
+    border: 0.3rem solid;
+    border-radius: 0.3rem;
+    
+    user-select: none;
+    cursor: pointer;
+}

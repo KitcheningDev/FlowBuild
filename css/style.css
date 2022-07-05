@@ -1,0 +1,11 @@
+:root {
+    --bg-col: rgb(215, 215, 215);
+    --fg-col: rgb(200, 200, 200);
+    --primary-col: rgb(30, 30, 30);
+}
+
+body {
+    font: 10px Consolas;
+
+    background-color: var(--bg-col);
+}

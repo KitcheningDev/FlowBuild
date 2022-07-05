@@ -1,0 +1,10 @@
+{
+    "name": "Spinat-Pesto",
+    "paths": 
+    [
+        [ "START", "Walnüsse in Olivenöl anbraten", "3-4 min anbraten", "Parmesan hinzufügen", "Alles pürieren", "Anrichten & servieren", "END" ],
+        [ "START", "Knoblauch pressen", "3-4 min anbraten" ],
+        [ "START", "Spinat & Basilikum waschen", "Parmesan hinzufügen" ],
+        [ "START", "Tomaten schneiden", "Anrichten & servieren" ]
+    ]
+}
