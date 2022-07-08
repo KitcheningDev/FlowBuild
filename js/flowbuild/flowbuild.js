@@ -35,17 +35,39 @@ export class Flowbuild {
     Backtrack(head) {
     }
     ArithmAvg(text) {
-        const avg = new Vec2();
+        let avg = 0;
         for (let parent of __classPrivateFieldGet(this, _Flowbuild_recipe, "f").paths.get(text).prev)
-            avg.AddVec(this.grid.GetPos(parent));
-        return avg.DivScal(__classPrivateFieldGet(this, _Flowbuild_recipe, "f").paths.get(text).prev.length);
+            avg += this.grid.GetPos(parent).x;
+        return Math.round(avg / __classPrivateFieldGet(this, _Flowbuild_recipe, "f").paths.get(text).prev.length);
+    }
+    ChildOff(text) {
+        const parent = __classPrivateFieldGet(this, _Flowbuild_recipe, "f").paths.get(text).prev[0];
+        const index = __classPrivateFieldGet(this, _Flowbuild_recipe, "f").paths.get(parent).next.indexOf(text);
+        const length = __classPrivateFieldGet(this, _Flowbuild_recipe, "f").paths.get(parent).next.length;
+        if (length % 2)
+            return index - Math.floor(length / 2);
+        else if (index < length / 2)
+            return index - length / 2;
+        else
+            return index + 1 - length / 2;
+    }
+    Max(text) {
+        let max = 0;
+        for (let parent of __classPrivateFieldGet(this, _Flowbuild_recipe, "f").paths.get(text).prev) {
+            if (max < this.grid.GetPos(parent).y)
+                max = this.grid.GetPos(parent).y;
+        }
+        return max;
     }
     BacktrackDefault(head) {
-        let head_pos = this.ArithmAvg(head);
+        let head_pos = new Vec2(this.ArithmAvg(head) + this.ChildOff(head), this.Max(head) + 1);
+        // derives path positions from head pos
         const positions = [];
         for (let i = 0; i < __classPrivateFieldGet(this, _Flowbuild_recipe, "f").paths.get(head).boxes.length; ++i) {
+            // path goes straight down from head
             if (__classPrivateFieldGet(this, _Flowbuild_config, "f").layout = PathLayout.Straight)
                 positions.push(new Vec2(0, i).AddVec(head_pos));
+            // path alternates on x (+0 and +1 or -1)pos while going down from head
             else if (__classPrivateFieldGet(this, _Flowbuild_config, "f").layout = PathLayout.Alternate) {
                 let ver = 0;
                 if (i % 4 == 1 || i % 4 == 2)

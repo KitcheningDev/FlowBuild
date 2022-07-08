@@ -1,50 +1,29 @@
-class RecipePath {
-    constructor(name) {
-        this.boxes = [name];
-        this.prev = [];
-        this.next = [];
-    }
-}
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _Recipe_connections;
+import { Graph } from "./Graph.js";
 export class Recipe {
-    constructor(json) {
-        this.name = json["name"];
-        this.paths = new Map();
-        const boxes = new Map();
-        for (let path of json["paths"]) {
-            let prev = "";
-            for (let text of path) {
-                if (!boxes.has(text))
-                    boxes.set(text, new RecipePath(text));
-                if (prev) {
-                    boxes.get(prev).next.push(text);
-                    boxes.get(text).prev.push(prev);
-                }
-                prev = text;
-            }
-        }
-        this.RecursiveAdd("START", boxes);
+    constructor(name) {
+        _Recipe_connections.set(this, void 0);
+        this.name = name;
+        __classPrivateFieldSet(this, _Recipe_connections, [["START", "END"]], "f");
+        this.graph = new Graph(__classPrivateFieldGet(this, _Recipe_connections, "f"));
     }
-    RecursiveAdd(head, boxes) {
-        // stop loop
-        if (this.paths.has(head))
-            return;
-        this.paths.set(head, new RecipePath(head));
-        let curr_text = head;
-        while (boxes.get(curr_text).next.length == 1) {
-            curr_text = boxes.get(curr_text).next[0];
-            if (boxes.get(curr_text).prev.length != 1) {
-                this.RecursiveAdd(curr_text, boxes);
-                this.paths.get(head).next.push(curr_text);
-                this.paths.get(curr_text).prev.push(head);
-                return;
-            }
-            this.paths.get(head).boxes.push(curr_text);
-        }
-        for (let child of boxes.get(curr_text).next) {
-            this.RecursiveAdd(child, boxes);
-            this.paths.get(head).next.push(child);
-            this.paths.get(child).prev.push(head);
-        }
+    AddConnection(from, to) {
+        __classPrivateFieldGet(this, _Recipe_connections, "f").push([from, to]);
+    }
+    UpdateGraph() {
+        this.graph = new Graph(__classPrivateFieldGet(this, _Recipe_connections, "f"));
     }
 }
+_Recipe_connections = new WeakMap();
 //# sourceMappingURL=Recipe.js.map

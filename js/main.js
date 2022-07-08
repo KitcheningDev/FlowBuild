@@ -1,17 +1,14 @@
-import { Grid, Vec2 } from "./flowbuild/grid.js";
-import { Recipe } from "./flowbuild/Recipe.js";
 import { recipes } from "./Recipes.js";
-import { DrawGrid } from "./editor/DrawGrid.js";
-import "./editor/Editor.js";
+import { Graph } from "./flowbuild/Graph.js";
 // recipes
 function LoadRecipe(name) {
     const req = new XMLHttpRequest();
-    req.onload = () => { new Recipe(JSON.parse(req.responseText)); };
+    req.onload = () => { new Graph(JSON.parse(req.responseText)["paths"]); };
     req.open("GET", `${document.URL}/recipes/${name}.json`);
     req.send();
 }
 // default load
-LoadRecipe("starters/Hummus");
+LoadRecipe("mains/Lasagne");
 // create recipe list
 const recipe_list = document.getElementById("recipe-list");
 for (let recipe_type of ["starters", "mains"]) {
@@ -27,8 +24,14 @@ for (let recipe_type of ["starters", "mains"]) {
         recipe_list.appendChild(recipe_btn);
     }
 }
-const grid = new Grid(7, 10);
-grid.SetText("START", new Vec2(3, 0));
-grid.SetText("END", new Vec2(3, 9));
-DrawGrid(grid);
+/*
+for (let starter of recipes["starters"])
+    LoadRecipe("starters/" + starter);
+for (let mains of recipes["mains"])
+    LoadRecipe("mains/" + mains);
+*/
+//const grid = new Grid(7, 10);
+//grid.SetText("START", new Vec2(3, 0));
+//grid.SetText("END", new Vec2(3, 9));
+//sDrawGrid(grid);
 //# sourceMappingURL=Main.js.map

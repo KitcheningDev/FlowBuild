@@ -1,4 +1,6 @@
+import { Recipe } from "../flowbuild/Recipe.js";
 export const flowchart = document.getElementById("flowchart");
+export const curr_recipe = new Recipe("Unnamed");
 let in_movement = false;
 const input_field = document.getElementById("input-field");
 let selected_box;
@@ -41,6 +43,8 @@ document.addEventListener('mouseup', (e) => {
 });
 input_field.addEventListener('keydown', (e) => {
     if (e.key == "Enter" && selected_box && !in_movement && input_field.value.length > 0) {
+        curr_recipe.AddConnection(selected_box.innerHTML.trim(), input_field.value);
+        //DrawGrid(Flo)
         console.log(selected_box.innerHTML.trim(), input_field.value);
         input_field.style.display = "none";
         flowchart.style.cursor = "default";

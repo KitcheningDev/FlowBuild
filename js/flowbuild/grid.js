@@ -51,7 +51,7 @@ export enum TileType {
     Empty, Box, Arrow, SyncLine, Connector
 }
 */
-class Arrow {
+export class Arrow {
     constructor() {
         this.up = false;
         this.right = false;
