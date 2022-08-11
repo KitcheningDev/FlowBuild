@@ -1,5 +1,7 @@
 import { recipes } from "./Recipes.js";
 import { Graph } from "./flowbuild/Graph.js";
+import "./editor/Editor.js";
+console.log("main started");
 // recipes
 function LoadRecipe(name) {
     const req = new XMLHttpRequest();

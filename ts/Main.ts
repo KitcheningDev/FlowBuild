@@ -3,8 +3,9 @@ import { Recipe } from "./flowbuild/Recipe.js";
 import { recipes } from "./Recipes.js";
 import { DrawGrid } from "./editor/DrawGrid.js";
 import { Graph } from "./flowbuild/Graph.js";
-import { curr_recipe } from "./editor/Editor.js";
+import "./editor/Editor.js";
 
+console.log("main started");
 // recipes
 function LoadRecipe(name: string) {
     const req = new XMLHttpRequest();

@@ -1,6 +1,6 @@
-import { Vec2, Arrow } from "./Grid.js";
+import { Vec2, Arrow, SyncLine } from "./Grid.js";
 
-class TextCoords {
+export class TextCoords {
     text: string;
     coords: Vec2;
 
@@ -9,7 +9,7 @@ class TextCoords {
         this.coords = coords;
     }
 }
-class ArrowCoords {
+export class ArrowCoords {
     arrow: Arrow;
     coords: Vec2;
 
@@ -18,8 +18,24 @@ class ArrowCoords {
         this.coords = coords;
     }
 }
+export class SyncLineCoords {
+    sync_line: SyncLine;
+    coords: Vec2;
+
+    constructor(sync_line: SyncLine, coords: Vec2) {
+        this.sync_line = sync_line;
+        this.coords = coords;
+    }
+}
 
 export class Move {
     boxes: Array<TextCoords>;
     arrows: Array<ArrowCoords>;
+    sync_lines: Array<SyncLineCoords>;
+
+    constructor() {
+        this.boxes = new Array<TextCoords>();
+        this.arrows = new Array<ArrowCoords>();
+        this.sync_lines = new Array<SyncLineCoords>();
+    }
 }

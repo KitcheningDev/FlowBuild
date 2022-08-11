@@ -1,8 +1,9 @@
 import { Recipe } from "../flowbuild/Recipe.js";
 import { DrawGrid } from "./DrawGrid.js";
+import { Flowbuild } from "../flowbuild/Flowbuild.js";
+import { default_config } from "../flowbuild/Configs/Default.js";
 
 export const flowchart = document.getElementById("flowchart");
-
 export const curr_recipe = new Recipe("Unnamed");
 
 let in_movement = false;
@@ -34,7 +35,6 @@ document.addEventListener('mousedown', (e: MouseEvent) => {
     if (html_element.classList.contains("box")) {
         selected_box = html_element;
         in_movement = true;
-    
         flowchart.style.cursor = "pointer";
     }
 })
@@ -57,8 +57,7 @@ input_field.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.key == "Enter" && selected_box && !in_movement && input_field.value.length > 0)
     {
         curr_recipe.AddConnection(selected_box.innerHTML.trim(), input_field.value);
-        //DrawGrid(Flo)
-        console.log(selected_box.innerHTML.trim(), input_field.value);
+        DrawGrid(new Flowbuild(curr_recipe, default_config).grid);
         input_field.style.display = "none";
         flowchart.style.cursor = "default";
         input_field.value = "";
