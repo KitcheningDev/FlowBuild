@@ -1,0 +1,13 @@
+{
+    "name": "Tiramisu",
+    "paths":
+    [
+        ["START", "Eier trennen", "Alle Zucker zum Eigelb geben", "4-5min aufschlagen",
+        "Mascarpone unterheben", "Eiweiß in Mascarpone unterheben", "Form voll?",
+        "Restl. Mascarpone darauf verteilen", "Kakao darauf streuen", "Mind. 4-6h kalt stellen", "END"],
+        ["Eier trennen", "Eiweiß steif schlagen", "Eiweiß in Mascarpone unterheben"],
+        ["START", "Starken Kaffee kochen", "4 EL Kaffee wegnehmen", "Eiweiß in Mascarpone unterheben"],
+        ["Starken Kaffee kochen", "Amaretto zu restl. Kaffee hinzufügen",
+         "Löffelbiskuite mit Kaffee beträufeln", "Form voll?", "Löffelbiskuite in Auflaufform legen", "Mascarpone darauf verteilen", "Form voll?"]
+    ]
+}

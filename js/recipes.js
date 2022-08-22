@@ -1,9 +1,34 @@
 export const recipes = {
     "starters": [
-        "Bruschetta", "Chicken-Salat", "Hummus", "Kürbissuppe", "Spinat-Pesto"
+        "Kürbissuppe",
+        "Spinat-Pesto",
+        "Chicken-Salat",
+        "Hummus",
+        "Bruschetta"
     ],
     "mains": [
-        "Gnocchi", "Lasagne", "Pizza-Teig", "Vodka-Pasta", "Erdbeer-Pizza", "Pilz-Risotto", "Chili"
+        "Lasagne",
+        "Vodka-Pasta",
+        "Gnocchi",
+        "Pizzateig",
+        "Erdbeer-Pizza",
+        "Pilz-Risotto",
+        "Chili",
+        "Gelbes Curry",
+        "Pho Hanoi",
+        "Shakshuka",
+        "Tajine",
+        "Linsensuppe",
+        "Tacos",
+        "Loaded Fries",
+        "Buddah-Bowl"
+    ],
+    "desserts": [
+        "Bananenbrot",
+        "Tiramisu",
+        "Brownies",
+        "Riegel",
+        "Muffins"
     ]
 };
 //# sourceMappingURL=Recipes.js.map

@@ -1,0 +1,10 @@
+{
+    "name": "Riegel",
+    "paths":
+    [
+        ["START", "Erdnussbutter in Topf erwärmen", "Agavensirup dazugeben",
+        "Backkakao einrühren", "Masse verrühren", "Backpapier auf Backblech auslegen",
+        "Masse mit Nudelholz platt walzen", "20min kalt stellen", "In Streifen schneiden & servieren", "END"],
+        ["START", "Datteln in Mixer zerkleinern", "Haferflocken in Schüssel untermengen", "Mandeln dazugeben", "Masse verrühren"]
+    ]
+}

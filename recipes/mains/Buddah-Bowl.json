@@ -1,0 +1,11 @@
+{
+    "name": "Buddah-Bowl",
+    "paths":
+    [
+        ["START", "Ofen auf 180°C vorheizen", "Süßkartoffel schneiden", "Süßkartoffel 30min im Ofen weich kochen", "Dressing auf Bowl verteilen", "END"],
+        ["START", "Flüssigkeit aus Tofu drücken", "Tofu mit Sojasoße einreiben", "Tofu in Panade aus restlichen Zutaten wälzen",
+        "Tofu in Öl anbraten", "Mit Spinat anrichten", "Dressing auf Bowl verteilen"],
+        ["START", "Quinoa kochen", "Mit Spinat anrichten", "Rohkost schneiden", "Mit Spinat anrichten"],
+        ["START", "Tahina & Limette vermischen", "Mit Salz abschmecken", "Dressing auf Bowl verteilen"]
+    ]
+}

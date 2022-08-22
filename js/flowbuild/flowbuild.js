@@ -9,229 +9,313 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _Flowbuild_graph, _Flowbuild_config, _Flowbuild_backtrack_order;
-import { Grid, Vec2 } from "./grid.js";
-import { BacktrackParams, FlowbuildConfig, PathLayout } from "./Config.js";
-import { Move, TextCoords, ArrowCoords } from "./Move.js";
-import { Arrow } from "./grid.js";
-export class Flowbuild {
-    constructor(recipe, config) {
-        _Flowbuild_graph.set(this, void 0);
-        _Flowbuild_config.set(this, void 0);
-        _Flowbuild_backtrack_order.set(this, void 0);
-        this.grid = new Grid(7, 10);
-        __classPrivateFieldSet(this, _Flowbuild_graph, recipe.CreateGraph(), "f");
-        const hor_spacing_order = [];
-        const ver_padding_order = [];
-        for (let i = 0; i < config.hor_spacing_order.length; ++i) {
-            let val = Math.round(config.hor_spacing_order[i] * 7);
-            if (val == 0)
-                val = 1;
-            if (i > 0 && hor_spacing_order[hor_spacing_order.length - 1] != val)
-                hor_spacing_order.push(val);
-        }
-        for (let i = 0; i < config.ver_padding_order.length; ++i) {
-            let val = Math.round(config.ver_padding_order[i] * 7);
-            if (val == 0)
-                val = 1;
-            if (i > 0 && ver_padding_order[ver_padding_order.length - 1] != val)
-                ver_padding_order.push(val);
-        }
-        __classPrivateFieldSet(this, _Flowbuild_config, new FlowbuildConfig(config.layout_order, hor_spacing_order, ver_padding_order), "f");
-        __classPrivateFieldSet(this, _Flowbuild_backtrack_order, [], "f");
-        this.RecursiveCreateBacktrackOrder(__classPrivateFieldGet(this, _Flowbuild_graph, "f").start);
-        __classPrivateFieldGet(this, _Flowbuild_backtrack_order, "f").shift();
-        console.log(__classPrivateFieldGet(this, _Flowbuild_graph, "f"));
-        console.log(__classPrivateFieldGet(this, _Flowbuild_backtrack_order, "f"));
-        this.grid.SetText("START", new Vec2(3, 0));
-        this.grid.SetText("END", new Vec2(4, 9));
-        console.log("Backtrack success ", this.Backtrack(0, 0, 0, 0));
-    }
-    RecursiveCreateBacktrackOrder(path) {
-        for (const parent of path.parents) {
-            let found = false;
-            for (const curr of __classPrivateFieldGet(this, _Flowbuild_backtrack_order, "f")) {
-                if (curr == parent.Head()) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-                this.RecursiveCreateBacktrackOrder(parent);
-        }
-        let found = false;
-        for (const curr of __classPrivateFieldGet(this, _Flowbuild_backtrack_order, "f")) {
-            if (curr == path.Head()) {
-                found = true;
-                break;
-            }
-        }
-        if (!found)
-            __classPrivateFieldGet(this, _Flowbuild_backtrack_order, "f").push(path.Head());
-        for (const child of path.childs)
-            this.RecursiveCreateBacktrackOrder(child);
-    }
-    Backtrack(backtrack_index, layout_index, hor_spacing_index, ver_padding_index) {
-        if (backtrack_index == __classPrivateFieldGet(this, _Flowbuild_backtrack_order, "f").length)
-            return true;
-        const move = this.CreateMove(__classPrivateFieldGet(this, _Flowbuild_backtrack_order, "f")[backtrack_index], new BacktrackParams(__classPrivateFieldGet(this, _Flowbuild_config, "f").layout_order[layout_index], __classPrivateFieldGet(this, _Flowbuild_config, "f").hor_spacing_order[hor_spacing_index], __classPrivateFieldGet(this, _Flowbuild_config, "f").ver_padding_order[ver_padding_index]));
-        let successfull = true;
-        if (move == null)
-            successfull = false;
-        if (successfull) {
-            this.DoMove(move);
-            if (this.Backtrack(backtrack_index + 1, 0, 0, 0))
-                return true;
-            this.UndoMove(move);
-        }
-        if (layout_index <= __classPrivateFieldGet(this, _Flowbuild_config, "f").layout_order.length - 1)
-            return this.Backtrack(backtrack_index, layout_index + 1, hor_spacing_index, ver_padding_index);
-        else if (hor_spacing_index <= __classPrivateFieldGet(this, _Flowbuild_config, "f").hor_spacing_order.length - 1)
-            return this.Backtrack(backtrack_index, layout_index, hor_spacing_index + 1, ver_padding_index);
-        else if (ver_padding_index <= __classPrivateFieldGet(this, _Flowbuild_config, "f").ver_padding_order.length - 1)
-            return this.Backtrack(backtrack_index, layout_index, hor_spacing_index, ver_padding_index + 1);
-        else
-            return false;
-    }
-    DoMove(move) {
-        for (const text_coords of move.boxes)
-            this.grid.SetText(text_coords.text, text_coords.coords);
-        for (const arrow_coords of move.arrows)
-            this.grid.OverlapArrow(arrow_coords.arrow, arrow_coords.coords);
-    }
-    UndoMove(move) {
-        for (const text_coords of move.boxes)
-            this.grid.SetText("", text_coords.coords);
-        for (const arrow_coords of move.arrows)
-            this.grid.SetArrow(new Arrow(), arrow_coords.coords);
-    }
-    // backtrack utils
-    ArithmAvgX(text) {
-        let avg = 0;
-        const node = __classPrivateFieldGet(this, _Flowbuild_graph, "f").node_map.get(text);
-        for (const parent of node.parents)
-            avg += this.grid.GetPos(parent).x;
-        return Math.round(avg / node.parents.length);
-    }
-    ChildOff(text) {
-        const parent = __classPrivateFieldGet(this, _Flowbuild_graph, "f").node_map.get(text).parents[0];
-        const index = __classPrivateFieldGet(this, _Flowbuild_graph, "f").node_map.get(parent).childs.indexOf(text);
-        const length = __classPrivateFieldGet(this, _Flowbuild_graph, "f").node_map.get(parent).childs.length;
-        if (length % 2)
-            return index - Math.floor(length / 2);
-        else if (index < length / 2)
-            return index - length / 2;
-        else
-            return index + 1 - length / 2;
-    }
-    MaxY(text) {
-        let max = 0;
-        for (let parent of __classPrivateFieldGet(this, _Flowbuild_graph, "f").node_map.get(text).parents) {
-            if (max < this.grid.GetPos(parent).y)
-                max = this.grid.GetPos(parent).y;
-        }
-        return max;
-    }
-    PathToArrowCoords(path) {
-        const arrow_coords = [new ArrowCoords(new Arrow(), path[0])];
-        for (let i = 1; i < path.length; ++i) {
-            const diff = new Vec2(path[i]).SubVec(path[i - 1]);
-            arrow_coords.push(new ArrowCoords(new Arrow(), path[i]));
-            if (diff.x == 1) {
-                arrow_coords[arrow_coords.length - 2].arrow.right = true;
-                arrow_coords[arrow_coords.length - 1].arrow.left = true;
-            }
-            else if (diff.x == -1) {
-                arrow_coords[arrow_coords.length - 2].arrow.left = true;
-                arrow_coords[arrow_coords.length - 1].arrow.right = true;
-            }
-            else if (diff.y == 1) {
-                arrow_coords[arrow_coords.length - 2].arrow.down = true;
-                arrow_coords[arrow_coords.length - 1].arrow.up = true;
-            }
-            else {
-                arrow_coords[arrow_coords.length - 2].arrow.up = true;
-                arrow_coords[arrow_coords.length - 1].arrow.down = true;
-            }
-        }
-        return arrow_coords;
-    }
-    BTS(from, to, move) {
-        let paths = [[from]];
-        let new_paths = [];
-        const visited = [from];
-        while (paths.length > 0) {
-            for (const path of paths) {
-                const curr_coords = path[path.length - 1];
-                const up = new Vec2(0, -1).AddVec(curr_coords);
-                const right = new Vec2(1, 0).AddVec(curr_coords);
-                const down = new Vec2(0, 1).AddVec(curr_coords);
-                const left = new Vec2(-1, 0).AddVec(curr_coords);
-                ;
-                for (const new_coords of [up, right, down, left]) {
-                    if (new_coords.Equals(to))
-                        return [...path, to];
-                    if (!this.grid.InBounds(new_coords) || this.grid.Get(new_coords).text != "")
-                        continue;
-                    let is_valid = true;
-                    for (const visited_coords of visited) {
-                        if (visited_coords.Equals(new_coords)) {
-                            is_valid = false;
-                            break;
-                        }
-                    }
-                    if (is_valid) {
-                        visited.push(new_coords);
-                        new_paths.push([...path, new_coords]);
-                    }
-                }
-            }
-            paths = new_paths;
-            new_paths = [];
-        }
-        return null;
-    }
-    CreateMove(head, params) {
-        const move = new Move();
-        const node = __classPrivateFieldGet(this, _Flowbuild_graph, "f").node_map.get(head);
-        const path = __classPrivateFieldGet(this, _Flowbuild_graph, "f").path_map.get(head);
-        const head_coords = new Vec2(this.ArithmAvgX(head) + this.ChildOff(head) * params.hor_spacing, this.MaxY(head) + 1 * params.ver_padding);
-        console.log(head_coords);
-        if (!this.grid.InBounds(head_coords) || !this.grid.IsEmpty(head_coords)) {
-            console.log("failed head coords");
-            return null;
-        }
-        for (const parent of node.parents) {
-            const path = this.BTS(this.grid.GetPos(parent), head_coords, move);
-            if (path == null) {
-                console.log("failed path");
-                return null;
-            }
-            const arrows = this.PathToArrowCoords(path);
-            for (const arrow of arrows)
-                move.arrows.push(arrow);
-        }
-        move.boxes.push(new TextCoords(head, head_coords));
-        for (let i = 1; i < path.nodes.length; ++i) {
-            if (path.nodes[i] == "END")
-                break;
-            let coords;
-            if (params.layout == PathLayout.Straight)
-                coords = new Vec2(0, i).AddVec(head_coords);
-            else if (params.layout == PathLayout.Alternate) {
+var _Flowbuild_graph, _Flowbuild_path_grids, _Flowbuild_arrangement, _Flowbuild_best_arr, _Flowbuild_best_eval, _Flowbuild_depth_heights, _Flowbuild_depth_widths;
+import { Grid, Vec2, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, SyncLine } from "./grid.js";
+class PathGrid {
+    constructor(path) {
+        this.origin = new Vec2();
+        this.in = new Vec2();
+        this.path = path;
+        this.shift = 0;
+        if (path.nodes.length > 3) {
+            this.out = new Vec2(path.nodes.length % 2, Math.floor(path.nodes.length / 2));
+            this.grid = new Grid(new Vec2(2, Math.ceil(path.nodes.length / 2)));
+            for (let i = 0; i < path.nodes.length; ++i) {
                 let ver = 0;
                 if (i % 4 == 1 || i % 4 == 2)
                     ver = 1;
-                coords = new Vec2(ver, Math.floor(i / 2)).AddVec(head_coords);
+                const coords = new Vec2(ver, Math.floor(i / 2));
+                this.grid.SetText(path.nodes[i], coords);
+                if (i != 0) {
+                    if (i % 4 == 0 || i % 4 == 2)
+                        this.grid.OverlapArrow(ArrowUp(), coords);
+                    else if (i % 4 == 1)
+                        this.grid.OverlapArrow(ArrowLeft(), coords);
+                    else
+                        this.grid.OverlapArrow(ArrowRight(), coords);
+                }
+                if (i != path.nodes.length - 1) {
+                    if (i % 4 == 0)
+                        this.grid.OverlapArrow(ArrowRight(), coords);
+                    else if (i % 4 == 1 || i % 4 == 3)
+                        this.grid.OverlapArrow(ArrowDown(), coords);
+                    else
+                        this.grid.OverlapArrow(ArrowLeft(), coords);
+                }
             }
-            if (!this.grid.InBounds(head_coords) || !this.grid.IsEmpty(coords)) {
-                console.log("failed node coords");
-                return null;
-            }
-            move.boxes.push(new TextCoords(path.nodes[i], coords));
         }
-        return move;
+        else {
+            this.out = new Vec2(0, path.nodes.length - 1);
+            this.grid = new Grid(new Vec2(1, path.nodes.length));
+            for (let i = 0; i < path.nodes.length; ++i) {
+                const coords = new Vec2(0, i);
+                this.grid.SetText(path.nodes[i], coords);
+                if (i != 0)
+                    this.grid.OverlapArrow(ArrowUp(), coords);
+                if (i != path.nodes.length - 1)
+                    this.grid.OverlapArrow(ArrowDown(), coords);
+            }
+        }
+    }
+    GlobalIn() {
+        return this.origin.Copy().AddVec(this.in);
+    }
+    GlobalOut() {
+        return this.origin.Copy().AddVec(this.out);
     }
 }
-_Flowbuild_graph = new WeakMap(), _Flowbuild_config = new WeakMap(), _Flowbuild_backtrack_order = new WeakMap();
+class Arrangement {
+    constructor() {
+        this.origin = new Vec2();
+        this.size = new Vec2();
+        this.members = [];
+        this.is_hor = true;
+        this.path = null;
+    }
+    Top() {
+        return new Vec2(this.origin.x, this.origin.y + this.size.y);
+    }
+    Left() {
+        return new Vec2(this.origin.x + this.size.x, this.origin.y);
+    }
+    CalcSize() {
+        if (this.is_hor) {
+            this.size.x = this.members[this.members.length - 1].Left().x;
+            this.size.y = 0;
+            for (const member of this.members)
+                this.size.y = Math.max(member.size.y, this.size.y);
+        }
+        else {
+            this.size.y = this.members[this.members.length - 1].Top().y;
+            this.size.x = 0;
+            for (const member of this.members)
+                this.size.x = Math.max(member.size.x, this.size.x);
+        }
+    }
+    CalcOrigin(from = 0, to = this.members.length - 1) {
+        if (this.is_hor) {
+            if (from == 0) {
+                this.members[0].origin.x = 0;
+                from++;
+            }
+            for (let i = from; i <= to; ++i)
+                this.members[i].origin.x = this.members[i - 1].Left().x;
+        }
+        else {
+            if (from == 0) {
+                this.members[0].origin.y = 0;
+                from++;
+            }
+            for (let i = from; i <= to; ++i)
+                this.members[i].origin.y = this.members[i - 1].Top().y;
+        }
+    }
+    SwapMembers(i1, i2) {
+        if (i1 == i2)
+            return;
+        if (i1 > i2)
+            return this.SwapMembers(i2, i1);
+        const temp = this.members[i1];
+        this.members[i1] = this.members[i2];
+        this.members[i2] = temp;
+        this.CalcOrigin(i1, i2);
+    }
+    Copy() {
+        const out = new Arrangement();
+        out.origin = this.origin.Copy();
+        out.size = this.size.Copy();
+        for (const member of this.members)
+            out.members.push(member.Copy());
+        out.is_hor = this.is_hor;
+        out.path = this.path;
+        return out;
+    }
+}
+function TieToArrangement(members, is_hor) {
+    if (members.length == 0)
+        return null;
+    else if (members.length == 1)
+        return members[0];
+    const out = new Arrangement();
+    out.members = members;
+    out.is_hor = is_hor;
+    out.CalcOrigin();
+    out.CalcSize();
+    return out;
+}
+const depth_padding = 1;
+export class Flowbuild {
+    constructor(recipe) {
+        _Flowbuild_graph.set(this, void 0);
+        _Flowbuild_path_grids.set(this, void 0);
+        _Flowbuild_arrangement.set(this, void 0);
+        _Flowbuild_best_arr.set(this, void 0);
+        _Flowbuild_best_eval.set(this, void 0);
+        _Flowbuild_depth_heights.set(this, void 0);
+        _Flowbuild_depth_widths.set(this, void 0);
+        __classPrivateFieldSet(this, _Flowbuild_graph, recipe.CreateGraph(), "f");
+        __classPrivateFieldSet(this, _Flowbuild_path_grids, new Map(), "f");
+        for (const path of __classPrivateFieldGet(this, _Flowbuild_graph, "f").path_map.values())
+            __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").set(path, new PathGrid(path));
+        __classPrivateFieldSet(this, _Flowbuild_depth_heights, [0], "f");
+        __classPrivateFieldSet(this, _Flowbuild_depth_widths, [1], "f");
+        __classPrivateFieldSet(this, _Flowbuild_arrangement, this.CreateArrangement(), "f");
+        __classPrivateFieldSet(this, _Flowbuild_best_arr, __classPrivateFieldGet(this, _Flowbuild_arrangement, "f"), "f");
+        __classPrivateFieldSet(this, _Flowbuild_best_eval, this.EvalPermutation(), "f");
+        this.Permutate(__classPrivateFieldGet(this, _Flowbuild_arrangement, "f"), 0);
+        __classPrivateFieldSet(this, _Flowbuild_arrangement, __classPrivateFieldGet(this, _Flowbuild_best_arr, "f"), "f");
+        this.grid = new Grid(__classPrivateFieldGet(this, _Flowbuild_arrangement, "f").size);
+        this.SetGridPathOrigins();
+        this.ShiftCoords();
+        console.log(__classPrivateFieldGet(this, _Flowbuild_arrangement, "f"));
+        for (const path_grid of __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").values())
+            console.log(path_grid.path.Head(), path_grid.path.advanced.depth);
+        this.FillGrid();
+    }
+    // arrangement
+    CreatePathArrangement(path) {
+        const out = new Arrangement();
+        out.size = __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(path).grid.size;
+        out.path = path;
+        return out;
+    }
+    CreateDepthArrangement(depth) {
+        const members = [];
+        for (const path of __classPrivateFieldGet(this, _Flowbuild_graph, "f").depth_map[depth]) {
+            if (path.advanced.depth_diff <= 1)
+                members.push(this.CreatePathArrangement(path));
+        }
+        return TieToArrangement(members, true);
+    }
+    CreateArrangement(depth = __classPrivateFieldGet(this, _Flowbuild_graph, "f").depth) {
+        if (depth == 0)
+            return this.CreateDepthArrangement(0);
+        const former_arr = this.CreateArrangement(depth - 1);
+        __classPrivateFieldGet(this, _Flowbuild_depth_heights, "f").push(former_arr.size.y + depth_padding);
+        const curr_depth_arr = this.CreateDepthArrangement(depth);
+        const curr_arr_members = [TieToArrangement([former_arr, curr_depth_arr], false)];
+        for (const path of __classPrivateFieldGet(this, _Flowbuild_graph, "f").path_map.values()) {
+            if (path.advanced.depth_diff > 1 && path.advanced.depth + path.advanced.depth_diff == depth + 1) {
+                const arr = this.CreatePathArrangement(path);
+                arr.origin.y = __classPrivateFieldGet(this, _Flowbuild_depth_heights, "f")[path.advanced.depth];
+                curr_arr_members.push(arr);
+            }
+        }
+        const out = TieToArrangement(curr_arr_members, true);
+        __classPrivateFieldGet(this, _Flowbuild_depth_widths, "f").push(out.size.x);
+        return out;
+    }
+    EvalPermutation() {
+        let x = 0;
+        for (const path of __classPrivateFieldGet(this, _Flowbuild_graph, "f").path_map.values()) {
+            for (const child of path.childs)
+                x += Math.abs(__classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(path).GlobalOut().x - __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(child).GlobalIn().x);
+        }
+        return x;
+    }
+    Permutate(arr = __classPrivateFieldGet(this, _Flowbuild_arrangement, "f"), index) {
+        if (arr.path == __classPrivateFieldGet(this, _Flowbuild_graph, "f").start) {
+            this.SetGridPathOrigins();
+            const new_eval = this.EvalPermutation();
+            if (new_eval < __classPrivateFieldGet(this, _Flowbuild_best_eval, "f")) {
+                console.log(new_eval, __classPrivateFieldGet(this, _Flowbuild_best_eval, "f"));
+                __classPrivateFieldSet(this, _Flowbuild_best_eval, new_eval, "f");
+                __classPrivateFieldSet(this, _Flowbuild_best_arr, __classPrivateFieldGet(this, _Flowbuild_arrangement, "f").Copy(), "f");
+            }
+            return;
+        }
+        if (index == arr.members.length - 1 || !arr.is_hor) {
+            for (const member of arr.members)
+                this.Permutate(member, 0);
+        }
+        for (let i = index; i < arr.members.length; ++i) {
+            arr.SwapMembers(index, i);
+            this.Permutate(arr, index + 1);
+            arr.SwapMembers(index, i);
+        }
+    }
+    SetGridPathOrigins(arr = __classPrivateFieldGet(this, _Flowbuild_arrangement, "f"), off = new Vec2()) {
+        for (const member of arr.members) {
+            if (member.path)
+                __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(member.path).origin = off.Copy().AddVec(member.origin);
+            else
+                this.SetGridPathOrigins(member, off.Copy().AddVec(member.origin));
+        }
+        if (arr == __classPrivateFieldGet(this, _Flowbuild_arrangement, "f"))
+            this.ShiftCoords();
+    }
+    ShiftCoords() {
+        for (const depth_paths of __classPrivateFieldGet(this, _Flowbuild_graph, "f").depth_map) {
+            let max_x = -1;
+            for (const path of depth_paths) {
+                max_x = Math.max(__classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(path).origin.x + __classPrivateFieldGet(this, _Flowbuild_arrangement, "f").size.x - 1, max_x);
+            }
+            let whole_shift = Math.floor((__classPrivateFieldGet(this, _Flowbuild_arrangement, "f").size.x - max_x - 1) / 2);
+            let frac_shift = 0;
+            if ((__classPrivateFieldGet(this, _Flowbuild_arrangement, "f").size.x % 2) == (max_x % 2))
+                frac_shift += 0.5;
+            for (const path of depth_paths) {
+                __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(path).origin.x += whole_shift;
+                __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(path).shift = frac_shift;
+            }
+        }
+    }
+    FillGrid() {
+        for (const path_grid of __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").values())
+            this.grid.SetSubGrid(path_grid.grid, path_grid.origin, path_grid.shift);
+        for (const path_grid of __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").values()) {
+            console.log(path_grid.path.Head(), path_grid.origin);
+            for (const child of path_grid.path.childs) {
+                this.CreateConnection(path_grid.GlobalOut(), __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(child).GlobalIn());
+            }
+        }
+        this.CreateSyncLines();
+    }
+    CreateSyncLines() {
+        for (const path of __classPrivateFieldGet(this, _Flowbuild_graph, "f").path_map.values()) {
+            if (path.childs.length > 1) {
+                let min_x = 999;
+                let max_x = -1;
+                for (const child of path.childs) {
+                    let x = __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(child).GlobalIn().x;
+                    min_x = Math.min(x, min_x);
+                    max_x = Math.max(x, max_x);
+                }
+                for (let x = min_x; x <= max_x; ++x)
+                    this.grid.OverlapSyncLine(new SyncLine(true, false), new Vec2(x, __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(path.childs[0]).GlobalIn().y));
+            }
+            if (path.parents.length > 1) {
+                let min_x = 999;
+                let max_x = -1;
+                for (const parent of path.parents) {
+                    let x = __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(parent).GlobalOut().x;
+                    min_x = Math.min(x, min_x);
+                    max_x = Math.max(x, max_x);
+                }
+                for (let x = min_x; x <= max_x; ++x)
+                    this.grid.OverlapSyncLine(new SyncLine(false, true), new Vec2(x, __classPrivateFieldGet(this, _Flowbuild_path_grids, "f").get(path).GlobalIn().y - 2));
+            }
+        }
+    }
+    CreateConnection(from, to) {
+        return;
+        for (let y = from.y; y < to.y; ++y) {
+            if (y != from.y)
+                this.grid.OverlapArrow(ArrowUp(), new Vec2(from.x, y));
+            if (y != to.y - 1)
+                this.grid.OverlapArrow(ArrowDown(), new Vec2(from.x, y));
+        }
+        const min_x = Math.min(from.x, to.x);
+        const max_x = Math.max(from.x, to.x);
+        for (let x = min_x; x <= max_x; ++x) {
+            if (x != min_x)
+                this.grid.OverlapArrow(ArrowLeft(), new Vec2(x, to.y - 1));
+            if (x != max_x)
+                this.grid.OverlapArrow(ArrowRight(), new Vec2(x, to.y - 1));
+        }
+        this.grid.OverlapArrow(ArrowDown(), new Vec2(0, -1).AddVec(to));
+        this.grid.OverlapArrow(ArrowUp(), to);
+    }
+}
+_Flowbuild_graph = new WeakMap(), _Flowbuild_path_grids = new WeakMap(), _Flowbuild_arrangement = new WeakMap(), _Flowbuild_best_arr = new WeakMap(), _Flowbuild_best_eval = new WeakMap(), _Flowbuild_depth_heights = new WeakMap(), _Flowbuild_depth_widths = new WeakMap();
 //# sourceMappingURL=Flowbuild.js.map

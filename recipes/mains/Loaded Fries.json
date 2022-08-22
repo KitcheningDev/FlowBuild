@@ -1,0 +1,11 @@
+{
+    "name": "Loaded Fries",
+    "paths":
+    [
+        ["START", "Tomaten schneiden", "2/3 der Zwiebeln schneiden", "2/3 der Zwiebeln anbraten",
+        "Mit Gewürzen 10min schmoren", "Chilibohnen unterrühren", "Chili auf Kartoffelspalten verteilen", "Mit Avocado & Sour cream garnieren", "END"],
+        ["START", "Ofen auf 180°C vorheizen", "Süßkartoffel in Spalten schneiden", "In Öl, Paprika & Salz schwenken",
+        "Avocado zerdrücken", "1/3 der Zwiebel schneiden", "Zitronensaft hinzufügen", "Mit Kreuzkümmel & Salz würzen", "Mit Avocado & Sour cream garnieren"],
+        ["In Öl, Paprika & Salz schwenken", "35min im Ofen backen", "Chili auf Kartoffelspalten verteilen"]
+    ]
+}

@@ -30,12 +30,12 @@ export class SyncLineCoords {
 
 export class Move {
     boxes: Array<TextCoords>;
-    arrows: Array<ArrowCoords>;
+    arrows: Array<Array<ArrowCoords>>;
     sync_lines: Array<SyncLineCoords>;
 
     constructor() {
         this.boxes = new Array<TextCoords>();
-        this.arrows = new Array<ArrowCoords>();
+        this.arrows = new Array<Array<ArrowCoords>>();
         this.sync_lines = new Array<SyncLineCoords>();
     }
 }

@@ -1,26 +1,28 @@
 class GraphNode {
     constructor(text) {
         this.text = text;
-        this.parents = new Array();
-        this.childs = new Array();
+        this.parents = [];
+        this.childs = [];
     }
 }
 class AdvancedPath {
     constructor() {
+        this.depth = 0;
+        this.depth_diff = 0;
         this.is_reversed = false;
         this.in_loop = false;
         this.is_loop_entry = false;
         this.is_loop_exit = false;
-        this.reversed_parents = new Array();
-        this.reversed_childs = new Array();
+        this.reversed_parents = [];
+        this.reversed_childs = [];
         this.boxes_to_end = 0;
     }
 }
 export class Path {
     constructor(head) {
-        this.nodes = new Array(head);
-        this.parents = new Array();
-        this.childs = new Array();
+        this.nodes = [head];
+        this.parents = [];
+        this.childs = [];
         this.advanced = new AdvancedPath();
     }
     Head() {
@@ -43,13 +45,26 @@ export class Graph {
         this.path_map = new Map();
         this.RecursiveAdd("START");
         this.start = this.path_map.get("START");
-        this.end = this.GetEnd(this.start);
+        this.end = this.GetEnd();
         // advanced
-        this.SetLoopProperties();
-        this.ReverseLoops();
-        this.RecursiveSetBoxesToEnd(this.start);
-        this.SortChilds();
+        //this.SetLoopProperties();
+        //this.ReverseLoops();
+        //this.RecursiveSetBoxesToEnd(this.start);
+        //this.SortChilds();
+        this.RecursiveSetDepth();
+        this.SetDepthDiff();
+        this.depth_map = [];
+        for (let i = 0; i <= this.end.advanced.depth; ++i)
+            this.depth_map.push([]);
+        for (const path of this.path_map.values())
+            this.depth_map[path.advanced.depth].push(path);
         /*
+        for (const depth of this.depth_map) {
+            const text_arr = []
+            for (const path of depth)
+                text_arr.push([path.Head(), path.advanced.depth_diff]);
+            //console.log("Depth: ", depth[0].advanced.depth, ...text_arr);
+        }
         for (let [head, path] of path_map.entries()) {
             console.log("Head", head);
             console.log("Nodes", path.nodes);
@@ -61,6 +76,7 @@ export class Graph {
             console.log();
         }
         */
+        this.depth = this.end.advanced.depth;
     }
     CreateNodeMap(connections) {
         for (const path of connections) {
@@ -84,11 +100,16 @@ export class Graph {
         if (this.node_map.get("START").parents.length > 0 || this.node_map.get("END").childs.length > 0)
             return false;
         for (const node of this.node_map.values()) {
-            if (node.parents.length == 0 && node.text != "START")
+            if (node.childs.includes("END") && node.childs.length > 1)
+                return false;
+            else if (node.parents.includes("START") && node.parents.length > 1)
+                return false;
+            else if (node.parents.length == 0 && node.text != "START")
                 return false;
             else if (node.childs.length == 0 && node.text != "END")
                 return false;
         }
+        // To Do: currently no loops in reversed paths allowed
         return true;
     }
     RecursiveAdd(head) {
@@ -97,6 +118,7 @@ export class Graph {
         const path = new Path(head);
         this.path_map.set(head, path);
         let curr_node = this.node_map.get(head);
+        // To Do: Remove "START" guard
         if (head != "START") {
             let child_node = null;
             while (curr_node.childs.length == 1) {
@@ -114,18 +136,29 @@ export class Graph {
         }
         return path;
     }
-    GetEnd(path, visited = new Set()) {
-        if (path.childs.length == 0)
-            return path;
-        visited.add(path);
-        for (const child of path.childs) {
-            if (!visited.has(child)) {
-                const found_path = this.GetEnd(child, visited);
-                if (found_path != null)
-                    return found_path;
-            }
+    GetEnd() {
+        for (const path of this.path_map.values()) {
+            if (path.childs.length == 0)
+                return path;
         }
-        return null;
+    }
+    RecursiveSetDepth(path = this.end, visited = new Set()) {
+        if (visited.has(path))
+            return;
+        visited.add(path);
+        for (const parent of path.parents)
+            this.RecursiveSetDepth(parent, visited);
+        for (const parent of path.parents)
+            path.advanced.depth = Math.max(path.advanced.depth, parent.advanced.depth + 1);
+    }
+    SetDepthDiff() {
+        for (const path of this.path_map.values()) {
+            if (path.childs.length == 0)
+                continue;
+            path.advanced.depth_diff = path.childs[0].advanced.depth - path.advanced.depth;
+            for (const child of path.childs)
+                path.advanced.depth_diff = Math.min(path.advanced.depth_diff, child.advanced.depth - path.advanced.depth);
+        }
     }
     HasPath(from, to, visited = new Set()) {
         if (visited.has(from))
@@ -181,7 +214,7 @@ export class Graph {
             path.childs = temp;
             const reversed_temp = path.advanced.reversed_parents;
             path.advanced.reversed_parents = path.advanced.reversed_childs;
-            path.advanced.reversed_childs = temp;
+            path.advanced.reversed_childs = reversed_temp;
         }
     }
     RecursiveSetBoxesToEnd(path, visited = new Set()) {

@@ -1,0 +1,12 @@
+{
+    "name": "Pho Hanoi",
+    "paths":
+    [
+        ["START", "Reisnudeln kochen", "In Schale anrichten"],
+        ["START", "Pho Gewürze andünsten", "Mit Brühe aufgießen", "30 min köcheln",
+         "Gewürze herausnehmen", "Zucker, Sojasoße & Essig dazu", "Mit Salz abschmecken", "In Schale anrichten", "END"],
+        ["START", "Ofen auf 180°C vorheizen", "Zwiebel schneiden", "Ingwer schneiden", "Beides mit Öl bestreichen", "7 Minuten im Ofen rösten", "Mit Brühe aufgießen"],
+        ["START", "Gemüse & Tofu schneiden", "Tofu in Öl anbraten", "In Schale anrichten"],
+        ["Gemüse & Tofu schneiden", "Gemüse in Öl anbraten", "In Schale anrichten"]
+    ]
+}

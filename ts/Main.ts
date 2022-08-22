@@ -1,47 +1,50 @@
-import { Grid, Tile, Vec2 } from "./flowbuild/grid.js";
-import { Recipe } from "./flowbuild/Recipe.js";
+import { Flowbuild } from "./flowbuild/Flowbuild.js";
 import { recipes } from "./Recipes.js";
 import { DrawGrid } from "./editor/DrawGrid.js";
-import { Graph } from "./flowbuild/Graph.js";
+import { curr_recipe } from "./editor/Editor.js";
 import "./editor/Editor.js";
 
-console.log("main started");
 // recipes
 function LoadRecipe(name: string) {
     const req = new XMLHttpRequest();
-    req.onload = () => { new Graph(JSON.parse(req.responseText)["paths"]); }
+    req.onload = () => { 
+        console.log(name);
+        const loaded = JSON.parse(req.responseText);
+        curr_recipe.SetConnections(loaded["paths"]);
+        curr_recipe.name = loaded["name"];
+        document.getElementById("recipe-name").innerHTML = curr_recipe.name;
+        DrawGrid(new Flowbuild(curr_recipe).grid);
+    }
     req.open("GET", `${document.URL}/recipes/${name}.json`);
     req.send();
 }
-
-// default load
-LoadRecipe("mains/Lasagne");
+LoadRecipe("Empty");
 
 // create recipe list
-const recipe_list = document.getElementById("recipe-list");
-for (let recipe_type of [ "starters", "mains" ]) {
+let offset = 0;
+function CreateRecipeList(name: string): HTMLElement {
     const headline = document.createElement("div");
     headline.classList.add("recipe-head");
-    headline.innerHTML = recipe_type + ":";
+    headline.innerHTML = name + ":";
+    
+    const recipe_list = document.createElement("div");
+    recipe_list.classList.add("recipe-list");
     recipe_list.appendChild(headline);
-
-    for (let name of recipes[recipe_type]) {
-        const recipe_btn = document.createElement("div");
-        recipe_btn.classList.add("recipe-btn");
-        recipe_btn.innerHTML = name;
-        recipe_btn.onclick = () => LoadRecipe(`${recipe_type}/${name}`);
-        recipe_list.appendChild(recipe_btn);
-    }
+    document.body.appendChild(recipe_list);
+    recipe_list.style.left = (55 + offset * 15).toString() + "rem";
+    offset += 1;
+    return recipe_list;
 }
-
-/*
-for (let starter of recipes["starters"])
-    LoadRecipe("starters/" + starter);
-for (let mains of recipes["mains"])
-    LoadRecipe("mains/" + mains);
-*/
-
-//const grid = new Grid(7, 10);
-//grid.SetText("START", new Vec2(3, 0));
-//grid.SetText("END", new Vec2(3, 9));
-//sDrawGrid(grid);
+function CreateRecipeButton(name: string, path: string, recipe_list: HTMLElement): void {
+    const recipe_btn = document.createElement("div");
+    recipe_btn.classList.add("recipe-btn");
+    recipe_btn.innerHTML = name;
+    recipe_btn.onclick = () => LoadRecipe(path);
+    recipe_list.appendChild(recipe_btn);
+}
+CreateRecipeButton("Empty", "Empty", CreateRecipeList("templates"));
+for (let recipe_type of ["starters", "mains", "desserts"]) {
+    const recipe_list = CreateRecipeList(recipe_type);
+    for (let name of recipes[recipe_type])
+       CreateRecipeButton(name, `${recipe_type}/${name}`, recipe_list);
+}

@@ -1,6 +1,18 @@
-#recipe-list {
+#recipe-name {
     position: absolute;
-    left: 60rem;
+
+    font-size: 2.5rem;
+    text-align: center;
+    color: var(--primary-col);
+
+    transform: translate(-50%, -50%);
+    top: 2rem;
+    left: 26rem;
+    user-select: none;
+}
+
+.recipe-list {
+    position: absolute;
     margin: 1rem 1rem;
 }
 

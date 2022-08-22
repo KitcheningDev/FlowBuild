@@ -1,0 +1,12 @@
+{
+    "name": "Bananenbrot",
+    "paths":
+    [
+        ["START", "Banane mit Gabel zerdrücken", "Mit restl. nassen Zutaten vermengen",
+        "Teig glatt rühren", "Teig in Form geben", "50min backen",
+        "Probe", "Kurz abkühlen", "Schneiden & servieren", "END"],
+        ["START", "Backofen auf 180°C vorheizen", "Trockene Zutaten vermischen", "Teig glatt rühren"],
+        ["START", "Topping auswählen", "50min backen"],
+        ["Probe", "+5min backen", "Probe"]
+    ]
+}

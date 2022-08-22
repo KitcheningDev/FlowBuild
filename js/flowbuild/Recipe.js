@@ -12,27 +12,35 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 var _Recipe_connections, _Recipe_boxes;
 import { Graph } from "./Graph.js";
 export class Recipe {
-    constructor(name) {
+    constructor(name, connections) {
         _Recipe_connections.set(this, void 0);
         _Recipe_boxes.set(this, void 0);
         this.name = name;
-        __classPrivateFieldSet(this, _Recipe_connections, [["START", "END"]], "f");
         __classPrivateFieldSet(this, _Recipe_boxes, new Set(), "f");
-        __classPrivateFieldGet(this, _Recipe_boxes, "f").add("START");
-        __classPrivateFieldGet(this, _Recipe_boxes, "f").add("END");
+        this.SetConnections(connections);
     }
     AddConnection(from, to) {
+        __classPrivateFieldSet(this, _Recipe_connections, __classPrivateFieldGet(this, _Recipe_connections, "f").filter((pair) => { return !(pair[0] == from && pair[1] == "END"); }), "f");
         if (!__classPrivateFieldGet(this, _Recipe_boxes, "f").has(to)) {
             __classPrivateFieldGet(this, _Recipe_boxes, "f").add(to);
             __classPrivateFieldGet(this, _Recipe_connections, "f").push([to, "END"]);
         }
-        __classPrivateFieldSet(this, _Recipe_connections, __classPrivateFieldGet(this, _Recipe_connections, "f").filter((pair) => { return pair[0] != from || pair[1] != "END"; }), "f");
         __classPrivateFieldGet(this, _Recipe_connections, "f").push([from, to]);
+    }
+    SetConnections(connections) {
+        __classPrivateFieldSet(this, _Recipe_connections, connections, "f");
+        __classPrivateFieldGet(this, _Recipe_boxes, "f").clear();
+        for (const connection of connections) {
+            for (const text of connection) {
+                if (!__classPrivateFieldGet(this, _Recipe_boxes, "f").has(text))
+                    __classPrivateFieldGet(this, _Recipe_boxes, "f").add(text);
+            }
+        }
     }
     CreateGraph() {
         const graph = new Graph(__classPrivateFieldGet(this, _Recipe_connections, "f"));
         if (!graph.is_valid) {
-            console.log(`recipe \"${this.name}\" has an invalid graph`);
+            alert(`recipe \"${this.name}\" has an invalid graph`);
             console.table(__classPrivateFieldGet(this, _Recipe_connections, "f"));
         }
         return graph;

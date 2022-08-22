@@ -3,7 +3,7 @@
     "paths":
     [
         [ "START", "Zwiebel schneiden", "Knoblauch pressen", "5 min in Butter anbraten", "Tomatenmark & Chili hinzufügen", "Alles anbraten bis dunkel gebräunt", "Mit Vodka ablöschen", "Sahne & Parmesan einrühren", "Mit Petersilie anrichten", "END" ],
-        [ "START", "Nudeln kochen", "Wasser zum kochen bringen", "1/2 Tasse Pasta-Wasser einschöpfen", "Sahne & Parmesan einrühren" ],
+        [ "START", "Wasser zum kochen bringen", "Nudeln kochen", "1/2 Tasse Pasta-Wasser einschöpfen", "Sahne & Parmesan einrühren" ],
         [ "Nudeln kochen", "Nudeln kochen bis al dente", "Wasser abgießen", "Mit Petersilie anrichten" ]
     ]
 }
