@@ -2,9 +2,9 @@
     "name": "Pilz-Risotto",
     "paths": 
     [
-        [ "START", "Zwiebel schneiden", "Knoblauch schneiden", "Alles in Öl anbraten bis glasig", "Reis 2 min anbraten", "Mit Weißwein ablöschen", "Reis fertig?", "Parmesan einschmelzen lassen", "Pfifferlinge abtupfen & unterheben", "Abschmecken & servieren", "END"],
+        [ "START", "Zwiebel schneiden", "Knoblauch schneiden", "Alles in Öl anbraten bis glasig", "Reis 2 min anbraten", "Mit Weißwein ablöschen", "Reis fertig?", "Parmesan einschmelzen lassen", "Pfifferlinge abtupfen &amp; unterheben", "Abschmecken &amp; servieren", "END"],
         [ "START", "Gemüsebrühe ansetzen", "Reis fertig?", "Mit 1 Kelle Brühe übergießen", "Warten bis vollst. aufgesogen", "Reis fertig?" ],
         [ "Mit 1 Kelle Brühe übergießen", "Konstantes rühren unter offenem Deckel", "Reis fertig?" ],
-        [ "Reis fertig?", "Pfifferlinge in Öl anbraten", "Pfifferlinge abtupfen & unterheben" ]
+        [ "Reis fertig?", "Pfifferlinge in Öl anbraten", "Pfifferlinge abtupfen &amp; unterheben" ]
     ]
 }

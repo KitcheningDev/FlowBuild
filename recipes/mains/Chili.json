@@ -2,7 +2,7 @@
     "name": "Chili",
     "paths":
     [
-        [ "START", "Zwiebel schneiden", "Knoblauch schneiden", "Alles anbraten bis glasig", "2 min köcheln", "Hackfleisch hinzufügen", "Anbraten bis vollst. durch", "Restl. Zutaten hinzufügen", "30 min köcheln", "Abschmecken & servieren", "END" ],
+        [ "START", "Zwiebel schneiden", "Knoblauch schneiden", "Alles anbraten bis glasig", "2 min köcheln", "Hackfleisch hinzufügen", "Anbraten bis vollst. durch", "Restl. Zutaten hinzufügen", "30 min köcheln", "Abschmecken &amp; servieren", "END" ],
         [ "START", "Paprika schneiden", "2 min köcheln" ],
         [ "START", "Gewürze untermischen", "Restl. Zutaten hinzufügen" ],
         [ "START", "Brühe ansetzen", "30 min köcheln" ]

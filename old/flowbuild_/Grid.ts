@@ -38,19 +38,25 @@ export class Vec2 {
         return this;
     }
 
-    Equals(other: Vec2): boolean {
-        return this.x == other.x && this.y == other.y;
-    }
     Copy(): Vec2 {
         return new Vec2(this.x, this.y);
     }
 }
-
-/*
-export enum TileType {
-    Empty, Box, Arrow, SyncLine, Connector
+export function Add(v1: Vec2, v2: Vec2): Vec2 {
+    return new Vec2(v1.x + v2.x, v1.y + v2.y);
 }
-*/
+export function Sub(v1: Vec2, v2: Vec2): Vec2 {
+    return new Vec2(v1.x - v2.x, v1.y - v2.y);
+}
+export function Mul(v1: Vec2, scalar: number): Vec2 {
+    return new Vec2(v1.x * scalar, v1.y * scalar);
+}
+export function Div(v1: Vec2, scalar: number): Vec2 {
+    return new Vec2(v1.x / scalar, v1.y / scalar);
+}
+export function Equals(v1: Vec2, v2: Vec2): boolean {
+    return v1.x == v2.x && v1.y == v2.y;
+}
 
 export class Arrow {
     up: boolean;
@@ -67,6 +73,18 @@ export class Arrow {
 
     IsEmpty(): boolean {
         return !(this.up || this.right || this.down || this.left);
+    }
+    Split(): Arrow[] {
+        const out = [];
+        if (this.up)
+            out.push(ArrowUp());
+        if (this.right)
+            out.push(ArrowRight());
+        if (this.down)
+            out.push(ArrowDown());
+        if (this.left)
+            out.push(ArrowLeft());
+        return out;
     }
 }
 export function ArrowUp(): Arrow {
@@ -94,18 +112,33 @@ export class SyncLine {
     IsEmpty(): boolean {
         return !(this.up || this.down);
     }
+    Split(): SyncLine[] {
+        const out = [];
+        if (this.up)
+            out.push(SyncLineUp());
+        if (this.down)
+            out.push(SyncLineDown());
+        return out;
+    }
 }
+export function SyncLineUp(): SyncLine {
+    return new SyncLine(true, false);
+}
+export function SyncLineDown(): SyncLine {
+    return new SyncLine(false, true);
+}
+
 export class Tile {
     text: string;
     arrow: Arrow;
     sync_line: SyncLine;
-    shift: number;
+    x_shift: number;
 
-    constructor(text: string = "", arrow: Arrow = new Arrow(), sync_line: SyncLine = new SyncLine(), shift: number = 0) {
+    constructor(text: string = "", arrow: Arrow = new Arrow(), sync_line: SyncLine = new SyncLine(), x_shift: number = 0) {
         this.text = text;
         this.arrow = arrow;
         this.sync_line = sync_line;
-        this.shift = shift;
+        this.x_shift = x_shift;
     }
 
     IsEmpty(): boolean {
@@ -115,13 +148,15 @@ export class Tile {
 
 export class Grid {
     readonly size: Vec2;
-    #tiles: Tile[];
+    depth_heights: Array<number>;
     #boxes: Map<string, Vec2>;
+    #tiles: Tile[];
 
     constructor(bounds: Vec2) {
         this.size = bounds;
         this.#boxes = new Map<string, Vec2>();
         this.#tiles = [];
+        this.depth_heights = [];
         for (let i = 0; i < bounds.x * bounds.y; ++i)
             this.#tiles.push(new Tile());
     }
@@ -147,7 +182,6 @@ export class Grid {
         this.#tiles[this.size.x * coords.y + coords.x].sync_line = sync_line;
     }
 
-    
     OverlapArrow(arrow: Arrow, coords: Vec2): void {
         const tile_arrow = this.#tiles[this.size.x * coords.y + coords.x].arrow;
         if (!tile_arrow.up)
@@ -167,11 +201,14 @@ export class Grid {
             tile_sync_line.down = sync_line.down;
     }
     
-    SetSubGrid(grid: Grid, origin: Vec2, shift: number): void {
+    SetSubGrid(grid: Grid, origin: Vec2): void {
+        let x_shift = origin.x - Math.floor(origin.x);
+        const int_origin = new Vec2(Math.floor(origin.x), origin.y);
         for (let y = 0; y < grid.size.y; ++y) {
             for (let x = 0; x < grid.size.x; ++x) {
-                this.Set(grid.Get(new Vec2(x, y)), new Vec2(x, y).AddVec(origin));
-                this.Get(new Vec2(x, y).AddVec(origin)).shift = shift;
+                const coords = new Vec2(x, y).AddVec(int_origin);
+                this.Set(grid.Get(new Vec2(x, y)), coords);
+                this.Get(coords).x_shift = x_shift;
             }
         }
     }

@@ -3,10 +3,10 @@
     "paths":
     [
         [ "START", "Zwiebel schneiden", "5 min in Öl andünsten", "Hackfleisch dazugeben", "Kochen bis vollst. durch",
-         "Alle Tomaten hinzufügen", "Zucker & Gewürze hinzufügen", "Tomatensoße darauf geben", "Käsesoße darauf geben",
-          "Schicht Blätter legen", "Form voll?", "Mit Mozzarella bestreuen", "20 min abgedeckt backen", "20 min offen backen", "Kurz abkühlen lassen & servieren", "END" ],
+         "Alle Tomaten hinzufügen", "Zucker &amp; Gewürze hinzufügen", "Tomatensoße darauf geben", "Käsesoße darauf geben",
+          "Schicht Blätter legen", "Form voll?", "Mit Mozzarella bestreuen", "20 min abgedeckt backen", "20 min offen backen", "Kurz abkühlen lassen &amp; servieren", "END" ],
         [ "START", "Ofen auf 180°C vorheizen", "Tomatensoße darauf geben" ],
-        [ "START", "Ricotta & Ei vermischen", "Parmesan hinzufügen", "Tomatensoße darauf geben" ],
+        [ "START", "Ricotta &amp; Ei vermischen", "Parmesan hinzufügen", "Tomatensoße darauf geben" ],
         [ "Form voll?", "Tomatensoße darauf geben" ]
     ]
 }

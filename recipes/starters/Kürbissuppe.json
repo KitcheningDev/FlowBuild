@@ -2,9 +2,9 @@
     "name": "Kürbissuppe",
     "paths":
     [
-        [ "START", "Ingwer schneiden", "Zwiebel schneiden", "Alles andünsten", "3-4 min weiter andünsten", "20 min kochen", "Pürieren & Würzen", "Mit Schnittlauch anrichten", "END" ],
+        [ "START", "Ingwer schneiden", "Zwiebel schneiden", "Alles andünsten", "3-4 min weiter andünsten", "20 min kochen", "Pürieren &amp; Würzen", "Mit Schnittlauch anrichten", "END" ],
         [ "START", "Hokkaido schneiden", "Karotten schneiden", "Kartoffeln schneiden", "3-4 min weiter andünsten" ],
         [ "START", "Gemüsebrühe ansetzen", "20 min kochen" ],
-        [ "START", "Orange pressen", "Pürieren & Würzen" ]
+        [ "START", "Orange pressen", "Pürieren &amp; Würzen" ]
     ]
 }

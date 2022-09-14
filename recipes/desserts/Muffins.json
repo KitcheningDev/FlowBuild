@@ -3,7 +3,7 @@
     "paths":
     [
         ["START", "Trockene Zutaten vermischen", "Alles verrühren", "Beeren unterheben", "In Form geben",
-        "20min backen", "Probe", "Kurz abkühlen", "Aus Form lösen & servieren", "END"],
+        "20min backen", "Probe", "Kurz abkühlen", "Aus Form lösen &amp; servieren", "END"],
         ["START", "Ofen auf 180°C vorheizen", "Nasse Zutaten (außer Beeren) vermischen", "Alles verrühren"],
         ["Probe", "+2min backen", "Probe"]
     ]

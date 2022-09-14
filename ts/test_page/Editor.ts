@@ -1,6 +1,20 @@
 import { Recipe } from "../flowbuild/Recipe.js";
-import { DrawGrid } from "./DrawGrid.js";
-import { Flowbuild } from "../flowbuild/Flowbuild.js";
+import { DrawRecipe } from "../flowbuild/DrawRecipe.js";
+
+// recipes
+export function LoadRecipe(name: string) {
+    const req = new XMLHttpRequest();
+    req.onload = () => { 
+        console.log(name);
+        const loaded = JSON.parse(req.responseText);
+        curr_recipe.name = loaded["name"];
+        curr_recipe.SetConnections(loaded["paths"]);
+        document.getElementById("recipe-name").innerHTML = curr_recipe.name;
+        DrawRecipe(curr_recipe);
+    }
+    req.open("GET", `${document.URL}/recipes/${name}.json`);
+    req.send();
+}
 
 export const flowchart = document.getElementById("flowchart");
 export let curr_recipe = new Recipe("", []);
@@ -44,12 +58,15 @@ const random_text = [
     "Zwiebel schneiden", "Knoblauch schneiden", "Alles anbraten bis glasig", "2 min köcheln",
     "Hackfleisch hinzufügen", "Anbraten bis vollst. durch", "Restl. Zutaten hinzufügen", "30 min köcheln",
     "Zwiebel schneiden", "Knoblauch schneiden", "Alles anbraten bis glasig", "2 min köcheln", "Hackfleisch hinzufügen",
-    "Anbraten bis vollst. durch", "Restl. Zutaten hinzufügen", "30 min köcheln", "Abschmecken & servieren",
+    "Anbraten bis vollst. durch", "Restl. Zutaten hinzufügen", "30 min köcheln", "Abschmecken &amp; servieren",
     "Zwiebel schneiden", "Tomaten schneiden", "Zwiebel reinlegen", "Tomaten daraufschichten",
     "Restl. Gemüse stapeln", "Oliven darauf verteilen", "15min auf mittlerer Hitze köcheln", "1,5h garen", "In Tajineboden servieren",
     "Trockene Zutaten vermischen", "Alles verrühren", "Beeren unterheben", "In Form geben",
-    "20min backen", "Probe", "Kurz abkühlen", "Aus Form lösen & servieren"
-]
+    "20min backen", "Probe", "Kurz abkühlen", "Aus Form lösen &amp; servieren",
+    "Ofen auf 250°C vorheizen", "Pizzateig ausrollen", "Erdbeeren halbieren", "Pesto auf Teig verteilen", "Erdbeeren auf Pesto verteilen", "15 min backen", "Mozzarella verteilen", "Auf vorgewärmten Teller servieren",
+    "Pistazien in Mixer geben", "Spinat, Zitronensaft &amp; Öl hinzu", "Honig &amp; Salz dazu", "Zu Pesto pürieren", "Pesto auf Teig verteilen",
+    "Teller vorwärmen", "Auf vorgewärmten Teller servieren"
+];
 document.addEventListener('mouseup', (e: MouseEvent) => {
     if (e.button != 0 || !in_movement)
         return;
@@ -64,6 +81,8 @@ document.addEventListener('mouseup', (e: MouseEvent) => {
             input_field.style.display = "inline";
             flowchart.style.cursor = "default";
             input_field.value = random_text[Math.round(Math.random() * (random_text.length - 1))];
+            while (curr_recipe.Includes(input_field.value))
+                input_field.value = random_text[Math.round(Math.random() * (random_text.length - 1))];
             input_field.focus();
             input_field.select();
             SetPos(input_field, GetMousePos(e));
@@ -76,14 +95,24 @@ input_field.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.key == "Enter" && from && !in_movement && input_field.value.length > 0)
         CommitChange();
 });
+document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key == "u") {
+        curr_recipe.UndoConn();
+        DrawRecipe(curr_recipe);
+    }
+});
 
 function CommitChange(): void {
-    if (to == null)
-        curr_recipe.AddConnection(from.innerHTML.trim(), input_field.value);    
-    else 
-        curr_recipe.AddConnection(from.innerHTML.trim(), to.innerHTML.trim());    
-    DrawGrid(new Flowbuild(curr_recipe).grid);
-    
+    if (from != to) {
+        if (to == null)
+            curr_recipe.AddConn(from.innerHTML.trim(), input_field.value);    
+        else 
+            curr_recipe.AddConn(from.innerHTML.trim(), to.innerHTML.trim());
+        if (curr_recipe.graph.is_valid)
+            DrawRecipe(curr_recipe);
+        else 
+            curr_recipe.UndoConn();
+    }
     input_field.style.display = "none";
     flowchart.style.cursor = "default";
     input_field.value = "";

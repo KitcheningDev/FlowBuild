@@ -1,4 +1,4 @@
-export const recipes = {
+export const recipe_index = {
     "starters": 
     [
         "Kürbissuppe",

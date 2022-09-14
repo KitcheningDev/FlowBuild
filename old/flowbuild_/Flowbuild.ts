@@ -1,10 +1,15 @@
 import { Graph, Path } from "./Graph.js";
-import { Grid, Vec2, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Arrow, Tile, SyncLine } from "./grid.js";
+import { 
+    Grid, Vec2, 
+    Arrow, Tile, SyncLine,
+    ArrowUp, ArrowDown, ArrowLeft, ArrowRight,
+    Add, Sub, Mul, Div, Equals 
+} from "./Grid.js";
 import { Recipe } from "./Recipe.js";
 
+const alternation_threshhold = 4;
 class PathGrid {
     origin: Vec2;
-    shift: number;
     readonly in: Vec2;
     readonly out: Vec2;
     readonly grid: Grid;
@@ -14,9 +19,8 @@ class PathGrid {
         this.origin = new Vec2();
         this.in = new Vec2();
         this.path = path;
-        this.shift = 0;
 
-        if (path.nodes.length > 3) {
+        if (alternation_threshhold <= path.nodes.length) {
             this.out = new Vec2(path.nodes.length % 2, Math.floor(path.nodes.length / 2));
             this.grid = new Grid(new Vec2(2, Math.ceil(path.nodes.length / 2)));
 
@@ -43,10 +47,25 @@ class PathGrid {
                     else
                         this.grid.OverlapArrow(ArrowLeft(), coords);
                 }
+                //if (this.path.parents.length > 0 || i != 0) {
+                //    if (i % 4 == 0 || i % 4 == 2)
+                //        this.grid.OverlapArrow(ArrowUp(), coords);
+                //    else if (i % 4 == 1)
+                //        this.grid.OverlapArrow(ArrowLeft(), coords);
+                //    else
+                //        this.grid.OverlapArrow(ArrowRight(), coords);
+                //}
+                //if (this.path.childs.length > 0 || i != path.nodes.length - 1) {
+                //    if (i % 4 == 0)
+                //        this.grid.OverlapArrow(ArrowRight(), coords);
+                //    else if (i % 4 == 1 || i % 4 == 3)
+                //        this.grid.OverlapArrow(ArrowDown(), coords);
+                //    else
+                //        this.grid.OverlapArrow(ArrowLeft(), coords);
+                //}
             }
         }
         else {
-
             this.out = new Vec2(0, path.nodes.length - 1);
             this.grid = new Grid(new Vec2(1, path.nodes.length));
             for (let i = 0; i < path.nodes.length; ++i) {
@@ -57,30 +76,35 @@ class PathGrid {
                     this.grid.OverlapArrow(ArrowUp(), coords);
                 if (i != path.nodes.length - 1)
                     this.grid.OverlapArrow(ArrowDown(), coords);
+                //if (this.path.parents.length > 0 || i != 0)
+                //    this.grid.OverlapArrow(ArrowUp(), coords);
+                //if (this.path.childs.length > 0 || i != path.nodes.length - 1)
+                //   this.grid.OverlapArrow(ArrowDown(), coords);
             }
         }
     }
 
     GlobalIn(): Vec2 {
-        return this.origin.Copy().AddVec(this.in);
+        return Add(this.origin, this.in);
     }
     GlobalOut(): Vec2 {
-        return this.origin.Copy().AddVec(this.out);
+        return Add(this.origin, this.out);
     }
 }
 
+const depth_padding = 1;
 class Arrangement {
     origin: Vec2;
     size: Vec2;
     members: Arrangement[];
-    is_hor: boolean;
+    dir: "hor" | "ver";
     path: Path;
 
     constructor() {
         this.origin = new Vec2();
         this.size = new Vec2();
         this.members = [];
-        this.is_hor = true;
+        this.dir = "hor";
         this.path = null;
     }
 
@@ -92,7 +116,7 @@ class Arrangement {
     }
 
     CalcSize(): void {
-        if (this.is_hor) {
+        if (this.dir == "hor") {
             this.size.x = this.members[this.members.length - 1].Left().x;
             this.size.y = 0;
             for (const member of this.members)
@@ -107,7 +131,7 @@ class Arrangement {
     }
 
     CalcOrigin(from: number = 0, to: number = this.members.length - 1): void {
-        if (this.is_hor) {
+        if (this.dir == "hor") {
             if (from == 0) {
                 this.members[0].origin.x = 0;
                 from++;   
@@ -121,7 +145,7 @@ class Arrangement {
                 from++;   
             }
             for (let i = from; i <= to; ++i)
-                this.members[i].origin.y = this.members[i - 1].Top().y;
+                this.members[i].origin.y = this.members[i - 1].Top().y + depth_padding;
         }
     }
 
@@ -142,12 +166,12 @@ class Arrangement {
         out.size = this.size.Copy();
         for (const member of this.members)
             out.members.push(member.Copy());
-        out.is_hor = this.is_hor;
+        out.dir = this.dir;
         out.path = this.path;
         return out;
     }
 }
-function TieToArrangement(members: Arrangement[], is_hor: boolean): Arrangement {
+function TieToArrangement(members: Arrangement[], dir: "hor" | "ver"): Arrangement {
     if (members.length == 0)
         return null;
     else if (members.length == 1)
@@ -155,50 +179,52 @@ function TieToArrangement(members: Arrangement[], is_hor: boolean): Arrangement 
     
     const out = new Arrangement();
     out.members = members;
-    out.is_hor = is_hor;
+    out.dir = dir;
     out.CalcOrigin()
     out.CalcSize();
     return out;
 }
 
-const depth_padding = 1;
 export class Flowbuild {
     grid: Grid;
     #graph: Graph;
     #path_grids: Map<Path, PathGrid>;
-    #arrangement: Arrangement;
+    #arr: Arrangement;
     
     #best_arr: Arrangement;
     #best_eval: number;
 
     #depth_heights: Array<number>;
-    #depth_widths: Array<number>;
 
     constructor(recipe: Recipe) {
-        this.#graph = recipe.CreateGraph();
+        this.#graph = recipe.graph;
 
+        // path_grids
         this.#path_grids = new Map<Path, PathGrid>();
         for (const path of this.#graph.path_map.values())
             this.#path_grids.set(path, new PathGrid(path));
         
         this.#depth_heights = [0];
-        this.#depth_widths = [1];
-        this.#arrangement = this.CreateArrangement();
+        this.#arr = this.CreateArrangement();
 
-        this.#best_arr = this.#arrangement;
+        this.#best_arr = this.#arr.Copy();
         this.#best_eval = this.EvalPermutation();
-        this.Permutate(this.#arrangement, 0);
-        this.#arrangement = this.#best_arr;
+        //this.Permutate(this.#arr, 0);
+        this.#arr = this.#best_arr.Copy();
 
-        this.grid = new Grid(this.#arrangement.size);
+        this.grid = new Grid(this.#arr.size);
         this.SetGridPathOrigins();
         this.ShiftCoords();
 
-        console.log(this.#arrangement);
+        /*
+        console.log(this.#arr);
         for (const path_grid of this.#path_grids.values())
             console.log(path_grid.path.Head(), path_grid.path.advanced.depth);
+        */
 
         this.FillGrid();
+        this.grid.depth_heights = this.#depth_heights;
+        this.PostProcessGrid();
     }
 
     // arrangement
@@ -214,15 +240,19 @@ export class Flowbuild {
             if (path.advanced.depth_diff <= 1)
                 members.push(this.CreatePathArrangement(path))
         }
-        return TieToArrangement(members, true);
+        return TieToArrangement(members, "hor");
     }
     private CreateArrangement(depth: number = this.#graph.depth): Arrangement {
         if (depth == 0)
             return this.CreateDepthArrangement(0);
+
         const former_arr = this.CreateArrangement(depth - 1);
         this.#depth_heights.push(former_arr.size.y + depth_padding);
         const curr_depth_arr = this.CreateDepthArrangement(depth);
-        const curr_arr_members = [TieToArrangement([former_arr, curr_depth_arr], false)];
+        const members = [former_arr, curr_depth_arr];
+        if (curr_depth_arr == null)
+            members.pop();
+        const curr_arr_members = [TieToArrangement(members, "ver")];
         for (const path of this.#graph.path_map.values()) {
             if (path.advanced.depth_diff > 1 && path.advanced.depth + path.advanced.depth_diff == depth + 1) {
                 const arr = this.CreatePathArrangement(path);
@@ -230,8 +260,7 @@ export class Flowbuild {
                 curr_arr_members.push(arr);
             }
         }
-        const out = TieToArrangement(curr_arr_members, true);
-        this.#depth_widths.push(out.size.x);
+        const out = TieToArrangement(curr_arr_members, "hor");
         return out;
     }
 
@@ -243,18 +272,18 @@ export class Flowbuild {
         }
         return x;
     }
-    private Permutate(arr: Arrangement = this.#arrangement, index: number): void {
+    private Permutate(arr: Arrangement = this.#arr, index: number): void {
         if (arr.path == this.#graph.start) {
             this.SetGridPathOrigins();
+            this.ShiftCoords();
             const new_eval = this.EvalPermutation();
             if (new_eval < this.#best_eval) {
-                console.log(new_eval, this.#best_eval);
                 this.#best_eval = new_eval;
-                this.#best_arr = this.#arrangement.Copy();
+                this.#best_arr = this.#arr.Copy();
             }
             return;
         }
-        if (index == arr.members.length - 1 || !arr.is_hor) {
+        if (index == arr.members.length - 1 || arr.dir == "ver") {
             for (const member of arr.members)
                 this.Permutate(member, 0);
         }
@@ -265,36 +294,32 @@ export class Flowbuild {
         }
     }
 
-    private SetGridPathOrigins(arr: Arrangement = this.#arrangement, off: Vec2 = new Vec2()): void {
+    private SetGridPathOrigins(arr: Arrangement = this.#arr, off: Vec2 = new Vec2()): void {
         for (const member of arr.members) {
             if (member.path)
-                this.#path_grids.get(member.path).origin = off.Copy().AddVec(member.origin);
+                this.#path_grids.get(member.path).origin = Add(off, member.origin);
             else 
-                this.SetGridPathOrigins(member, off.Copy().AddVec(member.origin));
+                this.SetGridPathOrigins(member, Add(off, member.origin));
         }
-        if (arr == this.#arrangement)
-            this.ShiftCoords();
     }
     private ShiftCoords(): void {
         for (const depth_paths of this.#graph.depth_map) {
             let max_x = -1;
             for (const path of depth_paths) {
-                max_x = Math.max(this.#path_grids.get(path).origin.x + this.#arrangement.size.x - 1, max_x);
+                max_x = Math.max(this.#path_grids.get(path).origin.x + this.#path_grids.get(path).grid.size.x - 1, max_x);
             }
-            let whole_shift = Math.floor((this.#arrangement.size.x - max_x - 1) / 2);
-            let frac_shift = 0;
-            if ((this.#arrangement.size.x % 2) == (max_x % 2))
-                frac_shift += 0.5;
+            let x_shift = Math.floor((this.#arr.size.x - max_x - 1) / 2);
+            if ((this.#arr.size.x % 2) == (max_x % 2))
+                x_shift += 0.5;
             for (const path of depth_paths) {
-                this.#path_grids.get(path).origin.x += whole_shift;
-                this.#path_grids.get(path).shift = frac_shift;
+                this.#path_grids.get(path).origin.x += x_shift;
             }
         }
     }
 
     private FillGrid(): void {
         for (const path_grid of this.#path_grids.values())
-            this.grid.SetSubGrid(path_grid.grid, path_grid.origin, path_grid.shift);
+            this.grid.SetSubGrid(path_grid.grid, path_grid.origin);
         for (const path_grid of this.#path_grids.values()) {
             console.log(path_grid.path.Head(), path_grid.origin);
             for (const child of path_grid.path.childs) {
@@ -309,7 +334,7 @@ export class Flowbuild {
                 let min_x = 999;
                 let max_x = -1;
                 for (const child of path.childs) {
-                    let x = this.#path_grids.get(child).GlobalIn().x;
+                    let x = Math.floor(this.#path_grids.get(child).GlobalIn().x);
                     min_x = Math.min(x, min_x);
                     max_x = Math.max(x, max_x);
                 }
@@ -321,7 +346,7 @@ export class Flowbuild {
                 let min_x = 999;
                 let max_x = -1;
                 for (const parent of path.parents) {
-                    let x = this.#path_grids.get(parent).GlobalOut().x;
+                    let x = Math.floor(this.#path_grids.get(parent).GlobalOut().x);
                     min_x = Math.min(x, min_x);
                     max_x = Math.max(x, max_x);
                 }
@@ -349,5 +374,19 @@ export class Flowbuild {
         }
         this.grid.OverlapArrow(ArrowDown(), new Vec2(0, -1).AddVec(to));
         this.grid.OverlapArrow(ArrowUp(), to);
+    }
+
+    private PostProcessGrid(): void {
+        return;
+        for (let x = 0; x < this.grid.size.x; ++x) {
+            if (this.grid.size.y == 2 + depth_padding) {
+                this.grid.OverlapSyncLine(new SyncLine(true, false), new Vec2(x, 1));
+                this.grid.OverlapSyncLine(new SyncLine(false, true), new Vec2(x, 1));
+            }
+            else {
+                this.grid.OverlapSyncLine(new SyncLine(true, false), new Vec2(x, 1 + depth_padding));
+                this.grid.OverlapSyncLine(new SyncLine(false, true), new Vec2(x, this.grid.size.y - 2 - depth_padding));
+            } 
+        }
     }
 }

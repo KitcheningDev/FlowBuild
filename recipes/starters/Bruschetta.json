@@ -2,10 +2,10 @@
     "name": "Bruschetta",
     "paths":
     [
-        [ "START", "Tomaten entkernen", "Tomaten würfeln", "Zwiebel schneiden", "Oliven schneiden", "In Essig & Öl schwenken", "Würzen", "Auf Brot anrichten & servieren", "END" ],
-        [ "START", "Ofen auf 180°C vorheizen", "Baguette schneiden", "Brot mit Öl bestreichen", "3-4 Blätter zum Dekorieren beiseite legen", "Restlichen Basilikum hacken", "Auf Brot anrichten & servieren" ],
-        [ "Restlichen Basilikum hacken", "In Essig & Öl schwenken" ],
-        [ "Brot mit Öl bestreichen", "Brot für 10 Minuten backen", "Mit Knoblauchzehe einreiben", "Auf Brot anrichten & servieren" ],
-        [ "Mit Knoblauchzehe einreiben", "In Essig & Öl schwenken" ]
+        [ "START", "Tomaten entkernen", "Tomaten würfeln", "Zwiebel schneiden", "Oliven schneiden", "In Essig &amp; Öl schwenken", "Würzen", "Auf Brot anrichten &amp; servieren", "END" ],
+        [ "START", "Ofen auf 180°C vorheizen", "Baguette schneiden", "Brot mit Öl bestreichen", "3-4 Blätter zum Dekorieren beiseite legen", "Restlichen Basilikum hacken", "In Essig &amp; Öl schwenken" ],
+        [ "Brot mit Öl bestreichen", "Brot für 10 Minuten backen", "Mit Knoblauchzehe einreiben", "In Essig &amp; Öl schwenken" ],
+        [ "Restlichen Basilikum hacken", "Auf Brot anrichten &amp; servieren" ],
+        [ "Mit Knoblauchzehe einreiben", "Auf Brot anrichten &amp; servieren" ]
     ]
 }

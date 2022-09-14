@@ -9,7 +9,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _Grid_tiles, _Grid_boxes;
+var _Grid_boxes, _Grid_tiles;
 export class Vec2 {
     constructor(...any) {
         if (any.length == 0) {
@@ -45,18 +45,25 @@ export class Vec2 {
         this.y /= scalar;
         return this;
     }
-    Equals(other) {
-        return this.x == other.x && this.y == other.y;
-    }
     Copy() {
         return new Vec2(this.x, this.y);
     }
 }
-/*
-export enum TileType {
-    Empty, Box, Arrow, SyncLine, Connector
+export function Add(v1, v2) {
+    return new Vec2(v1.x + v2.x, v1.y + v2.y);
 }
-*/
+export function Sub(v1, v2) {
+    return new Vec2(v1.x - v2.x, v1.y - v2.y);
+}
+export function Mul(v1, scalar) {
+    return new Vec2(v1.x * scalar, v1.y * scalar);
+}
+export function Div(v1, scalar) {
+    return new Vec2(v1.x / scalar, v1.y / scalar);
+}
+export function Equals(v1, v2) {
+    return v1.x == v2.x && v1.y == v2.y;
+}
 export class Arrow {
     constructor(up = false, right = false, down = false, left = false) {
         this.up = up;
@@ -66,6 +73,18 @@ export class Arrow {
     }
     IsEmpty() {
         return !(this.up || this.right || this.down || this.left);
+    }
+    Split() {
+        const out = [];
+        if (this.up)
+            out.push(ArrowUp());
+        if (this.right)
+            out.push(ArrowRight());
+        if (this.down)
+            out.push(ArrowDown());
+        if (this.left)
+            out.push(ArrowLeft());
+        return out;
     }
 }
 export function ArrowUp() {
@@ -88,13 +107,27 @@ export class SyncLine {
     IsEmpty() {
         return !(this.up || this.down);
     }
+    Split() {
+        const out = [];
+        if (this.up)
+            out.push(SyncLineUp());
+        if (this.down)
+            out.push(SyncLineDown());
+        return out;
+    }
+}
+export function SyncLineUp() {
+    return new SyncLine(true, false);
+}
+export function SyncLineDown() {
+    return new SyncLine(false, true);
 }
 export class Tile {
-    constructor(text = "", arrow = new Arrow(), sync_line = new SyncLine(), shift = 0) {
+    constructor(text = "", arrow = new Arrow(), sync_line = new SyncLine(), x_shift = 0) {
         this.text = text;
         this.arrow = arrow;
         this.sync_line = sync_line;
-        this.shift = shift;
+        this.x_shift = x_shift;
     }
     IsEmpty() {
         return this.text == "" && this.arrow.IsEmpty() && this.sync_line.IsEmpty();
@@ -102,11 +135,12 @@ export class Tile {
 }
 export class Grid {
     constructor(bounds) {
-        _Grid_tiles.set(this, void 0);
         _Grid_boxes.set(this, void 0);
+        _Grid_tiles.set(this, void 0);
         this.size = bounds;
         __classPrivateFieldSet(this, _Grid_boxes, new Map(), "f");
         __classPrivateFieldSet(this, _Grid_tiles, [], "f");
+        this.depth_heights = [];
         for (let i = 0; i < bounds.x * bounds.y; ++i)
             __classPrivateFieldGet(this, _Grid_tiles, "f").push(new Tile());
     }
@@ -147,11 +181,14 @@ export class Grid {
         if (!tile_sync_line.down)
             tile_sync_line.down = sync_line.down;
     }
-    SetSubGrid(grid, origin, shift) {
+    SetSubGrid(grid, origin) {
+        let x_shift = origin.x - Math.floor(origin.x);
+        const int_origin = new Vec2(Math.floor(origin.x), origin.y);
         for (let y = 0; y < grid.size.y; ++y) {
             for (let x = 0; x < grid.size.x; ++x) {
-                this.Set(grid.Get(new Vec2(x, y)), new Vec2(x, y).AddVec(origin));
-                this.Get(new Vec2(x, y).AddVec(origin)).shift = shift;
+                const coords = new Vec2(x, y).AddVec(int_origin);
+                this.Set(grid.Get(new Vec2(x, y)), coords);
+                this.Get(coords).x_shift = x_shift;
             }
         }
     }
@@ -186,7 +223,7 @@ export class Grid {
         }
     }
 }
-_Grid_tiles = new WeakMap(), _Grid_boxes = new WeakMap();
+_Grid_boxes = new WeakMap(), _Grid_tiles = new WeakMap();
 export function Resized(grid, size) {
     const out = new Grid(size);
     for (let y = 0; y < Math.min(grid.size.y, size.y); ++y) {
@@ -195,4 +232,4 @@ export function Resized(grid, size) {
     }
     return out;
 }
-//# sourceMappingURL=grid.js.map
+//# sourceMappingURL=Grid.js.map

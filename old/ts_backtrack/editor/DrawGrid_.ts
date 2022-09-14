@@ -24,9 +24,8 @@ export function DrawGrid(grid: Grid): void {
             
                 task.innerHTML = tile.text;
 
-                task.style.left = (grid_size_x * (x + 0.5 + tile.shift)).toString() + "px";
+                task.style.left = (grid_size_x * (x + 0.5 + tile.x_shift)).toString() + "px";
                 task.style.top = (grid_size_y * (y + 0.5)).toString() + "px";
-                
                 flowchart.appendChild(task);
             }
 
@@ -38,7 +37,7 @@ export function DrawGrid(grid: Grid): void {
                 arrow.style.width = arrow_width;
                 arrow.style.height = (grid_size_y / 2).toString() + "px";
 
-                arrow.style.left = (grid_size_x * (x + 0.5 + tile.shift)).toString() + "px";
+                arrow.style.left = (grid_size_x * (x + 0.5 + tile.x_shift)).toString() + "px";
                 arrow.style.top = (grid_size_y * (y + 0.25)).toString() + "px";
                 flowchart.appendChild(arrow);
             }
@@ -49,7 +48,7 @@ export function DrawGrid(grid: Grid): void {
                 arrow.style.width = (grid_size_x / 2).toString() + "px";
                 arrow.style.height = arrow_width;
                 
-                arrow.style.left = (grid_size_x * (x + 0.75 + tile.shift)).toString() + "px";
+                arrow.style.left = (grid_size_x * (x + 0.75 + tile.x_shift)).toString() + "px";
                 arrow.style.top = (grid_size_y * (y + 0.5)).toString() + "px";
                 flowchart.appendChild(arrow);
             }
@@ -60,7 +59,7 @@ export function DrawGrid(grid: Grid): void {
                 arrow.style.width = arrow_width;
                 arrow.style.height = (grid_size_y / 2).toString() + "px";
 
-                arrow.style.left = (grid_size_x * (x + 0.5 + tile.shift)).toString() + "px";
+                arrow.style.left = (grid_size_x * (x + 0.5 + tile.x_shift)).toString() + "px";
                 arrow.style.top = (grid_size_y * (y + 0.75)).toString() + "px";
                 flowchart.appendChild(arrow);
             }
@@ -71,7 +70,7 @@ export function DrawGrid(grid: Grid): void {
                 arrow.style.width = (grid_size_x / 2).toString() + "px";
                 arrow.style.height = arrow_width;
 
-                arrow.style.left = (grid_size_x * (x + 0.25 + tile.shift)).toString() + "px";
+                arrow.style.left = (grid_size_x * (x + 0.25 + tile.x_shift)).toString() + "px";
                 arrow.style.top = (grid_size_y * (y + 0.5)).toString() + "px";
                 flowchart.appendChild(arrow);
             }
@@ -91,7 +90,7 @@ export function DrawGrid(grid: Grid): void {
                     const connection_box = document.createElement("span");
                     connection_box.classList.add("connection_box");
 
-                    connection_box.style.left = (grid_size_x * (x + 0.5 + tile.shift)).toString() + "px";
+                    connection_box.style.left = (grid_size_x * (x + 0.5 + tile.x_shift)).toString() + "px";
                     connection_box.style.top = (grid_size_y * (y + 0.5)).toString() + "px";
                     flowchart.appendChild(connection_box);
                 }   
@@ -102,17 +101,21 @@ export function DrawGrid(grid: Grid): void {
                 const sync_line = document.createElement("span");
                 sync_line.classList.add("sync_line");
 
-                if (!grid.InBounds(new Vec2(x + 1, y)) || grid.Get(new Vec2(x + 1, y)).sync_line.IsEmpty()) {
+                if (grid.size.x == 1) {
+                    sync_line.style.width = (grid_size_x * 0.5).toString() + "px";
+                    sync_line.style.left = (grid_size_x * (x + 0.5 + tile.x_shift)).toString() + "px";
+                }
+                else if (!grid.InBounds(new Vec2(x + 1, y)) || grid.Get(new Vec2(x + 1, y)).sync_line.IsEmpty()) {
                     sync_line.style.width = (grid_size_x * 0.75).toString() + "px";
-                    sync_line.style.left = (grid_size_x * (x + 0.25 + tile.shift)).toString() + "px";
+                    sync_line.style.left = (grid_size_x * (x + 0.25 + tile.x_shift)).toString() + "px";
                 }
                 else if (!grid.InBounds(new Vec2(x - 1, y)) || grid.Get(new Vec2(x - 1, y)).sync_line.IsEmpty()) {
                     sync_line.style.width = (grid_size_x * 0.75).toString() + "px";
-                    sync_line.style.left = (grid_size_x * (x + 0.75 + tile.shift)).toString() + "px";
+                    sync_line.style.left = (grid_size_x * (x + 0.75 + tile.x_shift)).toString() + "px";
                 }
                 else {
                     sync_line.style.width = grid_size_x.toString() + "px";
-                    sync_line.style.left = (grid_size_x * (x + 0.5 + tile.shift)).toString() + "px";
+                    sync_line.style.left = (grid_size_x * (x + 0.5 + tile.x_shift)).toString() + "px";
                 }
                 sync_line.style.height = syncline_width;
 
@@ -123,19 +126,23 @@ export function DrawGrid(grid: Grid): void {
                 const sync_line = document.createElement("span");
                 sync_line.classList.add("sync_line");
 
-                if (!grid.InBounds(new Vec2(x + 1, y)) || grid.Get(new Vec2(x + 1, y)).sync_line.IsEmpty()) {
+                if (grid.size.x == 1) {
+                    sync_line.style.width = (grid_size_x * 0.5).toString() + "px";
+                    sync_line.style.left = (grid_size_x * (x + 0.5 + tile.x_shift)).toString() + "px";
+                }
+                else if (!grid.InBounds(new Vec2(x + 1, y)) || grid.Get(new Vec2(x + 1, y)).sync_line.IsEmpty()) {
                     sync_line.style.width = (grid_size_x * 0.75).toString() + "px";
-                    sync_line.style.left = (grid_size_x * (x + 0.25 + tile.shift)).toString() + "px";
+                    sync_line.style.left = (grid_size_x * (x + 0.25 + tile.x_shift)).toString() + "px";
                 }
                 else if (!grid.InBounds(new Vec2(x - 1, y)) || grid.Get(new Vec2(x - 1, y)).sync_line.IsEmpty()) {
                     sync_line.style.width = (grid_size_x * 0.75).toString() + "px";
-                    sync_line.style.left = (grid_size_x * (x + 0.75 + tile.shift)).toString() + "px";
+                    sync_line.style.left = (grid_size_x * (x + 0.75 + tile.x_shift)).toString() + "px";
                 }
                 else {
                     sync_line.style.width = grid_size_x.toString() + "px";
-                    sync_line.style.left = (grid_size_x * (x + 0.5 + tile.shift)).toString() + "px";
+                    sync_line.style.left = (grid_size_x * (x + 0.5 + tile.x_shift)).toString() + "px";
                 }
-                sync_line.style.color = "red";
+                sync_line.style.color = "grey";
                 sync_line.style.height = syncline_width;
 
                 sync_line.style.top = (grid_size_y * (y + 1.2)).toString() + "px";

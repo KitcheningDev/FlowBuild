@@ -2,8 +2,8 @@
     "name": "Vodka-Pasta",
     "paths":
     [
-        [ "START", "Zwiebel schneiden", "Knoblauch pressen", "5 min in Butter anbraten", "Tomatenmark & Chili hinzufügen", "Alles anbraten bis dunkel gebräunt", "Mit Vodka ablöschen", "Sahne & Parmesan einrühren", "Mit Petersilie anrichten", "END" ],
-        [ "START", "Wasser zum kochen bringen", "Nudeln kochen", "1/2 Tasse Pasta-Wasser einschöpfen", "Sahne & Parmesan einrühren" ],
+        [ "START", "Zwiebel schneiden", "Knoblauch pressen", "5 min in Butter anbraten", "Tomatenmark &amp; Chili hinzufügen", "Alles anbraten bis dunkel gebräunt", "Mit Vodka ablöschen", "Sahne &amp; Parmesan einrühren", "Mit Petersilie anrichten", "END" ],
+        [ "START", "Wasser zum kochen bringen", "Nudeln kochen", "1/2 Tasse Pasta-Wasser einschöpfen", "Sahne &amp; Parmesan einrühren" ],
         [ "Nudeln kochen", "Nudeln kochen bis al dente", "Wasser abgießen", "Mit Petersilie anrichten" ]
     ]
 }
