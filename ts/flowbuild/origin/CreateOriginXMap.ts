@@ -1,24 +1,21 @@
-import { Recipe } from "./Recipe.js";
-import { Path } from "./Graph.js";
-import { Vec2, Add, Div, Sub } from "../Utils/Vec2.js";
-import { CreateDefaultConfig } from "./Config.js";
-import { LastElem, Includes, PtrEqualsFunc } from "../Utils/Funcs.js";
-import { PathBounds, config } from "./PathBounds.js";
-import { CreateDepthHeights } from "./CreateDepthHeights.js";
+import { PathBounds } from "../PathBounds.js";
 import { Arrangement } from "./Arrangement.js";
+import { Recipe } from "./../Recipe.js";
+import { Path } from "./../Graph.js";
+import { Vec2, Add, Div, Sub } from "../../Utils/Vec2.js";
+import { CreateDefaultConfig } from "./../Config.js";
+import { LastElem, Includes, PrimitiveEqualsFunc } from "../../Utils/Funcs.js";
+import { config } from "./../Config.js";
 
-export function ArrangePaths(recipe: Recipe, path_bounds_map: Map<Path, PathBounds>): Map<Path, Vec2> {
+export function CreateOriginXMap(recipe: Recipe, path_bounds_map: Map<Path, PathBounds>): Map<Path, number> {
     const graph = recipe.graph;
-
-    // create depth heights
-    const depth_heights = CreateDepthHeights(graph, path_bounds_map);
 
     // create arrangement
     function CreateDepthArrangement(depth: number): Arrangement {
         const members = [] as Arrangement[];
         for (const path of graph.depth_map[depth]) {
             if (path.adv.depth_diff_max <= 1)
-                members.push(new Arrangement([], "none", [path, path_bounds_map.get(path)]));
+                members.push(new Arrangement([], "none", [path, path_bounds_map.get(path).size.x]));
         }
         if (members.length == 0)
             return null;
@@ -28,7 +25,7 @@ export function ArrangePaths(recipe: Recipe, path_bounds_map: Map<Path, PathBoun
     }
     function CreateArrangement(depth: number): Arrangement {
         if (depth == 0)
-            return new Arrangement([], "none", [graph.start, path_bounds_map.get(graph.start)]);
+            return new Arrangement([], "none", [graph.start, path_bounds_map.get(graph.start).size.x]);
         const last_arr = CreateArrangement(depth - 1);
         const depth_arr = CreateDepthArrangement(depth);
         let ver_arr: Arrangement;
@@ -46,7 +43,7 @@ export function ArrangePaths(recipe: Recipe, path_bounds_map: Map<Path, PathBoun
         const members = [ver_arr];
         for (const path of graph.path_map.values()) {
             if ( path.adv.depth_diff_max > 1 && path.adv.depth + path.adv.depth_diff_max == depth + 1) {
-                members.push(new Arrangement([], "none", [path, path_bounds_map.get(path)]));
+                members.push(new Arrangement([], "none", [path, path_bounds_map.get(path).size.x]));
             }
         }
         if (members.length == 1)
@@ -56,14 +53,14 @@ export function ArrangePaths(recipe: Recipe, path_bounds_map: Map<Path, PathBoun
     let arr = CreateArrangement(graph.depth);
 
     // set origins
-    const origin_map = new Map<Path, Vec2>();
+    const x_map = new Map<Path, number>();
     function SetOrigins(): void {
         (function RecursiveSetPathBounds(arr: Arrangement, off_x: number): void {
-            if (arr.path_bounds_pair != null)
-                origin_map.set(arr.path_bounds_pair[0], new Vec2(off_x, depth_heights[arr.path_bounds_pair[0].adv.depth]));
+            if (arr.path != null)
+                x_map.set(arr.path, off_x);
             
             for (let i = 0; i < arr.members.length; ++i)
-                RecursiveSetPathBounds(arr.members[i], off_x + arr.GetMemberOffset(i).x);
+                RecursiveSetPathBounds(arr.members[i], off_x + arr.GetMemberOffX(i));
         })(arr, 0);
     }
     SetOrigins();
@@ -73,7 +70,7 @@ export function ArrangePaths(recipe: Recipe, path_bounds_map: Map<Path, PathBoun
         let x_eval = 0;
         for (const path of graph.path_map.values()) {
             for (const child of path.childs)
-                x_eval += Math.abs(origin_map.get(path).x + path_bounds_map.get(path).out.x - (origin_map.get(child).x + path_bounds_map.get(child).in.x));
+                x_eval += Math.abs(x_map.get(path) + path_bounds_map.get(path).out.x - (x_map.get(child) + path_bounds_map.get(child).in.x));
         }
         return x_eval;
     }
@@ -86,7 +83,7 @@ export function ArrangePaths(recipe: Recipe, path_bounds_map: Map<Path, PathBoun
     let permutation_queue = [arr];
     let new_permutation_queue = [] as Arrangement[];
     function Permutate(arr: Arrangement, index: number): void {
-        if (arr.path_bounds_pair != null && arr.path_bounds_pair[0] == graph.start) {
+        if (arr.path == graph.start) {
             SetOrigins();
             const new_eval = EvalPathBounds();
             if (new_eval < best_eval) {
@@ -97,7 +94,7 @@ export function ArrangePaths(recipe: Recipe, path_bounds_map: Map<Path, PathBoun
         }
         if (index == arr.members.length - 1 || arr.dir == "ver") {
             for (const member of arr.members) {
-                if (!Includes(new_permutation_queue, PtrEqualsFunc(member)))
+                if (!Includes(new_permutation_queue, PrimitiveEqualsFunc(member)))
                     new_permutation_queue.push(member);
             }
         }
@@ -119,32 +116,5 @@ export function ArrangePaths(recipe: Recipe, path_bounds_map: Map<Path, PathBoun
     arr = best_arr.Copy();
     SetOrigins();
 
-    // scale path bounds map to flowchart size and offset
-    let min_y = 0;
-    let max_y = 0;
-    for (const path of graph.paths) {
-        min_y = Math.min(origin_map.get(path).y - path_bounds_map.get(path).size.y / 2, min_y);
-        max_y = Math.max(origin_map.get(path).y + path_bounds_map.get(path).size.y / 2, max_y);
-    }
-    for (const origin of origin_map.values()) {
-        origin.x *= (config.size.x - 2 * config.flowchart_hor_margin) / arr.size.x;
-        origin.y *= (config.size.y - 2 * config.flowchart_ver_margin) / (max_y - min_y);
-    }
-    let min_x = 0;
-    let max_x = 0;
-    for (const path of graph.paths) {
-        min_x = Math.min(origin_map.get(path).x - path_bounds_map.get(path).size.x / 2, min_x);
-        max_x = Math.max(origin_map.get(path).x + path_bounds_map.get(path).size.x / 2, max_x);
-    }
-    const diff = (config.size.x - 2 * config.flowchart_hor_margin - (max_x - min_x)) / 2;
-    for (const origin of origin_map.values())
-    {
-        origin.x += diff - min_x + config.flowchart_hor_margin;
-        origin.y += config.flowchart_ver_margin;
-    }
-
-    console.log(recipe.graph);
-    console.log(arr);
-    console.log(origin_map);
-    return origin_map;
+    return x_map;
 }

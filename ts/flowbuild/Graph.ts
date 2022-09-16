@@ -1,5 +1,5 @@
 import { Connection } from "./Recipe.js";
-import { LastElem, RemovePtr } from "../Utils/Funcs.js";
+import { LastElem, RemovePrimitive } from "../Utils/Funcs.js";
 
 interface GraphNode {
     text: string;
@@ -53,7 +53,7 @@ export class Path {
         path2.childs = this.childs;
         this.childs = [path2];
         for (const child of path2.childs) {
-            child.parents = RemovePtr(child.parents, this);
+            child.parents = RemovePrimitive(child.parents, this);
             child.parents.push(path2);
         }
 

@@ -15,7 +15,7 @@ export class Rect {
     Right(): Vec2 {
         return new Vec2(this.origin.x + this.size.x / 2, this.origin.y);
     }
-    Down(): Vec2 {
+    Bottom(): Vec2 {
         return new Vec2(this.origin.x, this.origin.y + this.size.y / 2);
     }
     Left(): Vec2 {
@@ -28,10 +28,10 @@ export class Rect {
     TopRight(): Vec2 {
         return new Vec2(this.origin.x + this.size.x / 2, this.origin.y - this.size.y / 2);
     }
-    DownRight(): Vec2 {
+    BottomRight(): Vec2 {
         return new Vec2(this.origin.x + this.size.x / 2, this.origin.y + this.size.y / 2);
     }
-    DownLeft(): Vec2 {
+    BottomLeft(): Vec2 {
         return new Vec2(this.origin.x - this.size.x / 2, this.origin.y + this.size.y / 2);
     }
 }

@@ -1,4 +1,4 @@
-import { RemovePtr } from "../Utils/Funcs.js";
+import { RemovePrimitive } from "../Utils/Funcs.js";
 export class Path {
     constructor(head) {
         this.nodes = [head];
@@ -23,7 +23,7 @@ export class Path {
         path2.childs = this.childs;
         this.childs = [path2];
         for (const child of path2.childs) {
-            child.parents = RemovePtr(child.parents, this);
+            child.parents = RemovePrimitive(child.parents, this);
             child.parents.push(path2);
         }
         path2.parents = [this];

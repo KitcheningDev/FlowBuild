@@ -1,5 +1,5 @@
 import { Graph } from "./Graph.js";
-import { Includes, LastElem, ObjEqualsFunc } from "../Utils/Funcs.js";
+import { Includes, ObjEqualsFunc, LastElem, RemoveObj } from "../Utils/Funcs.js";
 
 export interface Connection {
     from: string;
@@ -13,94 +13,86 @@ export class Recipe {
     name: string;
 
     #conns: Connection[];
+    #curr_change: ConnectionChange;
     #change_log: ConnectionChange[];
 
     #graph: Graph;
-    #changed: boolean;
+    #changed_conns: boolean;
 
     constructor(name: string, paths: string[][]) {
         this.name = name;
 
         this.#conns = [];
+        for (const path of paths) {
+            let last: string;
+            for (const curr of path) {
+                if (last != undefined)
+                    this.#conns.push({ from: last, to: curr });
+                last = curr;
+            }
+        }
+        this.#curr_change = null;
         this.#change_log = [];
 
         this.#graph = null;
-        this.#changed = true;
-        
-        this.SetConnections(paths);
+        this.#changed_conns = true;
     }
 
-    AddConn(from: string, to: string): void {
-        const conn = { from: from, to: to };
-        if (Includes(this.#conns, ObjEqualsFunc(conn)))
-            return;
-        
-        this.#changed = true;
-        const conn_change = { added: [], removed: [] };
-
-        this.#conns = this.#conns.filter((conn2: Connection) => 
-            {
-                if ((conn2.from == "START" && conn2.to == to) || (conn2.from == from && conn2.to == "END")) {
-                    conn_change.removed.push(conn2);
-                    return false;
-                }
-                return true;
-            });
-
-        if (from != "START" && !Includes(this.#conns, (val: Connection) => { return val.to == from; })) {
-            this.#conns.push({ from: "START", to: from });
-            conn_change.added.push({ from: "START", to: from });
-        }
-        if (to != "END" && !Includes(this.#conns, (val: Connection) => { return val.from == to; })) {
-            this.#conns.push({ from: to, to: "END" });
-            conn_change.added.push({ from: to, to: "END" });
-        } 
-  
-        this.#conns.push(conn);
-        conn_change.added.push(conn);
-
-        this.#change_log.push(conn_change);
+    StartChange(): void {
+        this.#curr_change = { added: [], removed: [] } as ConnectionChange;
     }
-    UndoConn(): void {
+    CommitChange(): void {
+        this.#conns = this.#conns.filter((conn: Connection) => { return !Includes(this.#curr_change.removed, ObjEqualsFunc(conn)); });
+        for (const add of this.#curr_change.added)
+            this.#conns.push(add);
+        
+        if (this.#curr_change.added.length > 0 || this.#curr_change.removed.length > 0)
+            this.#change_log.push(this.#curr_change);
+        this.#curr_change = null;
+        this.#changed_conns = true;
+        console.log(...this.#conns);
+    }
+    UndoChange(): void {
         if (this.#change_log.length == 0)
             return;
 
-        this.#changed = true;
         
-        const connection_change = LastElem(this.#change_log);
-        this.#conns = this.#conns.filter((conn: Connection) => { return !Includes(connection_change.added, ObjEqualsFunc(conn)); });
-        for (const conn of connection_change.removed)
+        const last_change = LastElem(this.#change_log);
+        this.#conns = this.#conns.filter((conn: Connection) => { return !Includes(last_change.added, ObjEqualsFunc(conn)); });
+        for (const conn of last_change.removed)
             this.#conns.push(conn);
         
         this.#change_log.pop();
+        this.#changed_conns = true;
     }
-    SetConnections(paths: string[][]): void {
-        this.#changed = true;
-        this.#conns = [];
-        this.#change_log = [];
-        for (const path of paths) {
-            let from: string;
-            for (const text of path) {
-                const conn = { from: from, to: text };
-                if (from && !Includes(this.#conns, ObjEqualsFunc(conn)))
-                    this.#conns.push(conn);
-                from = text;
-            }
-        }
+
+    AddConn(from: string, to: string): void {
+        console.assert(this.#curr_change != null, "You need to start a change before you add connections to the recipe!");
+        this.#curr_change.added.push({ from: from, to: to });
     }
-    Includes(text: string): boolean {
+    RemoveConn(from: string, to: string): void {
+        console.assert(this.#curr_change != null, "You need to start a change before you remove connections from the recipe!");
+        this.#curr_change.removed.push({ from: from, to: to });
+    }
+
+    HasText(text: string): boolean {
         return Includes(this.#conns, (val: Connection) => { return val.from == text || val.to == text; });
+    }
+    HasParent(text: string): boolean {
+        return Includes(this.#conns, (val: Connection) => { return val.to == text; });
+    }
+    HasChild(text: string): boolean {
+        return Includes(this.#conns, (val: Connection) => { return val.from == text; });
+    }
+    HasConn(from: string, to: string): boolean {
+        return Includes(this.#conns, ObjEqualsFunc({ from: from, to: to } as Connection));
     }
 
     get graph(): Graph {
-        if (this.#changed) {
+        if (this.#changed_conns) {
             this.#graph = new Graph(this.#conns);
-            if (!this.#graph.is_valid) {
-                console.log(`Recipe \"${this.name}\" created invalid graph!`);
-                console.log(...this.#conns);
-            }
-            this.#changed = false;
-            console.log(...this.#conns);
+            console.assert(this.#graph.is_valid, `Recipe \"${this.name}\" created invalid graph!`, ...this.#conns);
+            this.#changed_conns = false;
         }
         return this.#graph;
     }

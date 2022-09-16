@@ -18,6 +18,8 @@ export class FlowchartConfig {
         return new Vec2(rect.width + this.box_margin * 2, rect.height + this.box_margin * 2);
     }
 }
+
+// change this function for integration to the website!
 export function CreateDefaultConfig(): FlowchartConfig {
     const config = new FlowchartConfig();
     config.flowchart_html = document.getElementById("flowchart");
@@ -34,9 +36,15 @@ export function CreateDefaultConfig(): FlowchartConfig {
 
     config.flowchart_html.appendChild(config.box_html);
 
+    // in px
     config.box_margin = 5;
     config.depth_margin = 10;
     config.flowchart_ver_margin = 100;
     config.flowchart_hor_margin = 100;
     return config;
+}
+
+export let config: FlowchartConfig;
+export function InitConfig(): void {
+    config = CreateDefaultConfig();
 }
