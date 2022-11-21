@@ -1,4 +1,4 @@
 {
     "name": "Empty",
-    "paths": [["START", "END"]]
+    "paths": [["START", "LAST STEP", "END"]]
 }

@@ -1,5 +1,10 @@
 {
     "name": "Hummus",
+    "cooks":
+    [
+        [ "Kichererbsen abwaschen", "Zitrone auspressen", "Mit Tahina &amp; Öl pürieren", "Würzen" ],
+        [ "Knoblauch pressen", "Gemüse &amp; Brot schneiden" ]
+    ],
     "paths":
     [
         [ "START", "Kichererbsen abwaschen", "Zitrone auspressen", "Mit Tahina &amp; Öl pürieren", "Würzen", "Gemeinsam anrichten", "END" ],

@@ -1,5 +1,11 @@
 {
     "name": "Bruschetta",
+    "cooks":
+    [
+        [ "Tomaten entkernen", "Tomaten würfeln", "Zwiebel schneiden", "Oliven schneiden", "In Essig &amp; Öl schwenken", "Würzen" ],
+        [ "Ofen auf 180°C vorheizen", "Baguette schneiden", "Brot mit Öl bestreichen", "3-4 Blätter zum Dekorieren beiseite legen",
+            "Brot für 10 Minuten backen", "Restlichen Basilikum hacken", "Mit Knoblauchzehe einreiben" ]
+    ],
     "paths":
     [
         [ "START", "Tomaten entkernen", "Tomaten würfeln", "Zwiebel schneiden", "Oliven schneiden", "In Essig &amp; Öl schwenken", "Würzen", "Auf Brot anrichten &amp; servieren", "END" ],

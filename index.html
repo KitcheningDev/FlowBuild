@@ -5,19 +5,55 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!--for disabling flaticon error-->
+    <title>flowbuild™</title>
+
+    <!-- css imports -->
+    <!--for disabling flaticon error -->
     <link rel="shortcut icon" href="#">
+    
+    <!-- online -->
+    <script src="https://kit.fontawesome.com/a26baecaf4.js" crossorigin="anonymous"></script>
 
-    <title>FlowBuild</title>
-
+    <!-- local -->
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/flowchart.css">
-    <link rel="stylesheet" href="./css/recipe-editor.css">
 </head>
 <body>
-    <div id="recipe-name">Empty</div>
-    <span id="flowchart"></span>
-    <input id="input-field" style="display: none;">
+    <h1>flowbuild™</h1>
+    <nav id="recipe-nav"></nav>
+
+    <div id="content">
+        <div id="chart">
+            <h2 id="chart-title">empty</h2>
+            
+            <span id="chart-container">                
+                <div class="box" style="left: 50%; top: 15%;">START</div>
+                <div class="line" style="left: 50%; top: 50%; height: 70%;"></div>
+                <div class="box" style="left: 50%; top: 85%;">END</div>
+            </span>
+        </div>
+        <div id="chart-tools">
+            <i id="clear-btn" class="fa-solid fa-trash fa-lg"></i>
+            <i id="undo-btn" class="fa-solid fa-rotate-left fa-lg"></i>
+            <i id="help-btn" class="fa-solid fa-circle-question fa-lg"></i>
+            <i id="file-btn" class="fa-solid fa-file fa-lg"></i>
+        </div>
+        <div id="form" style="visibility: hidden;">
+            <!-- <h3>from</h3>
+            <div id="from" class="box" style="position: relative; left: 45%;"></div>
+            <h3>to</h3> -->
+            <h3>content</h3>
+            <input id="text-input"></input>
+            <h3>cook</h3>
+            <span class="btn cook-btn" style="font-weight: bold;"">cook 1</span>
+            <span class="btn cook-btn">cook 2</span>
+            <h3>time</h3>
+            <input id="time-input">
+            <span class="btn time-btn"  style="font-weight: bold;">sec</span>
+            <span class="btn time-btn">min</span>
+            <span class="btn time-btn">hrs</span>
+        </div>
+    </div>
     
     <script src="./js/main.js" type="module"></script>
 </body>

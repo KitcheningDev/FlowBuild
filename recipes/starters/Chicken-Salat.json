@@ -1,8 +1,13 @@
 {
     "name": "Chicken-Salat",
+    "cooks":
+    [
+        [ "Hähnchenbrust in Streifen schneiden", "Mit Gewürzen einreiben", "Hähnchen anbraten", "Gar?", "Öl abtropfen &amp; behalten", "Hähnchen zum Inkubieren legen", "Zitrone pressen &amp; Honig dazugeben" ],
+        [ "Zwiebel schneiden", "Mit reichlich Olivenöl andünsten", "Granatapfel entkernen", "Spinat waschen", "Walnusskerne anrösten" ]
+    ],
     "paths": 
     [
-        [ "START", "Hähnchenbrust in Streifen schneiden", "Mit Gewürzen einreiben", "Hähnchen anbraten", "Gar?", "Öl abtropfen und behalten", "Zitrone pressen &amp; Honig dazugeben", "Miteinander vermengen &amp; warm servieren", "END" ],
+        [ "START", "Hähnchenbrust in Streifen schneiden", "Mit Gewürzen einreiben", "Hähnchen anbraten", "Gar?", "Öl abtropfen &amp; behalten", "Zitrone pressen &amp; Honig dazugeben", "Miteinander vermengen &amp; warm servieren", "END" ],
         [ "START", "Zwiebel schneiden", "Mit reichlich Olivenöl andünsten", "Hähnchen anbraten" ],
         [ "Gar?", "Hähnchen anbraten" ],
         [ "Gar?", "Hähnchen zum Inkubieren legen", "Miteinander vermengen &amp; warm servieren" ],

@@ -1,8 +1,0 @@
-{
-    "name": "Hummus",
-    "paths": [
-        ["START", "Kichererbsen abwaschen", "Mit Tahina & Öl pürieren", "Würzen", "Gemeinsam anrichten", "END"],
-        ["START", "Knoblauch pressen", "Mit Tahina & Öl pürieren"],
-        ["START", "Gemüse & Brot schneiden", "Gemeinsam anrichten"]
-    ]
-}
