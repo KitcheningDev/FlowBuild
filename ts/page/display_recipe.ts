@@ -1,5 +1,5 @@
 import { recipe_t } from "../flowbuild/recipe.js";
-import { draw_recipe } from "../flowbuild/draw_recipe.js";
+import { draw_recipe } from "../flowbuild/draw/draw_recipe.js";
 import { init_global_config } from "../flowbuild/config.js";
 
 const title = document.getElementById('chart-title');

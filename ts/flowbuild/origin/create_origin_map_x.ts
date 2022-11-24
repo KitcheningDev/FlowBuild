@@ -1,8 +1,11 @@
 import { permutate } from "../../utils/permutate.js";
+import { vec2, vec2_t } from "../../utils/vec2.js";
 import { graph_t } from "../graph.js";
 import { hash_str, ID } from "../hash_str.js";
+import { line_intersection, line_segment_t } from "../line_segment.js";
 import { has_path, path_t } from "../path.js";
 import { alignment } from "./alignment.js";
+import { create_origin_map_y } from "./create_origin_map_y.js";
 
 function create_depth_alignment(depth: number, graph: graph_t): alignment.type {
     const members = [];
@@ -30,14 +33,14 @@ function create_graph_alignment(graph: graph_t): alignment.type {
         }
 
         for (const path of graph.paths) {
-                        if (graph.get_diff_max(path) > 1 && (!path.in_loop || has_path(path, graph.start))) {
+            if (graph.get_diff_max(path) > 1 && (!path.in_loop || has_path(path, graph.start))) {
                 end_depth_map.get(graph.get_depth(path) + graph.get_diff_max(path) - 1).push(alignment.create(path));
             }
         }
         for (const [id, loop_graph] of graph.loop_graphs) {
-                        const align = create_graph_alignment(loop_graph);
-                        if (loop_graph.depth == 0) {
-                                if (depth_aligns[graph.get_depth(loop_graph.start)] === null) {
+            const align = create_graph_alignment(loop_graph);
+            if (loop_graph.depth == 0) {
+                if (depth_aligns[graph.get_depth(loop_graph.start)] === null) {
                     depth_aligns[graph.get_depth(loop_graph.start)] = align;
                 }
                 else {
@@ -66,15 +69,36 @@ function create_permuation_list(align: alignment.type, list: alignment.type[][] 
     return list;
 }
 
-function eval_permutation(paths: path_t[], origin_map_x: Map<ID, number>): number {
+function eval_permutation(paths: Set<path_t>, origin_map_x: Map<ID, number>, origin_map_y: Map<ID, number>): number {
     let eval_x = 0;
+    const lines = new Set<line_segment_t>;
     for (const path of paths) {
         if (path.parents.size == 0) {
             continue;
         }
+
+        const top_left = new vec2_t(origin_map_x.get(path.id) - path.bounds.size.x / 2, origin_map_y.get(path.id));
+        const bottom_right = vec2.add(top_left, path.bounds.size);
+        const top_right = vec2.add(top_left, new vec2_t(path.bounds.size.x, 0));
+        const bottom_left = vec2.add(top_left, new vec2_t(0, path.bounds.size.y));
+        lines.add(new line_segment_t(top_left, top_right));
+        lines.add(new line_segment_t(top_left, bottom_left));
+        lines.add(new line_segment_t(bottom_right, top_right));
+        lines.add(new line_segment_t(bottom_right, bottom_left));
         for (const child of path.childs) {
             if (child.childs.size > 0) {
-                eval_x += Math.abs(origin_map_x.get(child.id) + child.bounds.in.x - origin_map_x.get(path.id) - path.bounds.out.x);
+                const from = vec2.add(new vec2_t(origin_map_x.get(path.id), origin_map_y.get(path.id)), path.bounds.out);
+                const to = vec2.add(new vec2_t(origin_map_x.get(child.id), origin_map_y.get(child.id)), child.bounds.in); 
+                const mid = new vec2_t(from.x, to.y);
+                lines.add(new line_segment_t(from, mid));
+                lines.add(new line_segment_t(mid, to));
+            }
+        }
+    }
+    for (const l1 of lines) {
+        for (const l2 of lines) {
+            if (line_intersection(l1, l2) !== null) {
+                eval_x += 1;
             }
         }
     }
@@ -100,16 +124,17 @@ export function create_origin_map_x(graph: graph_t): Map<ID, number> {
     let best_eval_x = Infinity;
     let best_align = null as alignment.type;
 
+    const origin_map_y = create_origin_map_y(graph);
     const permutation_list = create_permuation_list(align);
     permutate.permutate_multiple_lists(permutation_list, () => {
         set_origin_map_x(align, 0, origin_map_x);
-        const eval_x = eval_permutation(graph.paths, origin_map_x);
+        const eval_x = eval_permutation(graph.paths, origin_map_x, origin_map_y);
         if (eval_x < best_eval_x) {
-                        best_eval_x = eval_x;
+            best_eval_x = eval_x;
             best_align = alignment.copy(align);
         }
     });
 
     set_origin_map_x(best_align, 0, origin_map_x);
-        return origin_map_x;
+    return origin_map_x;
 }

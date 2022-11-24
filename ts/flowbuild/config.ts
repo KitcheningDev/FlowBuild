@@ -8,6 +8,7 @@ class config_t {
     box_html: HTMLElement;
     line_html: HTMLElement;
     sync_line_html: HTMLElement;
+    crossing_html: HTMLElement;
 
     box_margin: number;
     depth_margin: number;
@@ -15,7 +16,7 @@ class config_t {
     chart_hor_margin: number;
     cook_margin: number;
     path_fold_threshold: number;
-    reduce_size_callback: any;
+    try_reduce_size_callback: (config: config_t, size: vec2_t) => boolean;
 
     get_box_size(task: task_t) {
         this.box_html.innerHTML = task.str;
@@ -31,12 +32,15 @@ function create_default(): config_t {
     out.chart_hor_margin = 60;
     out.chart_size = new vec2_t();
     out.chart_size.x = document.getElementById("chart").getBoundingClientRect().width - 2 * out.chart_hor_margin;
-    out.chart_size.y = document.getElementById("chart").getBoundingClientRect().height - 2* out.chart_ver_margin;
+    out.chart_size.y = document.getElementById("chart").getBoundingClientRect().height - 2 * out.chart_ver_margin;
     
     out.box_html = document.createElement("div");
     out.box_html.classList.add("box");
-    out.box_html.style.fontSize = "15px";
+    out.box_html.style.fontSize = "12px";
     out.chart_container_html.appendChild(out.box_html);
+   
+    out.crossing_html = document.createElement("div");
+    out.crossing_html.classList.add("crossing")
 
     out.line_html = document.createElement("div");
     out.line_html.classList.add("line");
@@ -50,9 +54,12 @@ function create_default(): config_t {
     out.depth_margin = 10;
     out.cook_margin = 20;
 
-    out.path_fold_threshold = 5;
-    out.reduce_size_callback = (config: config_t, size: vec2_t) => {
+    out.path_fold_threshold = 4;
+    out.try_reduce_size_callback = (config: config_t, size: vec2_t) => {
         const old_font_size = Number(config.box_html.style.fontSize.substring(0, 2));
+        if (old_font_size == 1 && config.box_margin == 1 && config.depth_margin == 1) {
+            return false;
+        }
         config.box_html.style.fontSize = (old_font_size > 1 ? old_font_size - 1 : 1).toString() + "px";
         config.box_margin = config.box_margin > 1 ? config.box_margin - 1 : 1;
         config.depth_margin = config.depth_margin > 1 ? config.depth_margin - 1 : 1;
@@ -62,6 +69,7 @@ function create_default(): config_t {
         else if (size.x < config.chart_size.x && size.y > config.chart_size.y) {
             config.path_fold_threshold--;
         }
+        return true;
     };
     return out;
 }

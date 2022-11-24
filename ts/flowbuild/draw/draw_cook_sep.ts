@@ -1,8 +1,8 @@
-import { vec2_t } from "../utils/vec2.js";
-import { graph_t } from "./graph.js";
-import { ID } from "./hash_str";
-import { path_t } from "./path.js";
-import { global_config } from "./config.js";
+import { vec2_t } from "../../utils/vec2.js";
+import { graph_t } from "../graph.js";
+import { ID } from "../hash_str";
+import { path_t } from "../path.js";
+import { global_config } from "../config.js";
 
 export function draw_cook_sep(graph: graph_t, origin_map: Map<ID, vec2_t>): void {
     if (graph.cook_count == 1) {
@@ -37,7 +37,7 @@ export function draw_cook_sep(graph: graph_t, origin_map: Map<ID, vec2_t>): void
         if (id != max_id) {
             const cook_sep_html = document.createElement('div');
             cook_sep_html.classList.add('cook-sep');
-            cook_sep_html.style.top = top_syncline_y.toString() + 'px';
+            cook_sep_html.style.top = ((top_syncline_y + bottom_syncline_y) / 2).toString() + 'px';
             cook_sep_html.style.left = (cook_bound.right + global_config.box_margin).toString() + 'px';
             cook_sep_html.style.height = (bottom_syncline_y - top_syncline_y).toString() + 'px';
             global_config.chart_container_html.appendChild(cook_sep_html);

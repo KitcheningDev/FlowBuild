@@ -1,14 +1,14 @@
-import { vec2_t, vec2 } from "../utils/vec2.js";
-import { global_config } from "./config.js";
-import { ID } from "./hash_str.js";
-import { path_t } from "./path.js";
+import { vec2_t, vec2 } from "../../utils/vec2.js";
+import { global_config } from "../config.js";
+import { ID } from "../hash_str.js";
+import { path_t } from "../path.js";
 
 
-export function center_origin_map(paths: path_t[], origin_map: Map<ID, vec2_t>): void {
-    let min_x = 99999;
-    let max_x = -99999;
-    let min_y = 99999;
-    let max_y = -99999;
+export function center_origin_map(paths: Set<path_t>, origin_map: Map<ID, vec2_t>): void {
+    let min_x = Infinity;
+    let max_x = -Infinity;
+    let min_y = Infinity;
+    let max_y = -Infinity;
     for (const path of paths) {
         min_x = Math.min(origin_map.get(path.id).x - path.bounds.size.x / 2, min_x);
         max_x = Math.max(origin_map.get(path.id).x + path.bounds.size.x / 2, max_x);

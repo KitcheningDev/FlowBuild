@@ -8,7 +8,7 @@ export class graph_t {
     
     #start: path_t;
     #end: path_t;
-    #paths: path_t[];
+    #paths: Set<path_t>;
     
     #cook_graphs: Map<ID, graph_t>;
     #loop_graphs: Map<ID, graph_t>;
@@ -151,11 +151,11 @@ export class graph_t {
         this.#depth_map = null;
     }
 
-    get paths(): path_t[] {
+    get paths(): Set<path_t> {
         if (this.#paths === null) {
-            this.#paths = [];
+            this.#paths = new Set<path_t>();
             for (const [id, path] of this.#path_map) {
-                this.#paths.push(path);
+                this.#paths.add(path);
             }
         }
         return this.#paths;

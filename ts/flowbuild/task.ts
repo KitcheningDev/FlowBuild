@@ -6,15 +6,14 @@ export class task_t {
     #cook_id: ID;
     #duration: number;
     #id: ID;
-
-    debug_str: string;
+    //debug_str: string;
 
     constructor(str: string, cook_id: ID, duration: number = 0) {
         this.#str = str;
         this.#cook_id = cook_id;
         this.#duration = duration;
         this.#id = ++task_counter;
-        this.debug_str = str;
+        //this.debug_str = str;
     }
     copy(): task_t {
         return new task_t(this.#str, this.#cook_id, this.#duration);

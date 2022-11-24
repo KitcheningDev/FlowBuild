@@ -1,6 +1,4 @@
-import { vec2 } from "../../utils/vec2.js";
 import { last_elem, create_arr_with_func, create_arr } from "../../utils/funcs.js";
-import { path_t } from "../path.js";
 import { graph_t } from "../graph.js";
 import { ID } from "../hash_str.js";
 import { global_config } from "../config.js";

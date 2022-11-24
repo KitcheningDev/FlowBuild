@@ -22,7 +22,10 @@ export class path_t {
 
         this.parents = new Set();
         this.childs = new Set();
+        this.reset();
+    }
 
+    reset(): void {
         this.#in_loop = null;
         this.#is_loop_entry = null;
         this.#is_loop_exit = null;
@@ -32,7 +35,6 @@ export class path_t {
         
         this.#bounds = null;
     }
-
     get head(): task_t {
         return this.tasks[0];
     }

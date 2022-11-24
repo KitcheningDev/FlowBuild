@@ -60,7 +60,6 @@ export class recipe_t {
     has_conn(conn: connection_t): boolean {
         return this.#conns.has(conn.hash);
     }
-    
     get_task(id: ID): task_t {
         for (const conn of this.#conns.values()) {
             if (conn.from.id == id) {
@@ -89,7 +88,7 @@ export class recipe_t {
         return this.#conns;
     }
 
-    private update(): void {
+    update(): void {
         this.#graph = new graph_t(create_path_map(this.#conns));
         const cook_set = new Set<number>();
         this.#conns.forEach((conn: connection_t) => { cook_set.add(conn.from.cook_id); cook_set.add(conn.to.cook_id); });
