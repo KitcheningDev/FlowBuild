@@ -95,4 +95,12 @@ export class recipe_t {
         this.#cook_count = cook_set.size > 1 ? cook_set.size - 1 : 1;
         this.#has_changed = false;
     }
+
+    copy(): recipe_t {
+        const recipe = new recipe_t({ name: this.name, paths: [] });
+        for (const conn of this.#conns.values()) {
+            recipe.add_conn(conn);//new connection_t(conn.from.copy(), conn.to.copy()));
+        }
+        return recipe;
+    }
 }

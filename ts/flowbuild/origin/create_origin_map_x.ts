@@ -71,37 +71,47 @@ function create_permuation_list(align: alignment.type, list: alignment.type[][] 
 
 function eval_permutation(paths: Set<path_t>, origin_map_x: Map<ID, number>, origin_map_y: Map<ID, number>): number {
     let eval_x = 0;
-    const lines = new Set<line_segment_t>;
+    const lineset = new Set<line_segment_t[]>;
     for (const path of paths) {
         if (path.parents.size == 0) {
             continue;
         }
 
+        const lines = [];
         const top_left = new vec2_t(origin_map_x.get(path.id) - path.bounds.size.x / 2, origin_map_y.get(path.id));
         const bottom_right = vec2.add(top_left, path.bounds.size);
         const top_right = vec2.add(top_left, new vec2_t(path.bounds.size.x, 0));
         const bottom_left = vec2.add(top_left, new vec2_t(0, path.bounds.size.y));
-        lines.add(new line_segment_t(top_left, top_right));
-        lines.add(new line_segment_t(top_left, bottom_left));
-        lines.add(new line_segment_t(bottom_right, top_right));
-        lines.add(new line_segment_t(bottom_right, bottom_left));
+        lines.push(new line_segment_t(top_left, top_right));
+        lines.push(new line_segment_t(top_left, bottom_left));
+        lines.push(new line_segment_t(bottom_right, top_right));
+        lines.push(new line_segment_t(bottom_right, bottom_left));
         for (const child of path.childs) {
-            if (child.childs.size > 0) {
+            if (child.childs.size >= 0) {
                 const from = vec2.add(new vec2_t(origin_map_x.get(path.id), origin_map_y.get(path.id)), path.bounds.out);
                 const to = vec2.add(new vec2_t(origin_map_x.get(child.id), origin_map_y.get(child.id)), child.bounds.in); 
                 const mid = new vec2_t(from.x, to.y);
-                lines.add(new line_segment_t(from, mid));
-                lines.add(new line_segment_t(mid, to));
+                lines.push(new line_segment_t(from, mid));
+                lines.push(new line_segment_t(mid, to));
+            }
+        }
+        lineset.add(lines);
+    }
+    for (const lines1 of lineset) {
+        for (const lines2 of lineset) {
+            if (lines1 == lines2) {
+                continue;
+            }
+            for (const l1 of lines1) {
+                for (const l2 of lines2) {
+                    if (line_intersection(l1, l2) !== null) {
+                        eval_x += 1;
+                    }
+                }
             }
         }
     }
-    for (const l1 of lines) {
-        for (const l2 of lines) {
-            if (line_intersection(l1, l2) !== null) {
-                eval_x += 1;
-            }
-        }
-    }
+    console.log("EVAL", eval_x);
     return eval_x;
 }
 function set_origin_map_x(align: alignment.type, off_x: number, origin_map_x: Map<ID, number>): void {
@@ -132,6 +142,13 @@ export function create_origin_map_x(graph: graph_t): Map<ID, number> {
         if (eval_x < best_eval_x) {
             best_eval_x = eval_x;
             best_align = alignment.copy(align);
+        }
+    }, () => {
+        if (best_eval_x == 0) {
+            return true;
+        }
+        else {
+            return false;
         }
     });
 

@@ -16,13 +16,13 @@ export class line_segment_t {
         return vec2.sub(this.to, this.from);
     }
 }
-export function line_intersection(l1: line_segment_t, l2: line_segment_t): vec2_t {
+export function line_intersection(l1: line_segment_t, l2: line_segment_t, include_edges: boolean = false): vec2_t {
     if (vec2.equals(l1.dir, l2.dir)) {
         return null;
     }
     const t = ((l2.from.y - l1.from.y) * l1.dir.x - (l2.from.x - l1.from.x) * l1.dir.y) / (l1.dir.y * l2.dir.x - l1.dir.x * l2.dir.y);
     const s = (l2.from.x + t * l2.dir.x - l1.from.x) / l1.dir.x;
-    if ((0 < t && t < 1 && 0 <= s && s <= 1) || (0 <= t && t <= 1 && 0 < s && s < 1)) {
+    if ((0 < t && t < 1 && 0 < s && s < 1) || (include_edges && 0 <= t && t <= 1 && 0 <= s && s <= 1)) {
         return vec2.add(l1.from, vec2.mult_scal(l1.dir, s));
     }
     else {

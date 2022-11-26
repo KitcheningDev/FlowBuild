@@ -14,7 +14,8 @@ function draw_line(line: line_segment_t): void {
         line_segments.add([line]);
     }
     else {
-        const y_plateau = line.to.y - global_config.depth_margin / 2;
+        const y_plateau = line.to.y - global_config.depth_margin;
+        //const y_plateau = (line.from.y + line.to.y) / 2;
         const mid1 = new vec2_t(line.from.x, y_plateau);
         const mid2 = new vec2_t(line.to.x, y_plateau);
         
@@ -218,14 +219,13 @@ export function draw_lines(paths :Set<path_t>, start :path_t, end :path_t, origi
     draw_inner_lines(paths, origin_map);
     // draw crossings
     for (const lines1 of line_segments) {
-        console.log(...lines1)
         for (const lines2 of line_segments) {
-            if (lines1 == lines2) {
+            if (vec2.equals(lines1[0].from, lines2[0].from)) {
                 continue;
             }
             for (const l1 of lines1) {
                 for (const l2 of lines2) {
-                    const intersection = line_intersection(l1, l2);
+                    const intersection = line_intersection(l1, l2, true);
                     if (intersection !== null) {
                         global_config.crossing_html.style.left = intersection.x.toString() + "px";
                         global_config.crossing_html.style.top = intersection.y.toString() + "px";

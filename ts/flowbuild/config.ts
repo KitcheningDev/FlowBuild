@@ -51,10 +51,10 @@ function create_default(): config_t {
 
     // in px
     out.box_margin = 5;
-    out.depth_margin = 10;
+    out.depth_margin = 14;
     out.cook_margin = 20;
 
-    out.path_fold_threshold = 4;
+    out.path_fold_threshold = 5;
     out.try_reduce_size_callback = (config: config_t, size: vec2_t) => {
         const old_font_size = Number(config.box_html.style.fontSize.substring(0, 2));
         if (old_font_size == 1 && config.box_margin == 1 && config.depth_margin == 1) {

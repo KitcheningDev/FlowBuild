@@ -1,8 +1,9 @@
 import { connection_t } from "../flowbuild/connection.js";
+import { recipe_t } from "../flowbuild/recipe.js";
 import { task_t } from "../flowbuild/task.js";
 import { last_elem } from "../utils/funcs.js";
 import { display_recipe } from "./display_recipe.js";
-import { load_recipe, recipe } from "./load_recipe.js";
+import { load_recipe, log_recipe_mod, recipe } from "./load_recipe.js";
 
 let selected_html: HTMLElement = null;
 
@@ -60,8 +61,8 @@ function start_form(el: HTMLElement) {
         time_input_html.value = task.duration.toString();
         select_time(time_btns_html.item(0) as HTMLElement);
     }
-    text_input_html.select();
-    text_input_html.focus();
+    // text_input_html.select();
+    // text_input_html.focus();
     text_input_html.value = el.innerHTML.trim();
 }
 
@@ -87,13 +88,11 @@ chart_html.addEventListener('mouseup', (e: MouseEvent) => {
         return;
     }
     const from = recipe.get_task(parseInt(selected_html.id));
-    console.log(from.str);
-    const task = new task_t("NEW TASK", from.cook_id == -1 ? 0 : from.cook_id);
+    const task = new task_t(get_random_text(), from.cook_id == -1 ? 0 : from.cook_id);
     if (target.classList.contains("box")) {
         const last_step = recipe.graph.end.head;
         const to = recipe.get_task(parseInt(target.id));
         if (recipe.has_conn(new connection_t(from, last_step))) {
-            console.log("has last step");
             recipe.rm_conn(new connection_t(from, last_step));
         }
         recipe.add_conn(new connection_t(from, to));
@@ -101,20 +100,15 @@ chart_html.addEventListener('mouseup', (e: MouseEvent) => {
     else {
         const last_step = recipe.graph.end.head;
         if (recipe.has_conn(new connection_t(from, last_step))) {
-            console.log("has last step");
             recipe.rm_conn(new connection_t(from, last_step));
         }
         recipe.add_conn(new connection_t(from, task));
         recipe.add_conn(new connection_t(task, last_step));    
-        
-        console.log("CONNS:");
-        for (const conn of recipe.conns.values()) {
-            console.log(conn.from.str, conn.from, conn.to.str, conn.to);
-        }
     }
     display_recipe(recipe);
+    log_recipe_mod();
     for (const el of chart_container_html.children) {
-        if (el.innerHTML == "NEW TASK") {
+        if (el.id == task.id.toString()) {
             selected_html = el as HTMLElement;
             start_form(el as HTMLElement);
             text_input_html.select();
@@ -129,8 +123,6 @@ document.addEventListener('keypress', (e: KeyboardEvent) => {
          (selected_cook_btn === null) ? -1 : selected_cook_btn.innerHTML.charCodeAt(selected_cook_btn.innerHTML.length - 1) - '1'.charCodeAt(0),
          parseInt(time_input_html.value) * (selected_time_btn.innerHTML == "min" ? 60 : (selected_time_btn.innerHTML == "hrs" ? 3600 : 1)));
 
-        console.log("OLD TASK", task.str, task);
-        console.log("NEW TASK", new_task.str, new_task);
         if (task != new_task) {
             let changed = true;
             while (changed) {
@@ -151,9 +143,53 @@ document.addEventListener('keypress', (e: KeyboardEvent) => {
             }
         }
         display_recipe(recipe);
+        log_recipe_mod();
+        stop_form();
+    }
+    console.log(e.key);
+    if (e.key == "r" && selected_html !== null) {
+        console.log("DEL");
+        const start = recipe.graph.start.head;
+        const end = recipe.graph.end.head;
+        const task = recipe.get_task(parseInt(selected_html.id));
+        const from_tasks = new Set<task_t>();
+        const to_tasks = new Set<task_t>();
+
+        for (const conn of recipe.conns.values()) {
+            if (conn.from.id == task.id) {
+                to_tasks.add(conn.to);
+            }
+            else if (conn.to.id == task.id) {
+                from_tasks.add(conn.from);
+            }
+            else {
+                continue;
+            }
+            recipe.rm_conn(conn);
+        }
+        for (const from of from_tasks) {
+            for (const to of to_tasks) {
+                recipe.add_conn(new connection_t(from, to));
+            }
+        }
+        console.log(recipe.conns);
+        display_recipe(recipe);
+        log_recipe_mod();
         stop_form();
     }
 });
+
+function get_random_text(): string {
+    return random_text[Math.floor(Math.random() * random_text.length)];
+}
+const random_text = ["Tomaten schneiden", "2/3 der Zwiebeln schneiden", "2/3 der Zwiebeln anbraten",
+"Mit Gewürzen 10min schmoren", "Chilibohnen unterrühren", "Chili auf Kartoffelspalten verteilen", "Mit Avocado &amp; Sour cream garnieren",
+"START", "Ofen auf 180°C vorheizen", "Süßkartoffel in Spalten schneiden", "In Öl, Paprika &amp; Salz schwenken",
+"Avocado zerdrücken", "1/3 der Zwiebel schneiden", "Zitronensaft hinzufügen", "Mit Kreuzkümmel &amp; Salz würzen", "Mit Avocado &amp; Sour cream garnieren",
+"In Öl, Paprika &amp; Salz schwenken", "35min im Ofen backen", "Chili auf Kartoffelspalten verteilen",
+"Zwiebel schneiden", "Knoblauch pressen", "5 min in Butter anbraten", "Tomatenmark &amp; Chili hinzufügen", "Alles anbraten bis dunkel gebräunt", "Mit Vodka ablöschen", "Sahne &amp; Parmesan einrühren", "Mit Petersilie anrichten",
+"Wasser zum kochen bringen", "Nudeln kochen", "1/2 Tasse Pasta-Wasser einschöpfen", "Sahne &amp; Parmesan einrühren",
+"Nudeln kochen", "Nudeln kochen bis al dente", "Wasser abgießen", "Mit Petersilie anrichten"];
 
 // let from: string = null;
 // let to: string = null;

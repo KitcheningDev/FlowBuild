@@ -26,6 +26,7 @@
 .cook-sep {
     border-left: 5px dashed;
     color: var(--dark-col);
+    opacity: 0.4;
     width: 0px;
     z-index: 3;
 }
@@ -60,11 +61,15 @@
 .crossing::before {
     content: '';
     position: absolute;
-    width: 7px;
-    height: 7px;
+    width: 6px;
+    height: 6px;
     border-color: var(--dark-col);
     background-color: var(--light-col);
     border: 1px solid;
+    /*
+    border-top-color: grey;
+    border-left-color: grey;
+    */
     transform: translate(-50%, -50%) rotate(45deg);
 }
 

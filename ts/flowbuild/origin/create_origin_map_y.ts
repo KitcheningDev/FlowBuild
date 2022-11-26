@@ -5,13 +5,12 @@ import { global_config } from "../config.js";
 
 function create_depth_heights(graph: graph_t): number[] {
     const depth_heights = create_arr_with_func(graph.depth_levels.length, () => { return []; });
-    for (let depth = 0; depth < graph.depth_levels.length; ++depth) {
+    for (let depth = 0; depth < graph.depth; ++depth) {
         for (const path of graph.depth_levels[depth]) {
             if (graph.get_diff_min(path) <= 1) {
                 depth_heights[depth] = Math.max(depth_heights[depth], path.bounds.size.y);
             }
         }
-        depth_heights[depth] += global_config.depth_margin * 2;
     }
     for (const path of graph.paths) {
         if (graph.get_diff_min(path) > 1) {
@@ -29,6 +28,9 @@ function create_depth_heights(graph: graph_t): number[] {
                 depth_heights[depth] += diff;
             }
         }
+    }
+    for (let depth = 0; depth < graph.depth; ++depth) {
+        depth_heights[depth] += global_config.depth_margin * 2;
     }
     return depth_heights;
 }

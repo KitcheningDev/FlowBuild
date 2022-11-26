@@ -1,6 +1,6 @@
 import { vec2_t } from "../../utils/vec2.js";
 import { graph_t } from "../graph.js";
-import { ID } from "../hash_str";
+import { ID } from "../hash_str.js";
 import { path_t } from "../path.js";
 import { global_config } from "../config.js";
 
