@@ -36,10 +36,10 @@ export namespace permutate {
             }
         }
     }
-    export function permutate_multiple_lists<T>(list_list: T[][], callback: () => void, exit_cond: () => boolean = () => { return false }): void {
+    export function permutate_multiple_lists<T>(lists: T[][], callback: () => void, exit_cond: () => boolean = () => { return false }): void {
         let nested_callbacks = [callback];
-        for (let i = 0; i < list_list.length; ++i) {
-            nested_callbacks.push(() => { permutate_list(list_list[list_list.length - 1 - i], nested_callbacks[i], exit_cond); });
+        for (let i = 0; i < lists.length; ++i) {
+            nested_callbacks.push(() => { permutate_list(lists[lists.length - 1 - i], nested_callbacks[i], exit_cond); });
         }
         last_elem(nested_callbacks)();
     }

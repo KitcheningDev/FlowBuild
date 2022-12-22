@@ -1,7 +1,6 @@
 import { vec2_t } from "../utils/vec2.js";
-import { task_t } from "./task.js";
 
-class config_t {
+interface config_t {
     chart_size: vec2_t;
 
     chart_container_html: HTMLElement;
@@ -12,50 +11,53 @@ class config_t {
 
     box_margin: number;
     depth_margin: number;
-    chart_ver_margin: number;
-    chart_hor_margin: number;
     cook_margin: number;
-    path_fold_threshold: number;
-    try_reduce_size_callback: (config: config_t, size: vec2_t) => boolean;
-
-    get_box_size(task: task_t) {
-        this.box_html.innerHTML = task.str;
-        const bound_rect = this.box_html.getBoundingClientRect();
-        return new vec2_t(bound_rect.width + this.box_margin * 2, bound_rect.height + this.box_margin * 2);
-    }
-}
-function create_default(): config_t {
-    const out = new config_t();
-    out.chart_container_html = document.getElementById("chart-container");
-
-    out.chart_ver_margin = 20;
-    out.chart_hor_margin = 60;
-    out.chart_size = new vec2_t();
-    out.chart_size.x = document.getElementById("chart").getBoundingClientRect().width - 2 * out.chart_hor_margin;
-    out.chart_size.y = document.getElementById("chart").getBoundingClientRect().height - 2 * out.chart_ver_margin;
+    sync_line_margin: number;
+    crossing_margin: number;
+    y_plateu: number;
     
-    out.box_html = document.createElement("div");
-    out.box_html.classList.add("box");
-    out.box_html.style.fontSize = "12px";
-    out.chart_container_html.appendChild(out.box_html);
+    sync_line_width: number;
+
+    min_height: number;
+    alternate_treshhold: number;
+    reduce_size_callback: (config: config_t, size: vec2_t) => boolean;
+}
+export const config = {} as config_t;
+export function default_init_config(): void {
+    // chart size
+    const chart_rect = document.getElementById("chart").getBoundingClientRect();
+    config.chart_size = new vec2_t(chart_rect.width, chart_rect.height);
+    
+    // html elements
+    config.chart_container_html = document.getElementById("chart-container");
+
+    config.box_html = document.createElement("div");
+    config.box_html.classList.add("box");
+    config.box_html.style.fontSize = "12px";
+    config.chart_container_html.appendChild(config.box_html);
    
-    out.crossing_html = document.createElement("div");
-    out.crossing_html.classList.add("crossing")
+    config.line_html = document.createElement("div");
+    config.line_html.classList.add("line");
 
-    out.line_html = document.createElement("div");
-    out.line_html.classList.add("line");
-    //out.line_html.classList.add("dash-travel");
+    config.sync_line_html = document.createElement("div");
+    config.sync_line_html.classList.add("sync-line");
 
-    out.sync_line_html = document.createElement("div");
-    out.sync_line_html.classList.add("sync-line");
+    config.crossing_html = document.createElement("div");
+    config.crossing_html.classList.add("crossing");
 
-    // in px
-    out.box_margin = 5;
-    out.depth_margin = 14;
-    out.cook_margin = 20;
+    // margins
+    config.box_margin = 5;
+    config.depth_margin = 30;
+    config.cook_margin = 20;
+    config.sync_line_margin = 10;
+    config.crossing_margin = 10;
+    config.y_plateu = 10;
 
-    out.path_fold_threshold = 5;
-    out.try_reduce_size_callback = (config: config_t, size: vec2_t) => {
+    config.sync_line_width = 2;
+
+    config.min_height = 400;
+    config.alternate_treshhold = 5;
+    config.reduce_size_callback = (config: config_t, size: vec2_t) => {
         const old_font_size = Number(config.box_html.style.fontSize.substring(0, 2));
         if (old_font_size == 1 && config.box_margin == 1 && config.depth_margin == 1) {
             return false;
@@ -64,17 +66,11 @@ function create_default(): config_t {
         config.box_margin = config.box_margin > 1 ? config.box_margin - 1 : 1;
         config.depth_margin = config.depth_margin > 1 ? config.depth_margin - 1 : 1;
         if (size.x > config.chart_size.x && size.y < config.chart_size.y) {
-            config.path_fold_threshold++;
+            config.alternate_treshhold++;
         }
         else if (size.x < config.chart_size.x && size.y > config.chart_size.y) {
-            config.path_fold_threshold--;
+            config.alternate_treshhold--;
         }
         return true;
     };
-    return out;
-}
-
-export let global_config: config_t;
-export function init_global_config(): void {
-    global_config = create_default();
 }

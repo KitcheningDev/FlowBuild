@@ -1,5 +1,4 @@
-import { ID } from "./hash_str.js";
-import { task_t } from "./task.js";
+import { ID, task_t } from "./task.js";
 import { path_bounds_t } from "./path_bounds.js";
 
 export class path_t {
@@ -8,17 +7,17 @@ export class path_t {
     parents: Set<path_t>;
     childs: Set<path_t>;
 
+    #id: ID;
+    #bounds: path_bounds_t;
+    
     #in_loop: boolean;
     #is_loop_entry: boolean;
     #is_loop_exit: boolean;
-    #bw_parents: Set<path_t>;
-    #bw_childs: Set<path_t>;
     #is_bw: boolean;
-
-    #bounds: path_bounds_t;
 
     constructor(head: task_t) {
         this.tasks = [head];
+        this.#id = head.id;
 
         this.parents = new Set();
         this.childs = new Set();
@@ -29,17 +28,60 @@ export class path_t {
         this.#in_loop = null;
         this.#is_loop_entry = null;
         this.#is_loop_exit = null;
-        this.#bw_parents = null;
-        this.#bw_childs = null;
         this.#is_bw = null;
         
         this.#bounds = null;
+    }
+    split(new_head: task_t): path_t {
+        if (this.head == new_head) {
+            return this;
+        }
+
+        const new_path = new path_t(new_head);
+
+        // tasks
+        const index = this.tasks.indexOf(new_head);
+        new_path.tasks = this.tasks.slice(index);
+        this.tasks.splice(index);
+
+        // relatives
+        new_path.childs = this.childs;
+        new_path.parents = new Set([this]);
+        this.childs = new Set([new_path]);
+
+        // adjust childs
+        for (const child of new_path.childs) {
+            child.parents.delete(this);
+            child.parents.add(new_path);
+        }
+
+        return new_path;
+    }
+    reverse(): void {
+        this.tasks.reverse();
+
+        const temp = this.parents;
+        this.parents = this.childs;
+        this.childs = temp;
+
+        // if (this.parents.size == 1) {
+        //     const [parent] = this.parents;
+        //     if (parent.is_loop_entry) {
+        //         this.parents = parent.parents;
+        //     }
+        // }
+        // if (this.childs.size == 1) {
+        //     const [child] = this.childs;
+        //     if (child.is_loop_exit) {
+        //         this.childs = child.childs;
+        //     }
+        // }
     }
     get head(): task_t {
         return this.tasks[0];
     }
     get id(): ID {
-        return this.head.id;
+        return this.#id;
     }
     get cook_id(): ID {
         return this.tasks[0].cook_id;
@@ -55,7 +97,7 @@ export class path_t {
             this.#is_loop_entry = false;
             if (this.in_loop) {   
                 for (const parent of this.parents) {
-                    if (!parent.in_loop || !has_path(this, parent)) {
+                    if (!has_path(this, parent)) {
                         this.#is_loop_entry = true;
                         break;
                     }
@@ -69,7 +111,7 @@ export class path_t {
             this.#is_loop_exit = false;
             if (this.in_loop) {
                 for (const child of this.childs) {
-                    if (!child.in_loop || !has_path(child, this)) {
+                    if (!has_path(child, this)) {
                         this.#is_loop_exit = true;
                         break;
                     }
@@ -77,28 +119,6 @@ export class path_t {
             }
         }
         return this.#is_loop_exit
-    }
-    get bw_parents(): Set<path_t> {
-        if (this.#bw_parents === null) {
-            this.#bw_parents = new Set();
-            for (const parent of this.parents) {
-                if (parent.is_bw) {
-                    this.#bw_parents.add(parent);
-                }
-            }
-        }
-        return this.#bw_parents;
-    }
-    get bw_childs(): Set<path_t> {
-        if (this.#bw_childs === null) {
-            this.#bw_childs = new Set();
-            for (const child of this.childs) {
-                if (child.is_bw) {
-                    this.#bw_childs.add(child);
-                }
-            }
-        }
-        return this.#bw_childs;
     }
     get is_bw(): boolean {
         if (this.#is_bw === null) {

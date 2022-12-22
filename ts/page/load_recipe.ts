@@ -3,7 +3,7 @@ import { last_elem } from "../utils/funcs.js";
 
 export let recipe: recipe_t = null;
 let recipe_log = [];
-export function log_recipe_mod(): void {
+export function cache_recipe_mod(): void {
     recipe_log.push(recipe);
     recipe = recipe.copy();
 }
@@ -21,7 +21,7 @@ export function load_recipe(name: string): recipe_t {
         const json = JSON.parse(req.responseText);
         recipe = new recipe_t(json);
         recipe_log = [];
-        log_recipe_mod();
+        cache_recipe_mod();
     }
     console.log(name);
     req.open("GET", `${document.URL}/recipes/${name}.json`, false);

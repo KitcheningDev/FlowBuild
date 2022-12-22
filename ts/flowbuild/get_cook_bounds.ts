@@ -1,7 +1,7 @@
 import { last_elem } from "../utils/funcs.js";
 import { vec2_t } from "../utils/vec2.js";
-import { ID } from "./hash_str.js";
 import { recipe_t } from "./recipe.js";
+import { ID } from "./task.js";
 
 export function get_cook_bounds(recipe: recipe_t, origin_map: Map<ID, vec2_t>): { left: number, right:number }[] {
     const bounds = [] as { left: number, right: number }[];

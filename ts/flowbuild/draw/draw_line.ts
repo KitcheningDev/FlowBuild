@@ -1,220 +1,199 @@
+import { last_elem } from "../../utils/funcs.js";
 import { rect_t } from "../../utils/rect.js";
 import { vec2_t, vec2 } from "../../utils/vec2.js";
-import { global_config } from "../config.js";
-import { ID } from "../hash_str.js";
-import { line_intersection, line_segment_t } from "../line_segment.js";
+import { config } from "../config.js";
+import { line_intersect, line_t } from "../line.js";
+import { create_eq_group_map, eq_group_t } from "../origin/eq_group.js";
 import { path_t } from "../path.js";
-import { pathset_center, pathset_left_right, pathset_top_bottom } from "../pathset.js";
-import { draw_line_html, draw_sync_line_html } from "./draw_html.js";
+import { pathset_bounds } from "../pathset.js";
+import { draw_caret_html, draw_crossing_html, draw_line_html, draw_sync_line_html } from "./draw_html.js";
 
-let line_segments: Set<line_segment_t[]>;
-function draw_line(line: line_segment_t): void {
-    if (line.dir.x == 0) {
+let line_segments: Set<line_t[]>;
+function draw_line(line: line_t, ver_first = true): void {
+    if (line.dir.x == 0 || line.dir.y == 0) {
         draw_line_html(line);
+        draw_caret_html(line);
+
         line_segments.add([line]);
     }
     else {
-        const y_plateau = line.to.y - global_config.depth_margin;
-        //const y_plateau = (line.from.y + line.to.y) / 2;
-        const mid1 = new vec2_t(line.from.x, y_plateau);
-        const mid2 = new vec2_t(line.to.x, y_plateau);
+        const y_plateau = line.to.y - config.y_plateu;
+        let mid1: vec2_t;
+        let mid2: vec2_t;
+
+        if (ver_first) {
+            mid1 = new vec2_t(line.from.x, y_plateau);
+            mid2 = new vec2_t(line.to.x, y_plateau);
+        }
+        else {
+            mid1 = new vec2_t(line.to.x, line.from.y);
+            mid2 = new vec2_t(line.to.x, y_plateau);
+        }
+
+        draw_line_html(new line_t(line.from, mid1));
+        draw_line_html(new line_t(mid1, mid2));
+        draw_line_html(new line_t(mid2, line.to));
+        draw_caret_html(new line_t(mid2, line.to));
         
-        draw_line_html(new line_segment_t(line.from, mid1));
-        draw_line_html(new line_segment_t(mid1, mid2));
-        draw_line_html(new line_segment_t(mid2, line.to));
-        
-        line_segments.add([new line_segment_t(line.from, mid1), new line_segment_t(mid1, mid2), new line_segment_t(mid2, line.to)]);
+        line_segments.add([new line_t(line.from, mid1), new line_t(mid1, mid2), new line_t(mid2, line.to)]);
     }
 }
-function draw_sync_line(paths: Set<path_t>, pos: 'top' | 'bottom', origin_map: Map<ID, vec2_t>): void {
-    const [left, right] = pathset_left_right(paths, origin_map);
-    const [top, bottom] = pathset_top_bottom(paths, origin_map);
-    const y_plateau = (pos == 'top') ? top - global_config.depth_margin / 2 : bottom + global_config.depth_margin / 2;
+function draw_sync_line(paths: path_t[], pos: 'top' | 'bottom', origin_map: Map<path_t, vec2_t>): void {
+    const bounds = pathset_bounds(new Set(paths), origin_map);
+    const y_plateau = (pos == 'top') ? bounds.top - config.sync_line_margin : bounds.bottom + config.sync_line_margin;
     
     // draw sync_line
-    const sync_line_from = new vec2_t(left + global_config.box_margin, y_plateau);
-    const sync_line_to = new vec2_t(right - global_config.box_margin, y_plateau);
-    draw_sync_line_html(new line_segment_t(sync_line_from, sync_line_to));
+    const sync_line_from = new vec2_t(bounds.left, y_plateau);
+    const sync_line_to = new vec2_t(bounds.right, y_plateau);
+    draw_sync_line_html(new line_t(sync_line_from, sync_line_to));
     
     // draw lines attached to sync_line
     if (pos == 'top') {
         for (const path of paths) {
-            const to = vec2.add(origin_map.get(path.id), path.bounds.in);
-            draw_line_html(new line_segment_t(new vec2_t(to.x, y_plateau), to));
+            const to = vec2.add(origin_map.get(path), path.bounds.in);
+            draw_line(new line_t(new vec2_t(to.x, y_plateau + config.sync_line_width), to));
         }
     }
     else if (pos == 'bottom') {
         for (const path of paths) {
-            const from = vec2.add(origin_map.get(path.id), path.bounds.out);
-            draw_line_html(new line_segment_t(from, new vec2_t(from.x, y_plateau)));
+            const from = vec2.add(origin_map.get(path), path.bounds.out);
+            draw_line(new line_t(from, new vec2_t(from.x, y_plateau - config.sync_line_width)));
         }
     }
 }
-function draw_global_sync_line(path: path_t, paths: Set<path_t>, origin_map: Map<ID, vec2_t>, entry_map: Map<ID, any>): void {
+function draw_global_sync_line(path: path_t, end: path_t, paths: Set<path_t>, origin_map: Map<path_t, vec2_t>, entry_map: Map<path_t, any>): void {
     const pos = (path.parents.size == 0) ? 'top' : 'bottom';
-    const [chart_left, chart_right] = pathset_left_right(paths, origin_map);
+    const chart_bounds = pathset_bounds(paths, origin_map);
     let y_plateau = (pos == 'top') ?
-     origin_map.get(path.id).y + path.bounds.out.y + global_config.depth_margin / 2 : 
-     origin_map.get(path.id).y + path.bounds.in.y - global_config.depth_margin / 2;
+     origin_map.get(path).y + path.bounds.out.y + config.sync_line_margin: 
+     origin_map.get(path).y + path.bounds.in.y - config.sync_line_margin;
 
     // draw sync_line
-    draw_sync_line_html(new line_segment_t(new vec2_t(chart_left, y_plateau), new vec2_t(chart_right, y_plateau))); 
+    draw_sync_line_html(new line_t(new vec2_t(chart_bounds.left, y_plateau), new vec2_t(chart_bounds.right, y_plateau))); 
     
     // draw lines attached to sync_line
     if (pos == 'top') {
         for (const child of path.childs) {
             if (child.childs.size > 0) {
-                const to = get_in_pos(child, origin_map, entry_map);
-                draw_line(new line_segment_t(new vec2_t(to.x, y_plateau), to));
+                const to = vec2.add(origin_map.get(child), child.bounds.in); //get_in_pos(child, origin_map, entry_map);
+                draw_line(new line_t(new vec2_t(to.x, y_plateau + config.sync_line_width), to));
             }
         }
     }
     else if (pos == 'bottom') {
         for (const parent of path.parents) {
             if (parent.parents.size > 0) {
-                const from = get_out_pos(parent, origin_map, entry_map);
-                draw_line(new line_segment_t(from, new vec2_t(from.x, y_plateau)));
+                const from = get_out_pos(parent, end, origin_map, entry_map);
+                draw_line(new line_t(from, new vec2_t(from.x, y_plateau - config.sync_line_width)));
             }
         }
     }
 }
 
-function draw_inner_lines(paths :Set<path_t>, origin_map :Map<number, vec2_t>) {
+function draw_inner_lines(paths :Set<path_t>, origin_map :Map<path_t, vec2_t>) {
     for (const path of paths) {
-        const origin = origin_map.get(path.id);
-        let last: rect_t;
+        const origin = origin_map.get(path);
+        let last = null as rect_t;
         for (const curr of path.bounds.task_rects) {
-            if (last != undefined) {
-                draw_line_html(new line_segment_t(vec2.add(origin, last.origin), vec2.add(origin, curr.origin)));
+            if (last !== null) {
+                draw_line_html(new line_t(vec2.add(origin, last.origin), vec2.add(origin, curr.origin)));
             }
             last = curr;
         }
     }
 }
-function create_entry_map(paths: Set<path_t>, ignore: path_t, relative: 'childs' | 'parents'): Map<ID, any> {
-    const entry_map = new Map<ID, { cook_id: number, relatives: Set<path_t>, members: Set<path_t> }>();
-    for (const path of paths) {
-        if (path.is_bw) {
-            continue;
-        }
 
-        let found_entry = false;
-        for (const entry of entry_map.values()) {
-            if (entry.relatives.size != path[relative].size || entry.cook_id != path.cook_id
-             || (path[relative].size == 1 && path[relative].has(ignore))) {
-                continue;
-            }
-            let eq_entry = true;
-            for (const entry_path of entry.relatives) {
-                if (!path[relative].has(entry_path)) {
-                    eq_entry = false;
-                    break;
-                }
-            }
-            if (eq_entry) {
-                entry_map.set(path.id, entry);
-                entry.members.add(path);
-                found_entry = true;
-                break;
-            }
-        }
-
-        if (!found_entry) {
-            const entry = { cook_id: path.cook_id, relatives: path[relative], members: new Set<path_t>([path]) };
-            entry_map.set(path.id, entry);
-        }
-    }
-    return entry_map;
-}
-
-function get_in_pos(path: path_t, origin_map: Map<ID, vec2_t>, in_map: Map<ID, any>): vec2_t {
-    const in_paths = in_map.get(path.id).members;
-    if (in_paths.size == 1) {
-        return vec2.add(origin_map.get(path.id), path.bounds.in);
+function get_in_pos(path: path_t, start: path_t, origin_map: Map<path_t, vec2_t>, in_map: Map<path_t, eq_group_t>): vec2_t {
+    const entry_in = in_map.get(path);
+    if (entry_in.members.length > 1 && (entry_in.shared.size > 1 || !entry_in.shared.has(start))) {
+        const bounds = pathset_bounds(new Set(entry_in.members), origin_map);
+        return new vec2_t(bounds.origin.x, bounds.top - (config.sync_line_margin + config.sync_line_width));
     }
     else {
-        return new vec2_t(pathset_center(in_paths, origin_map).x, pathset_top_bottom(in_paths, origin_map)[0] - global_config.depth_margin / 2);
+        return vec2.add(origin_map.get(path), path.bounds.in);
     }
 }
-function get_out_pos(path: path_t, origin_map: Map<ID, vec2_t>, out_map: Map<ID, any>): vec2_t {
-    const out_paths = out_map.get(path.id).members;
-    if (out_paths.size == 1) {
-        return vec2.add(origin_map.get(path.id), path.bounds.out);
+function get_out_pos(path: path_t, end: path_t, origin_map: Map<path_t, vec2_t>, out_map: Map<path_t, eq_group_t>): vec2_t {
+    const entry_out = out_map.get(path);
+    if (entry_out.members.length > 1 && (entry_out.shared.size > 1 || !entry_out.shared.has(end))) {
+        const bounds = pathset_bounds(new Set(entry_out.members), origin_map);
+        return new vec2_t(bounds.origin.x, bounds.bottom + (config.sync_line_margin + config.sync_line_width));
     }
     else {
-        return new vec2_t(pathset_center(out_paths, origin_map).x, pathset_top_bottom(out_paths, origin_map)[1] + global_config.depth_margin / 2);
+        return vec2.add(origin_map.get(path), path.bounds.out);
     }
 }
 
-export function draw_lines(paths :Set<path_t>, start :path_t, end :path_t, origin_map :Map<ID, vec2_t>): void {
+export function draw_lines(paths :Set<path_t>, start :path_t, end :path_t, origin_map :Map<path_t, vec2_t>): void {
     // reset line segment cache
-    line_segments = new Set<line_segment_t[]>();
-    // for (const path of paths) {
-    //     for (const child of path.childs) {
-    //         const from = vec2.add(origin_map.get(path.id), path.bounds.out);
-    //         if (child.childs.size > 0) {
-    //             const to = vec2.add(origin_map.get(child.id), child.bounds.in); 
-    //             const y_plateau = to.y - global_config.depth_margin / 2;
-    //             const mid1 = new vec2_t(from.x, y_plateau);
-    //             const mid2 = new vec2_t(to.x, y_plateau);
-    //             line_segments.add([new line_segment_t(from, mid1), new line_segment_t(mid1, mid2), new line_segment_t(mid2, to)]);
-    //         }
-    //     }
-    // }
+    line_segments = new Set<line_t[]>();
 
     // create in and out map
-    const in_map = create_entry_map(paths, start, 'parents');
-    const out_map = create_entry_map(paths, end, 'childs');
+    const in_map = create_eq_group_map(paths, 'parents');
+    const out_map = create_eq_group_map(paths, 'childs');
 
     // draw lines
     for (const path of paths) {
         if (!path.is_bw && path != start) {
             for (const child of path.childs) {
                 if (!child.is_bw && child != end) {
-                    draw_line(new line_segment_t(get_out_pos(path, origin_map, out_map), get_in_pos(child, origin_map, in_map)));
+                    draw_line(new line_t(get_out_pos(path, end, origin_map, out_map), get_in_pos(child, start, origin_map, in_map)));
                 }
             }
         }
     }
+
     // draw sync_lines
     for (const entry_in of in_map.values()) {
-        if (entry_in.members.size > 1 && (entry_in.relatives.size > 1 || !entry_in.relatives.has(start))) {
-            draw_sync_line(entry_in.members, "top", origin_map);
+        if (entry_in.members.length > 1 && (entry_in.shared.size > 1 || !entry_in.shared.has(start))) {
+            draw_sync_line(entry_in.members, 'top', origin_map);
         }
     }
     for (const entry_out of out_map.values()) {
-        if (entry_out.members.size > 1 && (entry_out.relatives.size > 1 || !entry_out.relatives.has(end))) {
-            draw_sync_line(entry_out.members, "bottom", origin_map);
+        if (entry_out.members.length > 1 && (entry_out.shared.size > 1 || !entry_out.shared.has(end))) {
+            draw_sync_line(entry_out.members, 'bottom', origin_map);
         }
     }
-    
+
     // draw backwards lines
     for (const path of paths) {
         if (path.is_bw) {
-            for (const child of path.childs) {
-                if (child.is_loop_entry) {
-                    const from = vec2.add(origin_map.get(path.id), path.bounds.out);
-                    const mid = vec2.add(origin_map.get(path.id), path.bounds.in);
-                    const to = vec2.add(origin_map.get(child.id), child.bounds.in);
-                    draw_line(new line_segment_t(from, mid));
-                    draw_line(new line_segment_t(mid, to));
+            //const dummy_pos = vec2.add(origin_map.get(path), new vec2_t(last_elem(path.bounds.task_rects).left, path.bounds.out.y));
+            for (const parent of path.parents) {
+                if (parent.is_loop_entry) {
+                    const from = get_in_pos(path, start, origin_map, in_map);
+                    const to = get_in_pos(parent, start, origin_map, in_map);
+                    draw_line(new line_t(from, to));
+                    // const to = vec2.add(origin_map.get(child), child.bounds.task_rects[0].origin);
+                    // const mid = new vec2_t(dummy_pos.x, to.y);
+                    // draw_line_html(new line_t(from, mid));
+                    // draw_line_html(new line_t(mid, to));
+                    // line_segments.add([new line_t(from, mid), new line_t(mid, to)])
                 }
             }
-            for (const parent of path.parents) {
-                if (parent.is_loop_exit) {
-                    const from = vec2.add(origin_map.get(path.id), path.bounds.out);
-                    const mid = vec2.add(vec2.add(origin_map.get(parent.id), parent.bounds.out), new vec2_t(0, global_config.depth_margin));
-                    const to = vec2.add(origin_map.get(parent.id), parent.bounds.out);
-                    draw_line(new line_segment_t(from, mid));
-                    draw_line(new line_segment_t(mid, to));
+            for (const child of path.childs) {
+                if (child.is_loop_exit) {
+                    // const from = get_out_pos(child, end, origin_map, in_map);//origin_map.get(child);
+                    // const to = get_out_pos(path, end, origin_map, in_map);
+                    // draw_line(new line_t(from, to), false);
+                    const from = vec2.add(origin_map.get(child), last_elem(child.bounds.task_rects).origin);
+                    const to = path.head.str == "DUMMY" ? get_in_pos(path, start, origin_map, in_map) : get_out_pos(path, end, origin_map, out_map);
+                    const mid = new vec2_t(to.x, from.y); //from, new vec2_t(0, config.depth_margin));
+
+                    draw_line_html(new line_t(from, mid));
+                    draw_line_html(new line_t(mid, to));
+                    if (path.head.str != "DUMMY") {
+                        draw_caret_html(new line_t(mid, to));
+                    }
+                    line_segments.add([new line_t(from, mid), new line_t(mid, to)]);
                 }
             }
         }
     }
     
     // draw global sync_lines
-    draw_global_sync_line(start, paths, origin_map, in_map);
-    draw_global_sync_line(end, paths, origin_map, out_map);
+    draw_global_sync_line(start, end, paths, origin_map, in_map);
+    draw_global_sync_line(end, end, paths, origin_map, out_map);
     // draw inner lines
     draw_inner_lines(paths, origin_map);
     // draw crossings
@@ -225,11 +204,11 @@ export function draw_lines(paths :Set<path_t>, start :path_t, end :path_t, origi
             }
             for (const l1 of lines1) {
                 for (const l2 of lines2) {
-                    const intersection = line_intersection(l1, l2, true);
+                    const intersection = line_intersect(l1, l2, true);
                     if (intersection !== null) {
-                        global_config.crossing_html.style.left = intersection.x.toString() + "px";
-                        global_config.crossing_html.style.top = intersection.y.toString() + "px";
-                        global_config.chart_container_html.appendChild(global_config.crossing_html.cloneNode(false));
+                        draw_caret_html(new line_t(l1.from, vec2.sub(intersection, vec2.mult_scal(vec2.normalized(l1.dir), 8))));
+                        draw_caret_html(new line_t(l2.from, vec2.sub(intersection, vec2.mult_scal(vec2.normalized(l2.dir), 8))));
+                        draw_crossing_html(intersection);
                     }
                 }
             }

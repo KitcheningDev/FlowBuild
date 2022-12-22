@@ -17,12 +17,19 @@
     margin-top: 10px;
 }
 
+#chart-container {
+    position: absolute;
+    left: calc(var(--chart-width) / 2);
+    top: calc(var(--chart-height) / 2);
+    width: var(--chart-width);
+    height: var(--chart-height);
+}
+
 /* chart content */
 #chart-container > * {
     position: absolute;
     transform: translate(-50%, -50%);
 }
-
 .cook-sep {
     border-left: 5px dashed;
     color: var(--dark-col);
@@ -66,19 +73,5 @@
     border-color: var(--dark-col);
     background-color: var(--light-col);
     border: 1px solid;
-    /*
-    border-top-color: grey;
-    border-left-color: grey;
-    */
     transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.cook-tag {
-    background-color:  var(--light-col);
-    opacity: 0.4;
-
-    font-size: 15px;
-    text-align: center;
-    
-    z-index: 2;
 }

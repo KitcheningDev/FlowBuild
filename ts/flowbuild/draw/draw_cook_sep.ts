@@ -1,16 +1,16 @@
 import { vec2_t } from "../../utils/vec2.js";
 import { graph_t } from "../graph.js";
-import { ID } from "../hash_str.js";
 import { path_t } from "../path.js";
-import { global_config } from "../config.js";
+import { config } from "../config.js";
+import { ID } from "../task.js";
 
-export function draw_cook_sep(graph: graph_t, origin_map: Map<ID, vec2_t>): void {
-    if (graph.cook_count == 1) {
+export function draw_cook_sep(graph: graph_t, origin_map: Map<path_t, vec2_t>): void {
+    if (graph.cook_count < 2) {
         return;
     }
     const cook_bounds = new Map<ID, { left: number, right: number }>();
     for (const path of graph.paths) {
-        if (path.cook_id == -1) {
+        if (path.cook_id == 0) {
             continue;
         }
         if (!cook_bounds.has(path.cook_id)) {
@@ -18,12 +18,12 @@ export function draw_cook_sep(graph: graph_t, origin_map: Map<ID, vec2_t>): void
         }
 
         const bounds = cook_bounds.get(path.cook_id);
-        bounds.left = Math.min(origin_map.get(path.id).x - path.bounds.size.x / 2, bounds.left);
-        bounds.right = Math.max(origin_map.get(path.id).x + path.bounds.size.x / 2, bounds.right);
+        bounds.left = Math.min(origin_map.get(path).x - path.bounds.size.x / 2, bounds.left);
+        bounds.right = Math.max(origin_map.get(path).x + path.bounds.size.x / 2, bounds.right);
     }
 
     let max_id = 0;
-    let max_val = cook_bounds.get(0).right;
+    let max_val = cook_bounds.get(1).right;
     for (const [id, bound] of cook_bounds) {
         if (max_val < bound.right) {
             max_id = id;
@@ -31,25 +31,25 @@ export function draw_cook_sep(graph: graph_t, origin_map: Map<ID, vec2_t>): void
         }
     }
 
-    const top_syncline_y = origin_map.get(graph.start.id).y + graph.start.bounds.out.y + global_config.depth_margin + global_config.box_margin;
-    const bottom_syncline_y = origin_map.get(graph.end.id).y + graph.end.bounds.in.y - global_config.depth_margin - global_config.box_margin;
+    const top_syncline_y = origin_map.get(graph.start).y + graph.start.bounds.out.y + config.depth_margin + config.box_margin;
+    const bottom_syncline_y = origin_map.get(graph.end).y + graph.end.bounds.in.y - config.depth_margin - config.box_margin;
     for (const [id, cook_bound] of cook_bounds) {
         if (id != max_id) {
             const cook_sep_html = document.createElement('div');
             cook_sep_html.classList.add('cook-sep');
             cook_sep_html.style.top = ((top_syncline_y + bottom_syncline_y) / 2).toString() + 'px';
-            cook_sep_html.style.left = (cook_bound.right + global_config.box_margin).toString() + 'px';
+            cook_sep_html.style.left = (cook_bound.right + config.box_margin).toString() + 'px';
             cook_sep_html.style.height = (bottom_syncline_y - top_syncline_y).toString() + 'px';
-            global_config.chart_container_html.appendChild(cook_sep_html);
+            config.chart_container_html.appendChild(cook_sep_html);
         }
 
         // if (graph.cook_count > 1) {
         //     const cook_tag_html = document.createElement('div');
         //     cook_tag_html.classList.add('cook-tag');
         //     cook_tag_html.innerHTML = "cook " + (id + 1).toString();
-        //     cook_tag_html.style.top = (origin_map.get(graph.start.id).y + graph.start.bounds.size.y).toString() + 'px';
+        //     cook_tag_html.style.top = (origin_map.get(graph.start).y + graph.start.bounds.size.y).toString() + 'px';
         //     cook_tag_html.style.left = ((cook_bound.left + cook_bound.right) / 2).toString() + 'px';
-        //     global_config.chart_container_html.appendChild(cook_tag_html);
+        //     config.chart_container_html.appendChild(cook_tag_html);
         // }
     }
 }
