@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>flowbuild™</title>
+    <title>flowbuild</title>
 
     <!-- css imports -->
     <!--for disabling flaticon error -->
@@ -19,39 +19,131 @@
     <link rel="stylesheet" href="./css/flowchart.css">
 </head>
 <body>
-    <h1>flowbuild™</h1>
-    <nav id="recipe-nav"></nav>
+    <h1>flowbuild</h1>
 
     <div id="content">
-        <div id="chart">
-            <h2 id="chart-title">empty</h2>
-            
+        <!-- chart -->
+        <div id="chart" class="card">
+            <!--h2 id="chart-title">empty</h2-->
             <span id="chart-container">                
                 <div class="box" style="left: 50%; top: 15%;">START</div>
                 <div class="line" style="left: 50%; top: 50%; height: 70%;"></div>
                 <div class="box" style="left: 50%; top: 85%;">END</div>
             </span>
+            <div id="chart-tools" class="footer">
+                <i id="clear-btn" class="fa-solid fa-trash fa-lg">
+                    <span class="info-text">clear flowchart</span>
+                </i>
+                <i id="undo-btn" class="fa-solid fa-rotate-left fa-lg">
+                    <span class="info-text">undo</span>
+                </i>
+                <i id="info-btn" class="fa-solid fa-info fa-lg">
+                    <span class="info-text">
+                        <ol>
+                            <li>
+                                add task:<br>
+                                <ul>
+                                    <li>
+                                        drag task -> free<br>create task connected to last step
+                                    </li>
+                                    <li>
+                                        drag task -> task + ctrl<br>create task between tasks 
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                add connection:<br>
+                                drag task -> task<br>add connection between tasks and removes connections to last step
+                            </li>
+                            <li>
+                                edit task:<br>
+                                click on task and edit form. Press Enter to submit
+                            </li>
+                            <li>
+                                upload task:<br>
+                                click on upload button and fill form. Click submit
+                            </li>
+                        </ol>
+                    </span>
+                </i>
+                <i id="upload-btn" class="fa-solid fa-upload fa-lg">
+                    <span class="info-text">upload recipe</span>
+                </i>
+                <!--i id="help-btn" class="fa-solid fa-circle-question fa-lg"></i-->
+            </div>
         </div>
-        <div id="chart-tools">
-            <i id="clear-btn" class="fa-solid fa-trash fa-lg"></i>
-            <i id="undo-btn" class="fa-solid fa-rotate-left fa-lg"></i>
-            <i id="help-btn" class="fa-solid fa-circle-question fa-lg"></i>
-            <i id="file-btn" class="fa-solid fa-file fa-lg"></i>
+
+        <!-- upload form -->
+        <div id="upload-form" class="card form" style="visibility: hidden;">
+            <div class="sep">
+                <h3>title</h3><br>
+                <input id="title-input"></input><br>
+            </div>
+            <div class="sep">
+                <h3>difficulty</h3><br>
+                <span id="difficulty-container">
+                    <span class="radio-btn">lemon squeezy</span>
+                    <span class="radio-btn">easy</span>
+                    <span class="radio-btn">med</span>
+                    <span class="radio-btn">hard</span>
+                    <span class="radio-btn">expert</span>
+                    <span class="radio-btn">gordon ramsey</span>
+                </span>
+            </div>
+            <div class="sep">
+                <h3>duration</h3><br>
+                <span>
+                    <input id="recipe-duration-input">
+                    <span id="recipe-unit-container">
+                        <span class="radio-btn">min</span>
+                        <span class="radio-btn">hrs</span>
+                    </span>
+                </span>
+            </div>
+
+            <div class="footer">
+                <i id="cancel-upload-btn" class="fa-solid fa-xmark fa-xl">
+                    <span class="info-text">cancel</span>
+                </i>
+                <i id="submit-upload-btn" class="fa-solid fa-check fa-xl">
+                    <span class="info-text">submit</span>
+                </i>
+            </div>
         </div>
-        <div id="form" style="visibility: hidden;">
-            <!-- <h3>from</h3>
-            <div id="from" class="box" style="position: relative; left: 45%;"></div>
-            <h3>to</h3> -->
-            <h3>content</h3>
-            <input id="text-input"></input>
-            <h3>cook</h3>
-            <span class="btn cook-btn" style="font-weight: bold;"">cook 1</span>
-            <span class="btn cook-btn">cook 2</span>
-            <h3>time</h3>
-            <input id="time-input">
-            <span class="btn time-btn"  style="font-weight: bold;">sec</span>
-            <span class="btn time-btn">min</span>
-            <span class="btn time-btn">hrs</span>
+
+        <!-- task form -->
+        <div id="task-form" class="card form" style="visibility: hidden;">
+            <div class="sep">
+                <h3>content</h3><br>
+                <input id="text-input"></input><br>
+            </div>
+            <div id="task-form-cook" class="sep">
+                <h3>cook</h3><br>
+                <span id="cook-btn-container">
+                    <span class="radio-btn cook-btn">1</span>
+                    <span class="radio-btn cook-btn">+</span>
+                </span><br>
+            </div>
+            <div class="sep">
+                <h3>duration</h3><br>
+                <span>
+                    <input id="task-duration-input">
+                    <span id="task-duration-container">
+                        <span class="radio-btn">sec</span>
+                        <span class="radio-btn">min</span>
+                        <span class="radio-btn">hrs</span>
+                    </span>
+                </span>
+            </div>
+
+            <div id="task-footer" class="footer">
+                <i id="cancel-task-btn" class="fa-solid fa-xmark fa-xl">
+                    <span class="info-text">cancel</span>
+                </i>
+                <i id="submit-task-btn" class="fa-solid fa-check fa-xl">
+                    <span class="info-text">submit</span>
+                </i>
+            </div>
         </div>
     </div>
     

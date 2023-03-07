@@ -1,8 +1,17 @@
 import { vec2_t, vec2 } from "../utils/vec2.js";
 import { rect_t } from "../utils/rect.js";
 import { first_elem, last_elem } from "../utils/funcs.js";
-import { global_config } from "./config.js";
+import { config } from "./config.js";
 import { task_t } from "./task.js";
+
+function get_box_size(task: task_t): vec2_t {
+    if (task.str == "DUMMY")  {
+        return new vec2_t(0, 0);
+    }
+    config.box_html.innerHTML = task.str;
+    const bound_rect = config.box_html.getBoundingClientRect();
+    return new vec2_t(bound_rect.width + config.box_margin * 2, bound_rect.height + config.box_margin * 2);
+}
 
 export class path_bounds_t {
     in: vec2_t;
@@ -14,7 +23,7 @@ export class path_bounds_t {
         this.task_rects = [];
 
         for (const task of tasks) {
-            const size = global_config.get_box_size(task);
+            const size = get_box_size(task);
             this.task_rects.push(new rect_t(undefined, size)); 
         }
 
@@ -22,7 +31,7 @@ export class path_bounds_t {
         if (last_elem(tasks).str == "END") {
             dirs = [ "right"];
         }
-        else if (tasks.length >= global_config.path_fold_threshold)
+        else if (tasks.length >= config.alternate_treshhold)
             dirs = [ "right", "down", "left", "down" ];
         else
             dirs = [ "down" ];

@@ -27,6 +27,15 @@ export class vec2_t {
     abs(): vec2_t {
         return new vec2_t(Math.abs(this.x), Math.abs(this.y));
     }
+    length(): number {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+    normalize(): vec2_t {
+        const length = this.length();
+        this.x /= length;
+        this.y /= length;
+        return this;
+    }
 }
 export namespace vec2 {
     export function equals(v1: vec2_t, v2: vec2_t): boolean {
@@ -43,5 +52,8 @@ export namespace vec2 {
     }
     export function div_scal(v: vec2_t, scal: number): vec2_t {
         return new vec2_t(v.x / scal, v.y / scal);
+    }
+    export function normalized(v: vec2_t): vec2_t {
+        return v.copy().normalize();
     }
 }
