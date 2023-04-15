@@ -1,14 +1,14 @@
-import { vec2_t } from "./vec2.js";
-export class rect_t {
+import { Vec2 } from "./vec2.js";
+export class Rect {
     constructor(origin, size) {
         if (origin === undefined) {
-            this.origin = new vec2_t();
+            this.origin = new Vec2();
         }
         else {
             this.origin = origin.copy();
         }
         if (size === undefined) {
-            this.size = new vec2_t();
+            this.size = new Vec2();
         }
         else {
             this.size = size.copy();

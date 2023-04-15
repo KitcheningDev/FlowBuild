@@ -1,77 +1,179 @@
+:root {
+    --bg-col: rgb(200, 200, 200);
+    --light-col: rgb(215, 215, 215);
+    --dark-col: rgb(30, 30, 30);
+
+    --chart-width: 1000px;
+    --chart-height: 750px;
+
+    --editor-connector: visible;
+    --editor-add: visible;
+    --editor-remove: hidden;
+    
+    --connector-opacity: 1;
+    --add-opacity: 1;
+}
+
+/* container */
 #chart {
     position: relative;
     background-color: var(--light-col);
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
+    border-radius: 15px;
 
     width: var(--chart-width);
     height: var(--chart-height);
 }
-
-#chart-title {
+#flowchart-container {
     display: inline-block;
     position: relative;
-    font-size: 30px;
-    left: calc(var(--chart-width) / 2);
-    transform: translate(-50%, 0);
-    margin-top: 10px;
+    left: 50%;
+    top: 50%;
+    width: 10000px;
+    height: 10000px;
 }
-
-#chart-container {
-    position: absolute;
-    left: calc(var(--chart-width) / 2);
-    top: calc(var(--chart-height) / 2);
-    width: var(--chart-width);
-    height: var(--chart-height);
-}
-
-/* chart content */
-#chart-container > * {
+#flowchart-container > * {
     position: absolute;
     transform: translate(-50%, -50%);
-}
-.cook-sep {
-    border-left: 5px dashed;
     color: var(--dark-col);
-    opacity: 0.4;
-    width: 0px;
-    z-index: 3;
+    user-select: none;
 }
-.box {
+
+#remove-task {
+    position: absolute;
+    margin: 10px;
+    left: 0;
+    bottom: 0;
+    opacity: calc(1 - var(--connector-opacity));
+    cursor: pointer;
+}
+
+/* task */
+.flow-task {
+    position: absolute;
+    border: 2px solid;
     border-radius: 5px;
     background-color: var(--light-col);
 
-    font-size: 12px;
+    font-size: 10px;
+    font-family: monospace;
+    font-weight: bold;
     text-align: center;
-    
     max-width: 130px;
 
-    box-shadow: 3px 3px var(--dark-col);
-    padding: 7px 10px;
+    padding: 7px 5px;
+    z-index: 2;
+}
+.editor-connector, .editor-add, .editor-remove {
+    opacity: 0;
+    cursor: pointer;
+    position: absolute;
+    border: 2px solid;
+    border-radius: 50%;
+    background-color: var(--light-col);
+
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    transform: translate(-50%, -50%);
+}
+.editor-connector {
+    z-index: 3;
+}
+.editor-add, .editor-remove {
+    z-index: 4;
+}
+.flow-task:hover > .editor-connector {
+    opacity: calc(var(--connector-opacity) * 0.7);
+}
+.flow-task:hover > .editor-add {
+    opacity: calc(calc(1 - var(--connector-opacity)) * var(--add-opacity));
+}
+.flow-task:hover > .editor-remove {
+    opacity: calc(calc(1 - var(--connector-opacity)) * calc(1 - var(--add-opacity)));
+}
+.editor-add::before, .editor-remove::before {
+    position: absolute;
+    transform: translate(-6px, 10px);
+}
+
+/* start end */
+.flow-start {
+    position: absolute;
+    border: 3px solid;
+    border-radius: 50%;
+    background-color: var(--light-col);
+
+    padding: 6px;
     cursor: pointer;
     z-index: 2;
 }
-.line, .sync-line {
+.flow-end {
+    position: absolute;
+    border: 6px double;
+    border-radius: 50%;
+    background-color: var(--light-col);
+
+    padding: 6px;
+    z-index: 2;
+}
+
+/* line */
+.line {
+    position: absolute;
     border: 1px solid;
+    background-color: black;
     width: 0;
     height: 0;
     z-index: 1;
 }
-.sync-line {
-    border: 2px solid;
-    border-radius: 2px;
-}
-.crossing {
-    background-color: var(--light-col);
-    z-index: 3;
-}
-.crossing::before {
-    content: '';
+.caret-up, .caret-right, .caret-down, .caret-left {
     position: absolute;
-    width: 6px;
-    height: 6px;
-    border-color: var(--dark-col);
-    background-color: var(--light-col);
+    z-index: 1;
+}
+#flowchart-container .caret-up {
+    transform: translate(-50%, calc(-50% + 4px));
+}
+#flowchart-container .caret-right {
+    transform: translate(calc(-50% - 3px), -50%);
+}
+#flowchart-container .caret-down {
+    transform: translate(-50%, calc(-50% - 2px));
+}
+#flowchart-container .caret-left {
+    transform: translate(calc(-50% + 2px), -50%);
+}
+
+/* sync-line */
+.sync-line-left, .sync-line-middle, .sync-line-right {
+    position: absolute;
     border: 1px solid;
-    transform: translate(-50%, -50%) rotate(45deg);
+    background-color: black;
+    width: 1px;
+    height: 2px;
+    z-index: 1;
+}
+.sync-line-left {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+.sync-line-right {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+/* cook-line */
+.cook-line {
+    position: absolute;
+    border: 2px dashed;
+    /* background-color: black; */
+    width: 2;
+    height: 2;
+    z-index: 1;
+}
+
+/* crossing */
+.crossing {
+    position: absolute;
+    z-index: 1;
 }

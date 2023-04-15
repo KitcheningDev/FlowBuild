@@ -1,5 +1,5 @@
 import { vec2 } from "../utils/vec2.js";
-export class line_t {
+export class Line {
     constructor(from, to) {
         this.from = from;
         this.to = to;

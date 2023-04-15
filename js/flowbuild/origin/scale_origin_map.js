@@ -1,8 +1,8 @@
-// import { vec2_t, vec2 } from "../../utils/vec2.js";
+// import { Vec2, vec2 } from "../../utils/vec2.js";
 // import { config } from "./../config.js";
 // import { ID } from "./../hash_str.js";
-// import { path_t } from "./../path.js";
-// export function scale_origin_map(paths: Set<path_t>, origin_map: Map<ID, vec2_t>): void {
+// import { Path } from "./../path.js";
+// export function scale_origin_map(paths: Set<Path>, origin_map: Map<ID, Vec2>): void {
 //     let min_x = Infinity;
 //     let max_x = -Infinity;
 //     let min_y = Infinity;

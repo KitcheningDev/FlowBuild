@@ -4,6 +4,6 @@
     "outDir": "./../js",
     "sourceMap": true,
     "moduleResolution": "node",
-    "rootDirs": ["./", "flowbuild"]
+    "rootDir": "./",
   },
 }

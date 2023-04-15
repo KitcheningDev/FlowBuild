@@ -15,7 +15,6 @@
 }
 
 body {
-    font-size: 20px;
     font-family: monospace;
     font-weight: bold;
 
@@ -24,7 +23,11 @@ body {
 }
 
 #content {
-    margin: 20px 20px 0px 20px;
+    text-align: center;
+    justify-content: center;
+}
+#content > * {
+    margin: 20px;
 }
 
 /* header */
@@ -33,125 +36,4 @@ body > h1 {
     color: var(--light-col);
     background-color: var(--dark-col);
     padding: 15px;
-}
-
-/* icons */
-i {
-    color: var(--light-col);
-    margin: 5px 20px;
-}
-i:hover {
-    opacity: 0.7;
-}
-
-/* info text */
-.info-text {
-    text-align: left;
-    position: absolute;
-    visibility: hidden;
-    border-radius: 5px;
-    font-size: 15px;
-    background-color: var(--dark-col);
-    color: var(--light-col);
-    padding: 10px 30px;
-    bottom: 110%;
-    width:max-content;
-    line-height: normal;
-    transform: translate(-50%, 0);
-    z-index: 3;
-}
-i:hover .info-text {
-    visibility: visible;
-}
-
-/* card */
-.card {
-    position: absolute;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-    background-color: var(--light-col);
-}
-.card > .footer {
-    display: flex;
-    justify-content: space-evenly;
-
-    position: absolute;
-    text-align: center;
-    border-bottom-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    background-color: var(--dark-col);
-    width: 100%;
-    left: 0;
-    bottom: 0;
-    padding: 15px 0px;
-    margin: 0;
-    transform: translate(0, 100%);
-}
-
-/* form */
-.form > .sep {
-    display: block;
-    position: relative;
-    margin-top: 10px;
-    margin-bottom: 30px;
-}
-.form > .sep * {
-    text-align: center;
-}
-.form > .sep > * {
-    position: relative;
-    display: inline-block;
-    left: 50%;
-    transform: translate(-50%, 0);
-    margin: 5px 0px;
-}
-
-.form > .sep input {
-    font-size: inherit;
-    background-color: transparent;
-    font-weight: bold;
-    height: 25px;
-    
-    border: 3px solid;
-    border-left: 0px;
-    border-right: 0px;
-    border-top: 0px;
-    border-color: var(--dark-col);
-}
-.form > .sep .radio-btn {
-    font-weight: 100;
-    border: solid 2px;
-    border-radius: 3px;
-    padding: 3px 7px;
-    opacity: 0.7;
-    cursor: pointer;
-}
-.form > .sep .radio-btn:hover, .form > .sep .radio-btn-selected {
-    font-weight: bolder;
-    opacity: 1;
-}
-
-/* task form */
-#task-form {
-    left: 1200px;
-    top: 100px;
-
-    padding: 0 25px;
-}
-#text-input {
-    width: 400px;
-}
-#task-duration-input {
-    width: 40px;
-}
-
-/* upload form */
-#upload-form {
-    left: 1050px;
-    top: 100px;
-
-    padding: 25px;
-}
-#recipe-duration-input {
-    width: 40px;
 }

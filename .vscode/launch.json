@@ -5,11 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch localhost",
             "type": "firefox",
             "request": "launch",
-            "name": "Firefox",
+            "reAttach": true,
             "url": "http://localhost:5500",
-            "webRoot": "${workspaceFolder}"
+            "pathMappings": [{
+                "url": "http://localhost:5500",
+                "path": "${workspaceFolder}"
+            }],
+            "tmpDir": "/home/flo/dump/tmp"
+
         }
     ]
 }

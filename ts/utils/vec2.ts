@@ -1,59 +1,45 @@
-export class vec2_t {
+export class Vec2 {
     x: number;
     y: number;
 
-    constructor(...any: number[]) {
-        if (any.length == 0) {
-            this.x = 0;
-            this.y = 0;
-        }
-        else if (any.length == 1) {
-            this.x = any[0];
-            this.y = any[0];
-        }
-        else if (any.length == 2) {
-            this.x = any[0];
-            this.y = any[1];
-        }
-        else {
-            this.x = NaN;
-            this.y = NaN;
-        }
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
     }
 
-    copy(): vec2_t {
-        return new vec2_t(this.x, this.y);
+    up(amount: number = 1): Vec2 {
+        return new Vec2(this.x, this.y - amount);
     }
-    abs(): vec2_t {
-        return new vec2_t(Math.abs(this.x), Math.abs(this.y));
+    right(amount: number = 1): Vec2 {
+        return new Vec2(this.x + amount, this.y);
     }
-    length(): number {
-        return Math.sqrt(this.x * this.x + this.y * this.y);
+    down(amount: number = 1): Vec2 {
+        return new Vec2(this.x, this.y + amount);
     }
-    normalize(): vec2_t {
-        const length = this.length();
-        this.x /= length;
-        this.y /= length;
-        return this;
+    left(amount: number = 1): Vec2 {
+        return new Vec2(this.x - amount, this.y);
+    }
+
+    copy(): Vec2 {
+        return new Vec2(this.x, this.y);
     }
 }
-export namespace vec2 {
-    export function equals(v1: vec2_t, v2: vec2_t): boolean {
-        return v1.x == v2.x && v1.y == v2.y;
-    }
-    export function add(v1: vec2_t, v2: vec2_t): vec2_t {
-        return new vec2_t(v1.x + v2.x, v1.y + v2.y);
-    }
-    export function sub(v1: vec2_t, v2: vec2_t): vec2_t {
-        return new vec2_t(v1.x - v2.x, v1.y - v2.y);
-    }
-    export function mult_scal(v: vec2_t, scal: number): vec2_t {
-        return new vec2_t(v.x * scal, v.y * scal);
-    }
-    export function div_scal(v: vec2_t, scal: number): vec2_t {
-        return new vec2_t(v.x / scal, v.y / scal);
-    }
-    export function normalized(v: vec2_t): vec2_t {
-        return v.copy().normalize();
-    }
+
+export function vec2_equals(v1: Vec2, v2: Vec2): boolean {
+    return v1.x == v2.x && v1.y == v2.y;
+}
+export function vec2_abs(v: Vec2): Vec2 {
+    return new Vec2(Math.abs(v.x), Math.abs(v.y));
+}
+export function vec2_add(v1: Vec2, v2: Vec2): Vec2 {
+    return new Vec2(v1.x + v2.x, v1.y + v2.y);
+}
+export function vec2_sub(v1: Vec2, v2: Vec2): Vec2 {
+    return new Vec2(v1.x - v2.x, v1.y - v2.y);
+}
+export function vec2_mult(v: Vec2, t: number): Vec2 {
+    return new Vec2(v.x * t, v.y * t);
+}
+export function vec2_div(v: Vec2, t: number): Vec2 {
+    return new Vec2(v.x / t, v.y / t);
 }

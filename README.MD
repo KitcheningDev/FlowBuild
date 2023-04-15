@@ -1,1 +1,3 @@
-Empty Readme
+ToDo:
+-fix cook rule
+-restrict add / remove

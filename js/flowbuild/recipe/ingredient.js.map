@@ -1,0 +1,1 @@
+{"version":3,"file":"ingredient.js","sourceRoot":"","sources":["../../../ts/flowbuild/recipe/ingredient.ts"],"names":[],"mappings":"AAEA,MAAM,OAAO,UAAU;IAKnB,YAAY,QAAkB,EAAE,MAAc,EAAE,IAAY;QACxD,IAAI,CAAC,QAAQ,GAAG,QAAQ,CAAC;QACzB,IAAI,CAAC,MAAM,GAAG,MAAM,CAAC;QACrB,IAAI,CAAC,IAAI,GAAG,IAAI,CAAC;IACrB,CAAC;CACJ"}

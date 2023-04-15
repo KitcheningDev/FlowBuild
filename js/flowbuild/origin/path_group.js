@@ -9,9 +9,9 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _grid_t_data, _grid_t_size, _grid_t_graph, _grid_t_eq_groups, _grid_t_collapse_order, _grid_t_paths_pos, _grid_t_eq_group_x, _grid_t_rules, _grid_t_valid;
+var _Grid_data, _Grid_size, _Grid_graph, _Grid_eq_groups, _Grid_collapse_order, _Grid_paths_pos, _Grid_eq_group_x, _Grid_rules, _Grid_valid;
 import { create_arr, create_arr_with_func, cut_set, last_elem } from "../../utils/funcs.js";
-import { vec2_t } from "../../utils/vec2.js";
+import { Vec2 } from "../../utils/vec2.js";
 import { create_eq_groups } from "./eq_group.js";
 import { permutate } from "../../utils/permutate.js";
 function create_dep_groups(eq_groups) {
@@ -100,17 +100,17 @@ function create_collapse_order(graph, eq_groups) {
     }
     return order;
 }
-export class grid_t {
+export class Grid {
     constructor(graph) {
-        _grid_t_data.set(this, void 0);
-        _grid_t_size.set(this, void 0);
-        _grid_t_graph.set(this, void 0);
-        _grid_t_eq_groups.set(this, void 0);
-        _grid_t_collapse_order.set(this, void 0);
-        _grid_t_paths_pos.set(this, void 0);
-        _grid_t_eq_group_x.set(this, void 0);
-        _grid_t_rules.set(this, void 0);
-        _grid_t_valid.set(this, void 0);
+        _Grid_data.set(this, void 0);
+        _Grid_size.set(this, void 0);
+        _Grid_graph.set(this, void 0);
+        _Grid_eq_groups.set(this, void 0);
+        _Grid_collapse_order.set(this, void 0);
+        _Grid_paths_pos.set(this, void 0);
+        _Grid_eq_group_x.set(this, void 0);
+        _Grid_rules.set(this, void 0);
+        _Grid_valid.set(this, void 0);
         const depth_counts = create_arr(graph.depth + 1, 0);
         for (const path of graph.paths) {
             const min_y = graph.get_depth(path);
@@ -119,77 +119,77 @@ export class grid_t {
                 depth_counts[y]++;
             }
         }
-        __classPrivateFieldSet(this, _grid_t_size, new vec2_t(Math.max(...depth_counts), graph.depth + 1), "f");
+        __classPrivateFieldSet(this, _Grid_size, new Vec2(Math.max(...depth_counts), graph.depth + 1), "f");
         this.clear();
-        __classPrivateFieldSet(this, _grid_t_graph, graph, "f");
-        __classPrivateFieldSet(this, _grid_t_eq_groups, create_eq_groups(graph.paths, 'parents'), "f");
-        __classPrivateFieldSet(this, _grid_t_collapse_order, create_collapse_order(graph, __classPrivateFieldGet(this, _grid_t_eq_groups, "f")), "f");
+        __classPrivateFieldSet(this, _Grid_graph, graph, "f");
+        __classPrivateFieldSet(this, _Grid_eq_groups, create_eq_groups(graph.paths, 'parents'), "f");
+        __classPrivateFieldSet(this, _Grid_collapse_order, create_collapse_order(graph, __classPrivateFieldGet(this, _Grid_eq_groups, "f")), "f");
         // console.log("DEPTH LEVELS", ...graph.depth_levels);
         // console.log("COLLAPSE ORDER", ...this.#collapse_order);
-        __classPrivateFieldSet(this, _grid_t_rules, create_adjacency_rules(__classPrivateFieldGet(this, _grid_t_eq_groups, "f")), "f");
-        __classPrivateFieldSet(this, _grid_t_valid, false, "f");
+        __classPrivateFieldSet(this, _Grid_rules, create_adjacency_rules(__classPrivateFieldGet(this, _Grid_eq_groups, "f")), "f");
+        __classPrivateFieldSet(this, _Grid_valid, false, "f");
     }
     get size() {
-        return __classPrivateFieldGet(this, _grid_t_size, "f").copy();
+        return __classPrivateFieldGet(this, _Grid_size, "f").copy();
     }
     get mid() {
-        return Math.floor((__classPrivateFieldGet(this, _grid_t_size, "f").x - 1) / 2);
+        return Math.floor((__classPrivateFieldGet(this, _Grid_size, "f").x - 1) / 2);
     }
     get valid() {
-        return __classPrivateFieldGet(this, _grid_t_valid, "f");
+        return __classPrivateFieldGet(this, _Grid_valid, "f");
     }
     in_bounds(pos) {
-        return 0 <= pos.x && pos.x < __classPrivateFieldGet(this, _grid_t_size, "f").x && 0 <= pos.y && pos.y <= __classPrivateFieldGet(this, _grid_t_size, "f").y;
+        return 0 <= pos.x && pos.x < __classPrivateFieldGet(this, _Grid_size, "f").x && 0 <= pos.y && pos.y <= __classPrivateFieldGet(this, _Grid_size, "f").y;
     }
     clear() {
-        __classPrivateFieldSet(this, _grid_t_data, create_arr_with_func(__classPrivateFieldGet(this, _grid_t_size, "f").y, () => create_arr(__classPrivateFieldGet(this, _grid_t_size, "f").x, null)), "f");
-        __classPrivateFieldSet(this, _grid_t_paths_pos, new Map(), "f");
-        __classPrivateFieldSet(this, _grid_t_eq_group_x, new Map(), "f");
+        __classPrivateFieldSet(this, _Grid_data, create_arr_with_func(__classPrivateFieldGet(this, _Grid_size, "f").y, () => create_arr(__classPrivateFieldGet(this, _Grid_size, "f").x, null)), "f");
+        __classPrivateFieldSet(this, _Grid_paths_pos, new Map(), "f");
+        __classPrivateFieldSet(this, _Grid_eq_group_x, new Map(), "f");
     }
     at(pos) {
-        return this.in_bounds(pos) ? __classPrivateFieldGet(this, _grid_t_data, "f")[pos.y][pos.x] : undefined;
+        return this.in_bounds(pos) ? __classPrivateFieldGet(this, _Grid_data, "f")[pos.y][pos.x] : undefined;
     }
     top(pos) {
-        return __classPrivateFieldGet(this, _grid_t_data, "f")[pos.y - 1][pos.x];
+        return __classPrivateFieldGet(this, _Grid_data, "f")[pos.y - 1][pos.x];
     }
     right(pos) {
-        return __classPrivateFieldGet(this, _grid_t_data, "f")[pos.y][pos.x + 1];
+        return __classPrivateFieldGet(this, _Grid_data, "f")[pos.y][pos.x + 1];
     }
     bottom(pos) {
-        return __classPrivateFieldGet(this, _grid_t_data, "f")[pos.y + 1][pos.x];
+        return __classPrivateFieldGet(this, _Grid_data, "f")[pos.y + 1][pos.x];
     }
     left(pos) {
-        return __classPrivateFieldGet(this, _grid_t_data, "f")[pos.y][pos.x - 1];
+        return __classPrivateFieldGet(this, _Grid_data, "f")[pos.y][pos.x - 1];
     }
     set(x, path) {
-        const y = __classPrivateFieldGet(this, _grid_t_graph, "f").get_depth(path);
-        __classPrivateFieldGet(this, _grid_t_paths_pos, "f").set(path, new vec2_t(x, y));
-        __classPrivateFieldGet(this, _grid_t_data, "f")[y][x] = path;
+        const y = __classPrivateFieldGet(this, _Grid_graph, "f").get_depth(path);
+        __classPrivateFieldGet(this, _Grid_paths_pos, "f").set(path, new Vec2(x, y));
+        __classPrivateFieldGet(this, _Grid_data, "f")[y][x] = path;
     }
     path_pos(path) {
-        return __classPrivateFieldGet(this, _grid_t_paths_pos, "f").get(path);
+        return __classPrivateFieldGet(this, _Grid_paths_pos, "f").get(path);
     }
     remove(pos) {
-        __classPrivateFieldGet(this, _grid_t_data, "f")[pos.y][pos.x] = null;
+        __classPrivateFieldGet(this, _Grid_data, "f")[pos.y][pos.x] = null;
     }
     pos_left(eq_group) {
-        return __classPrivateFieldGet(this, _grid_t_eq_group_x, "f").get(eq_group);
+        return __classPrivateFieldGet(this, _Grid_eq_group_x, "f").get(eq_group);
     }
     pos_right(eq_group) {
-        return __classPrivateFieldGet(this, _grid_t_eq_group_x, "f").get(eq_group) + eq_group.members.length - 1;
+        return __classPrivateFieldGet(this, _Grid_eq_group_x, "f").get(eq_group) + eq_group.members.length - 1;
     }
     insert(x, eq_group) {
-        __classPrivateFieldGet(this, _grid_t_eq_group_x, "f").set(eq_group, x);
+        __classPrivateFieldGet(this, _Grid_eq_group_x, "f").set(eq_group, x);
         for (let i = 0; i < eq_group.members.length; ++i) {
             this.set(x + i, eq_group.members[i]);
         }
     }
     delete(eq_group) {
-        const x = __classPrivateFieldGet(this, _grid_t_eq_group_x, "f").get(eq_group);
+        const x = __classPrivateFieldGet(this, _Grid_eq_group_x, "f").get(eq_group);
         for (let i = 0; i < eq_group.members.length; ++i) {
-            this.remove(new vec2_t(x + i, __classPrivateFieldGet(this, _grid_t_graph, "f").get_depth(eq_group.members[i])));
+            this.remove(new Vec2(x + i, __classPrivateFieldGet(this, _Grid_graph, "f").get_depth(eq_group.members[i])));
         }
-        __classPrivateFieldGet(this, _grid_t_eq_group_x, "f").delete(eq_group);
+        __classPrivateFieldGet(this, _Grid_eq_group_x, "f").delete(eq_group);
     }
     path_above(pos) {
         const curr_pos = pos.copy();
@@ -214,14 +214,14 @@ export class grid_t {
             const from_x = Math.min(left.x, pos.x);
             const to_x = Math.max(right.x, pos.x);
             for (let x = from_x; x <= to_x; ++x) {
-                const above = this.path_above(new vec2_t(x, left.y - 1));
+                const above = this.path_above(new Vec2(x, left.y - 1));
                 if (x == pos.x && above !== parent) {
                     return false;
                 }
                 if (above === null) {
                     continue;
                 }
-                const above_depth_max = __classPrivateFieldGet(this, _grid_t_graph, "f").get_depth(above) + __classPrivateFieldGet(this, _grid_t_graph, "f").get_diff_max(above);
+                const above_depth_max = __classPrivateFieldGet(this, _Grid_graph, "f").get_depth(above) + __classPrivateFieldGet(this, _Grid_graph, "f").get_diff_max(above);
                 if (!eq_group.shared.has(above) && pos.y <= above_depth_max) {
                     return false;
                 }
@@ -231,7 +231,7 @@ export class grid_t {
     }
     is_valid_x(x, eq_group) {
         if (eq_group.cook_id > 0) {
-            for (const [path, pos] of __classPrivateFieldGet(this, _grid_t_paths_pos, "f")) {
+            for (const [path, pos] of __classPrivateFieldGet(this, _Grid_paths_pos, "f")) {
                 if (path.cook_id == 0) {
                     continue;
                 }
@@ -244,26 +244,26 @@ export class grid_t {
             }
         }
         let max_y = 0, min_y = Infinity;
-        eq_group.members.forEach(el => { max_y = Math.max(__classPrivateFieldGet(this, _grid_t_graph, "f").get_depth(el), max_y); });
-        eq_group.members.forEach(el => { min_y = Math.min(__classPrivateFieldGet(this, _grid_t_graph, "f").get_depth(el), min_y); });
+        eq_group.members.forEach(el => { max_y = Math.max(__classPrivateFieldGet(this, _Grid_graph, "f").get_depth(el), max_y); });
+        eq_group.members.forEach(el => { min_y = Math.min(__classPrivateFieldGet(this, _Grid_graph, "f").get_depth(el), min_y); });
         // is free
         for (let i = 0; i < eq_group.members.length; ++i) {
-            const depth = __classPrivateFieldGet(this, _grid_t_graph, "f").get_depth(eq_group.members[i]);
+            const depth = __classPrivateFieldGet(this, _Grid_graph, "f").get_depth(eq_group.members[i]);
             for (let y = depth; y <= max_y; ++y) {
-                if (this.at(new vec2_t(x + i, y)) != null) {
-                    // console.log("not free at", new vec2_t(x + i, y));
+                if (this.at(new Vec2(x + i, y)) != null) {
+                    // console.log("not free at", new Vec2(x + i, y));
                     return false;
                 }
             }
         }
         // parents reachable
-        if (!this.parents_reachable(new vec2_t(x, min_y), new vec2_t(x + eq_group.members.length - 1, min_y), eq_group)) {
+        if (!this.parents_reachable(new Vec2(x, min_y), new Vec2(x + eq_group.members.length - 1, min_y), eq_group)) {
             // console.log("not all parents reachable");
             return false;
         }
         // satisfies neighbor rules
-        for (const neighbor of __classPrivateFieldGet(this, _grid_t_rules, "f").get(eq_group)) {
-            if (__classPrivateFieldGet(this, _grid_t_eq_group_x, "f").has(neighbor)) {
+        for (const neighbor of __classPrivateFieldGet(this, _Grid_rules, "f").get(eq_group)) {
+            if (__classPrivateFieldGet(this, _Grid_eq_group_x, "f").has(neighbor)) {
                 if (this.pos_right(neighbor) != x - 1
                     && this.pos_left(neighbor) != x + eq_group.members.length) {
                     // console.log("missing neighbors", ...neighbor.members);
@@ -284,17 +284,17 @@ export class grid_t {
     }
     collapse() {
         const max_iterations = 10;
-        for (const path of __classPrivateFieldGet(this, _grid_t_graph, "f").paths) {
+        for (const path of __classPrivateFieldGet(this, _Grid_graph, "f").paths) {
             if (path.is_bw) {
                 console.log("BACKWARDS", path.head.str);
             }
         }
         for (let i = 1; i <= max_iterations; ++i) {
             this.clear();
-            this.set(this.mid, __classPrivateFieldGet(this, _grid_t_graph, "f").start);
-            this.set(this.mid, __classPrivateFieldGet(this, _grid_t_graph, "f").end);
-            __classPrivateFieldSet(this, _grid_t_valid, this.permutated_collapse_index(0), "f");
-            if (!__classPrivateFieldGet(this, _grid_t_valid, "f")) {
+            this.set(this.mid, __classPrivateFieldGet(this, _Grid_graph, "f").start);
+            this.set(this.mid, __classPrivateFieldGet(this, _Grid_graph, "f").end);
+            __classPrivateFieldSet(this, _Grid_valid, this.permutated_collapse_index(0), "f");
+            if (!__classPrivateFieldGet(this, _Grid_valid, "f")) {
                 console.warn("failed to collapse graph. iteration: ", i);
                 if (i == max_iterations) {
                     console.error("failed to collapse graph!");
@@ -305,22 +305,22 @@ export class grid_t {
                 this.log_grid();
                 return;
             }
-            __classPrivateFieldGet(this, _grid_t_size, "f").x++;
+            __classPrivateFieldGet(this, _Grid_size, "f").x++;
         }
     }
     permutated_collapse_index(index) {
         let success = false;
-        if (index == __classPrivateFieldGet(this, _grid_t_collapse_order, "f").length) {
+        if (index == __classPrivateFieldGet(this, _Grid_collapse_order, "f").length) {
             return true;
         }
-        permutate.permutate_list(__classPrivateFieldGet(this, _grid_t_collapse_order, "f")[index].members, () => success = this.collapse_index(index), () => success);
+        permutate.permutate_list(__classPrivateFieldGet(this, _Grid_collapse_order, "f")[index].members, () => success = this.collapse_index(index), () => success);
         return success;
     }
     collapse_index(index) {
-        if (index == __classPrivateFieldGet(this, _grid_t_collapse_order, "f").length) {
+        if (index == __classPrivateFieldGet(this, _Grid_collapse_order, "f").length) {
             return true;
         }
-        const eq_group = __classPrivateFieldGet(this, _grid_t_collapse_order, "f")[index];
+        const eq_group = __classPrivateFieldGet(this, _Grid_collapse_order, "f")[index];
         const possible_x = this.possible_x(eq_group);
         // console.log(...possible_x);
         // this.log_grid();
@@ -338,10 +338,10 @@ export class grid_t {
     }
     log_grid() {
         const rows = [];
-        for (let y = 0; y < __classPrivateFieldGet(this, _grid_t_size, "f").y; ++y) {
+        for (let y = 0; y < __classPrivateFieldGet(this, _Grid_size, "f").y; ++y) {
             const row = [];
-            for (let x = 0; x < __classPrivateFieldGet(this, _grid_t_size, "f").x; ++x) {
-                const val = this.at(new vec2_t(x, y));
+            for (let x = 0; x < __classPrivateFieldGet(this, _Grid_size, "f").x; ++x) {
+                const val = this.at(new Vec2(x, y));
                 row.push((val === null ? "-" : val.head.str));
             }
             rows.push(row);
@@ -349,5 +349,5 @@ export class grid_t {
         console.table(rows);
     }
 }
-_grid_t_data = new WeakMap(), _grid_t_size = new WeakMap(), _grid_t_graph = new WeakMap(), _grid_t_eq_groups = new WeakMap(), _grid_t_collapse_order = new WeakMap(), _grid_t_paths_pos = new WeakMap(), _grid_t_eq_group_x = new WeakMap(), _grid_t_rules = new WeakMap(), _grid_t_valid = new WeakMap();
+_Grid_data = new WeakMap(), _Grid_size = new WeakMap(), _Grid_graph = new WeakMap(), _Grid_eq_groups = new WeakMap(), _Grid_collapse_order = new WeakMap(), _Grid_paths_pos = new WeakMap(), _Grid_eq_group_x = new WeakMap(), _Grid_rules = new WeakMap(), _Grid_valid = new WeakMap();
 //# sourceMappingURL=path_group.js.map

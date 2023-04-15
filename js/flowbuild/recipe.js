@@ -9,112 +9,105 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _recipe_t_conns, _recipe_t_has_changed, _recipe_t_graph;
-import { connection_t } from "./connection.js";
-import { create_paths, graph_t } from "./graph.js";
-import { task_t } from "./task.js";
-export class recipe_t {
-    constructor(json) {
-        _recipe_t_conns.set(this, void 0);
-        _recipe_t_has_changed.set(this, void 0);
-        _recipe_t_graph.set(this, void 0);
-        // load json
-        this.title = json["name"];
-        this.difficulty = "none";
+var _Recipe_connections;
+import { Graph } from "./graph.js";
+import { set_merge } from "../utils/set.js";
+export class Recipe {
+    constructor(title) {
+        _Recipe_connections.set(this, void 0);
+        this.title = title;
+        this.prep_time = 0;
         this.duration = 0;
-        const task_map = new Map();
-        if (json['cooks'] != undefined) {
-            let cook_id = 1;
-            for (const cook_arr of json["cooks"]) {
-                for (const str of cook_arr) {
-                    if (!task_map.has(str)) {
-                        task_map.set(str, new task_t(str, cook_id));
-                    }
+        this.difficulty = 'medium';
+        __classPrivateFieldSet(this, _Recipe_connections, new Map(), "f");
+    }
+    add_connection(from, to) {
+        var _a;
+        if (!__classPrivateFieldGet(this, _Recipe_connections, "f").has(from)) {
+            __classPrivateFieldGet(this, _Recipe_connections, "f").set(from, new Set());
+        }
+        (_a = __classPrivateFieldGet(this, _Recipe_connections, "f").get(from)) === null || _a === void 0 ? void 0 : _a.add(to);
+    }
+    remove_connection(from, to) {
+        const childs = __classPrivateFieldGet(this, _Recipe_connections, "f").get(from);
+        if (childs !== undefined) {
+            childs.delete(to);
+            if (childs.size == 0) {
+                __classPrivateFieldGet(this, _Recipe_connections, "f").delete(from);
+            }
+        }
+    }
+    has_conn(from, to) {
+        const childs = __classPrivateFieldGet(this, _Recipe_connections, "f").get(from);
+        if (childs === undefined) {
+            return false;
+        }
+        else {
+            return childs.has(to);
+        }
+    }
+    add_task_from_start(task) {
+        const graph = this.create_graph();
+        this.add_connection(graph.start.task, task);
+        this.add_connection(task, graph.end.task);
+    }
+    add_task(parent, task) {
+        const graph = this.create_graph();
+        this.add_connection(parent, task);
+        this.add_connection(task, graph.end.task);
+    }
+    add_task_between(parent, task, child) {
+        this.add_connection(parent, task);
+        this.add_connection(task, child);
+    }
+    remove_task(task) {
+        if (__classPrivateFieldGet(this, _Recipe_connections, "f").has(task)) {
+            const task_childs = __classPrivateFieldGet(this, _Recipe_connections, "f").get(task);
+            for (const [parent, childs] of __classPrivateFieldGet(this, _Recipe_connections, "f")) {
+                if (childs.has(task)) {
+                    childs.delete(task);
+                    __classPrivateFieldGet(this, _Recipe_connections, "f").set(parent, set_merge(childs, task_childs));
                 }
-                cook_id++;
             }
-        }
-        __classPrivateFieldSet(this, _recipe_t_conns, new Map(), "f");
-        for (const path of json["paths"]) {
-            let from;
-            for (const to of path) {
-                if (from !== undefined) {
-                    if (!task_map.has(from)) {
-                        task_map.set(from, new task_t(from, 0));
-                    }
-                    const from_task = task_map.get(from);
-                    if (!task_map.has(to)) {
-                        task_map.set(to, new task_t(to, 0));
-                    }
-                    const to_task = task_map.get(to);
-                    const conn = new connection_t(from_task, to_task);
-                    __classPrivateFieldGet(this, _recipe_t_conns, "f").set(conn.id, conn);
-                }
-                from = to;
-            }
-        }
-        __classPrivateFieldSet(this, _recipe_t_has_changed, true, "f");
-    }
-    add_conn(conn) {
-        if (!__classPrivateFieldGet(this, _recipe_t_conns, "f").has(conn.id)) {
-            __classPrivateFieldGet(this, _recipe_t_conns, "f").set(conn.id, conn);
-            __classPrivateFieldSet(this, _recipe_t_has_changed, true, "f");
+            __classPrivateFieldGet(this, _Recipe_connections, "f").delete(task);
         }
     }
-    rm_conn(conn) {
-        if (__classPrivateFieldGet(this, _recipe_t_conns, "f").has(conn.id)) {
-            __classPrivateFieldGet(this, _recipe_t_conns, "f").delete(conn.id);
-            __classPrivateFieldSet(this, _recipe_t_has_changed, true, "f");
-        }
-    }
-    has_conn(conn) {
-        return __classPrivateFieldGet(this, _recipe_t_conns, "f").has(conn.id);
-    }
-    get_task(id) {
-        for (const conn of __classPrivateFieldGet(this, _recipe_t_conns, "f").values()) {
-            if (conn.from.id == id) {
-                return conn.from;
-            }
-            else if (conn.to.id == id) {
-                return conn.to;
-            }
-        }
-        return null;
-    }
-    has_description(str) {
-        for (const conn of __classPrivateFieldGet(this, _recipe_t_conns, "f").values()) {
-            if (conn.from.str == str) {
-                return true;
-            }
-            else if (conn.to.str == str) {
+    has_task(task) {
+        for (const [parent, childs] of __classPrivateFieldGet(this, _Recipe_connections, "f")) {
+            if (parent == task || childs.has(task)) {
                 return true;
             }
         }
         return false;
     }
-    copy() {
-        const recipe = new recipe_t({ name: this.title, paths: [] });
-        for (const conn of __classPrivateFieldGet(this, _recipe_t_conns, "f").values()) {
-            recipe.add_conn(conn);
+    get_task_by_id(id) {
+        for (const [task, childs] of __classPrivateFieldGet(this, _Recipe_connections, "f")) {
+            if (task.id == id) {
+                return task;
+            }
+            for (const child of childs) {
+                if (child.id == id) {
+                    return child;
+                }
+            }
         }
-        return recipe;
+        return null;
     }
-    get conns() {
-        return __classPrivateFieldGet(this, _recipe_t_conns, "f");
-    }
-    get cook_count() {
-        return this.graph.cook_count;
-    }
-    get graph() {
-        if (__classPrivateFieldGet(this, _recipe_t_has_changed, "f")) {
-            this.update();
+    get_parents(task) {
+        const parents = new Set();
+        for (const [task, childs] of __classPrivateFieldGet(this, _Recipe_connections, "f")) {
+            if (childs.has(task)) {
+                parents.add(task);
+            }
         }
-        return __classPrivateFieldGet(this, _recipe_t_graph, "f");
+        return parents;
     }
-    update() {
-        __classPrivateFieldSet(this, _recipe_t_graph, new graph_t(create_paths(__classPrivateFieldGet(this, _recipe_t_conns, "f"))), "f");
-        __classPrivateFieldSet(this, _recipe_t_has_changed, false, "f");
+    get_childs(task) {
+        return __classPrivateFieldGet(this, _Recipe_connections, "f").get(task);
+    }
+    create_graph() {
+        return new Graph(__classPrivateFieldGet(this, _Recipe_connections, "f"));
     }
 }
-_recipe_t_conns = new WeakMap(), _recipe_t_has_changed = new WeakMap(), _recipe_t_graph = new WeakMap();
+_Recipe_connections = new WeakMap();
 //# sourceMappingURL=recipe.js.map

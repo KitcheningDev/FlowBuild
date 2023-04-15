@@ -1,4 +1,4 @@
-import { recipe_t } from "../flowbuild/recipe.js";
+import { Recipe } from "../flowbuild/recipe.js";
 import { last_elem } from "../utils/funcs.js";
 export let recipe = null;
 let recipe_log = [];
@@ -17,7 +17,7 @@ export function load_recipe(name) {
     const req = new XMLHttpRequest();
     req.onload = () => {
         const json = JSON.parse(req.responseText);
-        recipe = new recipe_t(json);
+        recipe = new Recipe(json);
         recipe_log = [];
         cache_recipe_mod();
     };

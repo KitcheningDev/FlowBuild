@@ -1,3 +1,4 @@
+import { flatten_graph } from "../flowbuild/flatten.js";
 import { last_elem } from "../utils/funcs.js";
 function get_date() {
     const today = new Date();
@@ -26,40 +27,40 @@ function send_html_request(type, str, body) {
     req.setRequestHeader("Content-Type", "application/json");
     req.send(JSON.stringify(body));
 }
-function add_task(task, recipe_key) {
-    const key = recipe_key + task.id.toString();
+function add_task(task, recipe_key, task_id) {
+    const key = recipe_key + task_id.toString();
     const add_body = {
-        "PK": recipe_key,
-        "SK": key
-    };
-    send_html_request("POST", "https://7y0a1sogrh.execute-api.us-east-1.amazonaws.com/staging/recipe", add_body);
-    const update_body = {
-        "PK": key,
-        "SK": key,
+        "PK": "TASK#" + key,
+        "SK": "TASK#" + key,
         "body": task.str,
         "cookId": task.cook_id,
         "duration": task.duration
     };
-    send_html_request("PUT", "https://ks29sd5rn3.execute-api.us-east-1.amazonaws.com/staging/task", update_body);
+    send_html_request("POST", "https://ks29sd5rn3.execute-api.us-east-1.amazonaws.com/staging/task", add_body);
+    const update_body = {
+        "PK": "RECIPE#" + recipe_key,
+        "SK": "TASK#" + key
+    };
+    send_html_request("POST", "https://7y0a1sogrh.execute-api.us-east-1.amazonaws.com/staging/recipe", update_body);
     return key;
 }
 function add_connection(from_id, to_id) {
     const key = from_id + to_id;
     const body = {
-        "PK": from_id,
-        "SK": key,
-        "parentId": from_id,
-        "childId": to_id
+        "PK": "TASK#" + from_id,
+        "SK": "CONNECTION#" + key,
+        "parentId": "TASK#" + from_id,
+        "childId": "TASK#" + to_id
     };
     send_html_request("POST", "https://ks29sd5rn3.execute-api.us-east-1.amazonaws.com/staging/task", body);
     return key;
 }
 function add_recipe(recipe) {
-    const key = "RECIPE#" + Date.now().toString();
+    const key = Date.now().toString().substring(0, 10);
     const today = get_date();
     const body = {
-        "PK": key,
-        "SK": key,
+        "PK": 'RECIPE#' + key,
+        "SK": 'RECIPE#' + key,
         "creationDate": today,
         "updateDate": today,
         "title": recipe.title,
@@ -73,14 +74,25 @@ function add_recipe(recipe) {
     };
     send_html_request("POST", "https://7y0a1sogrh.execute-api.us-east-1.amazonaws.com/staging/recipe", body);
     const task_key_map = new Map();
-    for (const path of recipe.graph.paths) {
+    const flattened_paths = flatten_graph(recipe.graph);
+    //
+    flattened_paths.shift();
+    let task_id = 1;
+    for (const path of flattened_paths) {
         for (const task of path.tasks) {
-            const task_key = add_task(task, key);
+            const task_key = add_task(task, key, task_id);
             task_key_map.set(task, task_key);
+            task_id++;
+            if (task == recipe.graph.last_step) {
+                break;
+            }
         }
     }
-    for (const path of recipe.graph.paths) {
+    for (const path of flattened_paths) {
         for (let i = 0; i < path.tasks.length - 1; ++i) {
+            if (path.tasks[i] == recipe.graph.last_step) {
+                break;
+            }
             add_connection(task_key_map.get(path.tasks[i]), task_key_map.get(path.tasks[i + 1]));
         }
         for (const child of path.childs) {

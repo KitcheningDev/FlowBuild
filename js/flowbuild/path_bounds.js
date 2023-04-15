@@ -1,21 +1,21 @@
-import { vec2_t } from "../utils/vec2.js";
-import { rect_t } from "../utils/rect.js";
+import { Vec2 } from "../utils/vec2.js";
+import { Rect } from "../utils/rect.js";
 import { first_elem, last_elem } from "../utils/funcs.js";
 import { config } from "./config.js";
 function get_box_size(task) {
     if (task.str == "DUMMY") {
-        return new vec2_t(0, 0);
+        return new Vec2(0, 0);
     }
     config.box_html.innerHTML = task.str;
     const bound_rect = config.box_html.getBoundingClientRect();
-    return new vec2_t(bound_rect.width + config.box_margin * 2, bound_rect.height + config.box_margin * 2);
+    return new Vec2(bound_rect.width + config.box_margin * 2, bound_rect.height + config.box_margin * 2);
 }
-export class path_bounds_t {
+export class PathBounds {
     constructor(tasks) {
         this.task_rects = [];
         for (const task of tasks) {
             const size = get_box_size(task);
-            this.task_rects.push(new rect_t(undefined, size));
+            this.task_rects.push(new Rect(undefined, size));
         }
         let dirs;
         if (last_elem(tasks).str == "END") {
@@ -92,14 +92,14 @@ export class path_bounds_t {
             min_y = Math.min(rect.top, min_y);
             max_y = Math.max(rect.bottom, max_y);
         }
-        this.size = new vec2_t(max_x - min_x, max_y - min_y);
+        this.size = new Vec2(max_x - min_x, max_y - min_y);
         const center_x = (max_x + min_x) / 2;
         for (const rect of this.task_rects) {
             rect.origin.x -= center_x;
             rect.origin.y += first_elem(this.task_rects).size.y / 2;
         }
-        this.in = new vec2_t(first_elem(this.task_rects).origin.x, first_elem(this.task_rects).top);
-        this.out = new vec2_t(last_elem(this.task_rects).origin.x, last_elem(this.task_rects).bottom);
+        this.in = new Vec2(first_elem(this.task_rects).origin.x, first_elem(this.task_rects).top);
+        this.out = new Vec2(last_elem(this.task_rects).origin.x, last_elem(this.task_rects).bottom);
     }
 }
 //# sourceMappingURL=path_bounds.js.map
