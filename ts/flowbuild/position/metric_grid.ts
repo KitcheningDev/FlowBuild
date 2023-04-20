@@ -68,6 +68,9 @@ export class MetricGrid extends Grid<MetricTile> {
                     let max_x = super.get(new Vec2(x - 1, y)).right() + super.get(new Vec2(x, y)).dim.x / 2;
                     if (tile.node !== null) {
                         for (const sibling of [...tile.node.parents, ...tile.node.childs]) {
+                            if (sibling.is_end()) {
+                                continue;
+                            }
                             const coords = flow_grid.get_node_coords(sibling);
                             if (coords.x < x) {
                                 max_x = Math.max(super.get(coords).right(), max_x);
@@ -105,6 +108,15 @@ export class MetricGrid extends Grid<MetricTile> {
                 }
             }
         }
+        const start_entry = super.get_entry(new Vec2(0, 0));
+        start_entry.tile.pos.x = this.get_grid_center().x;
+        super.set_entry(start_entry);
+        const last_step_entry = super.get_entry(new Vec2(0, flow_grid.get_size().y - 1));
+        last_step_entry.tile.pos.x = start_entry.tile.pos.x;
+        super.set_entry(last_step_entry);
+        // const end_entry = super.get_entry(new Vec2(1, flow_grid.get_size().y - 1));
+        // end_entry.tile.pos.x = last_step_entry.tile.pos.right().x + 60;
+        // super.set_entry(end_entry);
     }
     set_pos_y(flow_grid: FlowGrid): void {
         for (let x = 0; x  < flow_grid.get_size().x; ++x) {
@@ -130,6 +142,9 @@ export class MetricGrid extends Grid<MetricTile> {
 
                     if (tile.node !== null) {
                         for (const sibling of [...tile.node.parents, ...tile.node.childs]) {
+                            if (sibling.is_end()) {
+                                continue;
+                            }
                             const coords = flow_grid.get_node_coords(sibling);
                             if (coords.y < y) {
                                 max_y = Math.max(super.get(coords).bottom(), max_y);
@@ -145,6 +160,22 @@ export class MetricGrid extends Grid<MetricTile> {
                     if (tile.lines.right !== null) {
                         max_y = Math.max(super.get(new Vec2(x + 1, y)).pos.y, max_y);
                     }
+                    if (tile.sync_lines.top) {
+                        if (tile.sync_lines.top != 'left' && 0 < x) {
+                            max_y = Math.max(super.get(new Vec2(x - 1, y)).pos.y, max_y);
+                        }
+                        if (tile.sync_lines.top != 'right' && x < super.get_size().x - 1) {
+                            max_y = Math.max(super.get(new Vec2(x + 1, y)).pos.y, max_y);
+                        }
+                    }
+                    if (tile.sync_lines.bottom) {
+                        if (tile.sync_lines.bottom != 'left' && 0 < x) {
+                            max_y = Math.max(super.get(new Vec2(x - 1, y)).pos.y, max_y);
+                        }
+                        if (tile.sync_lines.bottom != 'right' && x < super.get_size().x - 1) {
+                            max_y = Math.max(super.get(new Vec2(x + 1, y)).pos.y, max_y);
+                        }
+                    }
 
                     if (entry.tile.pos.y < max_y) {
                         entry.tile.pos.y = max_y;
@@ -157,6 +188,10 @@ export class MetricGrid extends Grid<MetricTile> {
                 }
             }
         }
+        const last_step_entry = super.get_entry(new Vec2(0, flow_grid.get_size().y - 1));
+        last_step_entry.tile.pos.y = super.get_entry(new Vec2(0, flow_grid.get_size().y - 2)).tile.pos.y;
+        last_step_entry.tile.pos.y += last_step_entry.tile.dim.y / 2;
+        super.set_entry(last_step_entry);
     }
 
     get_grid_dim(): Vec2 {
@@ -193,159 +228,4 @@ export class MetricGrid extends Grid<MetricTile> {
     diff(coords1: Vec2, coords2: Vec2): Vec2 {
         return vec2_abs(vec2_sub(super.get(coords2).pos, super.get(coords1).pos));
     }
-    // update_flow_grid(flow_grid: FlowGrid): void {
-    //     for (const [tile, coords] of flow_grid.get_entries()) {
-    //         this.set_flow_val(tile, coords);
-    //     }
-    // }
-
-    // set_flow_val(tile: Tile, coords: Vec2): void {
-    //     super.set(new MetricTile(new Vec2(0, 0), get_tile_size(tile)), coords);
-    // }
-    // set_flow_entry(entry: IEntry<Tile>): void {
-    //     this.set_flow_val(entry.tile, entry.coords);
-    // }
-
-    // // max entry
-    // get_max_x_entry(x: number = null): IEntry<MetricTile> {
-    //     let entry = null as IEntry<MetricTile>;
-    //     if (x === null) {
-    //         for (let y = 0; y < this.get_size().y; ++y) {
-    //             for (let x = 0; x < this.get_size().x; ++x) {
-    //                 if (entry === null || entry.tile.dim.x < this.get(new Vec2(x, y)).dim.x) {
-    //                     entry = this.get_entry(new Vec2(x, y));
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else {
-    //         for (let y = 0; y < this.get_size().y; ++y) {
-    //             if (entry === null || entry.tile.dim.x < this.get(new Vec2(x, y)).dim.x) {
-    //                 entry = this.get_entry(new Vec2(x, y));
-    //             }
-    //         }
-    //     }
-    //     return entry;
-    // }
-    // get_max_y_entry(y: number = null): IEntry<MetricTile> {
-    //     let entry = null as IEntry<MetricTile>;
-    //     if (y === null) {
-    //         for (let y = 0; y < this.get_size().y; ++y) {
-    //             for (let x = 0; x < this.get_size().x; ++x) {
-    //                 if (entry === null || entry.tile.dim.y < this.get(new Vec2(x, y)).dim.y) {
-    //                     entry = this.get_entry(new Vec2(x, y));
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else {
-    //         for (let x = 0; x < this.get_size().x; ++x) {
-    //             if (entry === null || entry.tile.dim.y < this.get(new Vec2(x, y)).dim.y) {
-    //                 entry = this.get_entry(new Vec2(x, y));
-    //             }
-    //         }
-    //     }
-    //     return entry;
-    // }
-
-
-    // // pos
-    // get_tile_pos_x(x: number): number {
-    //     let dist = 0;
-    //     for (let curr_x = 0; curr_x < x; ++curr_x) {
-    //         dist += this.get_tile_dim_x(curr_x);
-    //     }
-    //     dist += this.get_tile_dim_x(x) / 2;
-    //     return dist;
-    // }
-    // get_tile_pos_y(y: number): number {
-    //     let dist = 0;
-    //     for (let curr_y = 0; curr_y < y; ++curr_y) {
-    //         dist += this.get_tile_dim_y(curr_y);
-    //     }
-    //     dist += this.get_tile_dim_y(y) / 2;
-    //     return dist;
-    // }
-    // get_tile_pos(coords: Vec2): Vec2 {
-    //     return new Vec2(this.get_tile_pos_x(coords.x), this.get_tile_pos_y(coords.y));
-    // }
-
-    // // dim
-    // get_tile_dim_x(x: number): number {
-    //     return this.get_max_x_entry(x).tile.dim.x;
-    // }
-    // get_tile_dim_y(y: number): number {
-    //     return this.get_max_y_entry(y).tile.dim.y;
-    // }
-    // get_tile_dim(coords: Vec2): Vec2 {
-    //     return new Vec2(this.get_tile_dim_x(coords.x), this.get_tile_dim_y(coords.y));
-    // }
-
-    // // dist
-    // get_tile_dist_x(x1: number, x2: number): number {
-    //     if (x1 == x2) {
-    //         return 0;
-    //     }
-    //     else if (x2 < x1) {
-    //         return this.get_tile_dist_x(x2, x1);
-    //     }
-    //     let dist = 0;
-    //     dist += this.get_tile_dim_x(x1) / 2;
-    //     for (let x = x1 + 1; x < x2; ++x) {
-    //         dist += this.get_tile_dim_x(x);
-    //     }
-    //     dist += this.get_tile_dim_x(x2) / 2;
-    //     return dist;
-    // }
-    // get_tile_dist_y(y1: number, y2: number): number {
-    //     if (y1 == y2) {
-    //         return 0;
-    //     }
-    //     else if (y2 < y1) {
-    //         return this.get_tile_dist_y(y2, y1);
-    //     }
-    //     let dist = 0;
-    //     dist += this.get_tile_dim_y(y1) / 2;
-    //     for (let y = y1 + 1; y < y2; ++y) {
-    //         dist += this.get_tile_dim_y(y);
-    //     }
-    //     dist += this.get_tile_dim_y(y2) / 2;
-    //     return dist;
-    // }
-    // get_tile_dist(coords1: Vec2, coords2: Vec2): Vec2 {
-    //     return new Vec2(this.get_tile_dist_x(coords1.x, coords2.x), this.get_tile_dist_y(coords1.y, coords2.y));
-    // }
-
-    // // grid dim
-    // get_grid_dim(): Vec2 {
-    //     let dim = new Vec2(0, 0);
-    //     for (let x = 0; x < super.get_size().x; ++x) {
-    //         dim.x += this.get_tile_dim_x(x);
-    //     }
-    //     for (let y = 0; y < super.get_size().y; ++y) {
-    //         dim.y += this.get_tile_dim_y(y);
-    //     }
-    //     return dim;
-    // }
-
-    // // reduce
-    // reduce_x(): void {
-    //     const entries = [] as IEntry<MetricTile>[];
-    //     for (let x = 1; x < super.get_size().x - 1; ++x) {
-    //         const entry = this.get_max_x_entry(x);
-    //         if (0 < entry.tile.dim.x) {
-    //             entries.push(entry);
-    //         }
-    //     }
-    //     entries.sort((a: IEntry<MetricTile>, b: IEntry<MetricTile>) => b.tile.dim.x - a.tile.dim.x);
-    //     for (const entry of entries) {
-    //         if (super.get(entry.coords.left()).is_empty() && super.get(entry.coords.right()).is_empty()) {
-    //             if (entry.tile.dim.x / 2 < this.get_tile_dim_x(entry.coords.x - 1) && entry.tile.dim.x / 2 < this.get_tile_dim_x(entry.coords.x + 1)) {
-    //                 entry.tile.dim.x = 0;
-    //                 super.set_entry(entry);
-    //                 return this.reduce_x();
-    //             }
-    //         }
-    //     }
-    // }
 }

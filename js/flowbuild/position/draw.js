@@ -12,8 +12,8 @@ function create_div(...classes) {
     return div;
 }
 function draw_element(el, pos, size) {
-    el.style.left = (pos.x + offset.x).toString() + 'px';
-    el.style.top = (pos.y + offset.y).toString() + 'px';
+    el.style.left = (pos.x - offset.x).toString() + 'px';
+    el.style.top = (pos.y - offset.y).toString() + 'px';
     if (size !== undefined) {
         if (size.x !== null) {
             el.style.width = size.x.toString() + 'px';
@@ -112,7 +112,7 @@ function draw_lines(entry, metric_grid) {
 export function draw_grid(flow_grid, metric_grid, graph) {
     container.innerHTML = "";
     // metric_grid.reduce_x();
-    offset = vec2_div(metric_grid.get_grid_dim(), -2);
+    offset = metric_grid.get_grid_center();
     for (const [tile, coords] of flow_grid.get_entries()) {
         const size = get_tile_size(tile, false);
         const pos = metric_grid.get(coords).pos;

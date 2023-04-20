@@ -4,6 +4,7 @@ import { Node } from "../../graph/node.js";
 import { Entry, FlowGrid } from "../../grid/flow_grid.js";
 import { SyncLine } from "../../graph/sync_line.js";
 import { log_grid } from "../../log.js";
+import { draw_grid } from "../../position/draw.js";
 
 export function add_hor_line(from: Vec2, x_off: number, grid: FlowGrid): void {
     if (0 < x_off) {
@@ -49,7 +50,6 @@ export function add_ver_line(from: Vec2, y_off: number, grid: FlowGrid): void {
         }
     }
 }
-
 function add_normal_line(from: Vec2, to: Vec2, grid: FlowGrid): void {
     if (to.y - from.y == 1) {
         if (from.x == to.x) {
@@ -71,8 +71,6 @@ function add_normal_line(from: Vec2, to: Vec2, grid: FlowGrid): void {
     }
 }
 function add_backwards_line(from: Vec2, to: Vec2, grid: FlowGrid): void {
-    console.log("bw");
-    log_grid(grid);
     if (from.y - to.y == 1) {
         if (from.x == to.x) {
             add_ver_line(from, -1, grid);
@@ -92,8 +90,8 @@ function add_backwards_line(from: Vec2, to: Vec2, grid: FlowGrid): void {
         add_ver_line(to.down(), -1, grid);
     }
 }
-function add_loop_top_line(from: Vec2, to: Vec2, grid: FlowGrid): void {
-    if (grid.get(from).sync_lines.top !== null || from.y == to.y) {
+function add_loop_top_line(from: Vec2, to: Vec2, grid: FlowGrid, supress_insert: boolean = false): void {
+    if (!false && (grid.get(from).sync_lines.top !== null || from.y == to.y)) {
         grid.insert_row(from.y);
         add_ver_line(from.down(), -1, grid);
         return add_loop_top_line(from, to.down(), grid);
@@ -141,7 +139,7 @@ export function add_lines(grid: FlowGrid, graph: Graph): void {
     // normal lines
     for (const loop of graph.loops) {
         for (const parent of loop.backwards_heads) {
-            add_loop_top_line(grid.get_node_in(parent, graph), grid.get_node_in(loop.loop_top, graph), grid);
+            add_loop_top_line(grid.get_node_in(parent, graph), grid.get_node_in(loop.loop_top, graph), grid, loop.loop_top.task.is_empty());
             break;
         }
     }

@@ -56,6 +56,9 @@ export class MetricGrid extends Grid {
                     let max_x = super.get(new Vec2(x - 1, y)).right() + super.get(new Vec2(x, y)).dim.x / 2;
                     if (tile.node !== null) {
                         for (const sibling of [...tile.node.parents, ...tile.node.childs]) {
+                            if (sibling.is_end()) {
+                                continue;
+                            }
                             const coords = flow_grid.get_node_coords(sibling);
                             if (coords.x < x) {
                                 max_x = Math.max(super.get(coords).right(), max_x);
@@ -93,6 +96,15 @@ export class MetricGrid extends Grid {
                 }
             }
         }
+        const start_entry = super.get_entry(new Vec2(0, 0));
+        start_entry.tile.pos.x = this.get_grid_center().x;
+        super.set_entry(start_entry);
+        const last_step_entry = super.get_entry(new Vec2(0, flow_grid.get_size().y - 1));
+        last_step_entry.tile.pos.x = start_entry.tile.pos.x;
+        super.set_entry(last_step_entry);
+        // const end_entry = super.get_entry(new Vec2(1, flow_grid.get_size().y - 1));
+        // end_entry.tile.pos.x = last_step_entry.tile.pos.right().x + 60;
+        // super.set_entry(end_entry);
     }
     set_pos_y(flow_grid) {
         for (let x = 0; x < flow_grid.get_size().x; ++x) {
@@ -116,6 +128,9 @@ export class MetricGrid extends Grid {
                     max_y += super.get(new Vec2(x, y)).dim.y / 2;
                     if (tile.node !== null) {
                         for (const sibling of [...tile.node.parents, ...tile.node.childs]) {
+                            if (sibling.is_end()) {
+                                continue;
+                            }
                             const coords = flow_grid.get_node_coords(sibling);
                             if (coords.y < y) {
                                 max_y = Math.max(super.get(coords).bottom(), max_y);
@@ -131,6 +146,22 @@ export class MetricGrid extends Grid {
                     if (tile.lines.right !== null) {
                         max_y = Math.max(super.get(new Vec2(x + 1, y)).pos.y, max_y);
                     }
+                    if (tile.sync_lines.top) {
+                        if (tile.sync_lines.top != 'left' && 0 < x) {
+                            max_y = Math.max(super.get(new Vec2(x - 1, y)).pos.y, max_y);
+                        }
+                        if (tile.sync_lines.top != 'right' && x < super.get_size().x - 1) {
+                            max_y = Math.max(super.get(new Vec2(x + 1, y)).pos.y, max_y);
+                        }
+                    }
+                    if (tile.sync_lines.bottom) {
+                        if (tile.sync_lines.bottom != 'left' && 0 < x) {
+                            max_y = Math.max(super.get(new Vec2(x - 1, y)).pos.y, max_y);
+                        }
+                        if (tile.sync_lines.bottom != 'right' && x < super.get_size().x - 1) {
+                            max_y = Math.max(super.get(new Vec2(x + 1, y)).pos.y, max_y);
+                        }
+                    }
                     if (entry.tile.pos.y < max_y) {
                         entry.tile.pos.y = max_y;
                         has_changed = true;
@@ -142,6 +173,10 @@ export class MetricGrid extends Grid {
                 }
             }
         }
+        const last_step_entry = super.get_entry(new Vec2(0, flow_grid.get_size().y - 1));
+        last_step_entry.tile.pos.y = super.get_entry(new Vec2(0, flow_grid.get_size().y - 2)).tile.pos.y;
+        last_step_entry.tile.pos.y += last_step_entry.tile.dim.y / 2;
+        super.set_entry(last_step_entry);
     }
     get_grid_dim() {
         let max_x = -Infinity;

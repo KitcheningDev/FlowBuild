@@ -3,7 +3,7 @@ import { Graph } from "../graph/graph.js";
 import { Node } from "../graph/node.js";
 import { SyncLine } from "../graph/sync_line.js";
 import { Bounds, HorBounds, VerBounds } from "./bounds.js";
-import { Grid, IEntry } from "./grid.js";
+import { Grid, IEntry, ITile } from "./grid.js";
 import { Tile } from "./tile.js";
 
 export type Entry = IEntry<Tile>;
@@ -121,12 +121,14 @@ export class FlowGrid extends Grid<Tile> {
     }
     set_sync_line(sync_line: SyncLine): void {
         const bounds = this.get_sync_line_bounds(sync_line);
-        if (sync_line.where == 'top') {
-            bounds.top++;
-            this.insert_row(bounds.top);
-        }
-        else {
-            this.insert_row(bounds.top);
+        if (!this.is_hor_path_empty(bounds.left, bounds.right, bounds.top)) {
+            if (sync_line.where == 'top') {
+                bounds.top++;
+                this.insert_row(bounds.top);
+            }
+            else {
+                this.insert_row(bounds.top);
+            }
         }
 
         const left_entry = this.get_entry(new Vec2(bounds.left, bounds.top));
@@ -159,6 +161,44 @@ export class FlowGrid extends Grid<Tile> {
         }
         else {
             return this.get_node_coords(node);
+        }
+    }
+
+    // insert
+    insert_row(where: number): void {
+        super.insert_row(where);
+        for (let x = 0; x < super.get_size().x; ++x) {
+            const coords = new Vec2(x, where);
+            
+            const top = super.get(coords.up());
+            const bottom = super.get(coords.down());
+
+            if (bottom.lines.top) {
+                const tile = new Tile();
+                tile.lines.top = bottom.lines.top;
+                tile.lines.bottom = bottom.lines.top == 'in' ? 'out' : 'in';
+                super.set(tile, coords);
+            }
+            if (top.sync_lines.bottom) {
+                super.set(top, coords);
+                super.set(new Tile(), coords.up());
+            }
+            if (bottom.sync_lines.bottom) {
+                super.set(bottom, coords);
+                super.set(new Tile(), coords.down());
+            }
+        }
+    }
+    insert_column(where: number): void {
+        super.insert_column(where);
+        for (let y = 0; y < super.get_size().y; ++y) {
+            const tile = super.get(new Vec2(where + 1, y));
+            if (tile.lines.left) {
+                const tile = new Tile();
+                tile.lines.left = tile.lines.left;
+                tile.lines.right = tile.lines.left == 'in' ? 'out' : 'in';
+                super.set(tile, new Vec2(where, y));
+            }
         }
     }
 }

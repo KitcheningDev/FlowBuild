@@ -16,6 +16,9 @@ const sync_line_stroke = get_stroke('sync-line-middle', 'height');
 const cook_line_stroke = get_stroke('cook-line', 'width');
 // html size
 export function get_node_size(node) {
+    if (node.task.is_empty()) {
+        return new Vec2(0, 0);
+    }
     const box = document.createElement('div');
     box.classList.add('flow-task');
     config.apply(box);

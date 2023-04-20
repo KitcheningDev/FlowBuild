@@ -19,8 +19,8 @@ function create_div(...classes: string[]): HTMLElement {
     return div;
 }
 function draw_element(el: HTMLElement, pos: Vec2, size?: Vec2): void {
-    el.style.left = (pos.x + offset.x).toString() + 'px';
-    el.style.top = (pos.y + offset.y).toString() + 'px';
+    el.style.left = (pos.x - offset.x).toString() + 'px';
+    el.style.top = (pos.y - offset.y).toString() + 'px';
     if (size !== undefined) {
         if (size.x !== null) {
             el.style.width = size.x.toString() + 'px';
@@ -122,7 +122,8 @@ function draw_lines(entry: IEntry<Tile>, metric_grid: MetricGrid) {
 export function draw_grid(flow_grid: FlowGrid, metric_grid: MetricGrid, graph: Graph): void {
     container.innerHTML = "";
     // metric_grid.reduce_x();
-    offset = vec2_div(metric_grid.get_grid_dim(), -2);
+    offset = metric_grid.get_grid_center();
+
     for (const [tile, coords] of flow_grid.get_entries()) {
         const size = get_tile_size(tile, false);
         const pos = metric_grid.get(coords).pos;
@@ -142,19 +143,19 @@ export function draw_grid(flow_grid: FlowGrid, metric_grid: MetricGrid, graph: G
 
         // sync-lines
         if (coords.y != 1 && coords.y != flow_grid.get_size().y - 2) {
-                if (tile.sync_lines.top) {
-                    if (tile.sync_lines.top == 'left') {
-                        draw_element(create_sync_line(tile.sync_lines.top), pos, new Vec2(metric_grid.diff(coords, coords.right()).x, null));
-                    }
-                    else if (tile.sync_lines.top == 'middle') {
-                        draw_element(create_sync_line(tile.sync_lines.top), pos, new Vec2(metric_grid.diff(coords.left(), coords.right()).x, null));
-                    }
-                    else if (tile.sync_lines.top == 'right') {
-                        draw_element(create_sync_line(tile.sync_lines.top), pos, new Vec2(metric_grid.diff(coords.left(), coords).x, null));
-                    }
+            if (tile.sync_lines.top) {
+                if (tile.sync_lines.top == 'left') {
+                    draw_element(create_sync_line(tile.sync_lines.top), pos, new Vec2(metric_grid.diff(coords, coords.right()).x, null));
                 }
-                if (tile.sync_lines.bottom) {
-                    if (tile.sync_lines.bottom == 'left') {
+                else if (tile.sync_lines.top == 'middle') {
+                    draw_element(create_sync_line(tile.sync_lines.top), pos, new Vec2(metric_grid.diff(coords.left(), coords.right()).x, null));
+                }
+                else if (tile.sync_lines.top == 'right') {
+                    draw_element(create_sync_line(tile.sync_lines.top), pos, new Vec2(metric_grid.diff(coords.left(), coords).x, null));
+                }
+            }
+            if (tile.sync_lines.bottom) {
+                if (tile.sync_lines.bottom == 'left') {
                     draw_element(create_sync_line(tile.sync_lines.bottom), pos, new Vec2(metric_grid.diff(coords, coords.right()).x, null));
                 }
                 else if (tile.sync_lines.bottom == 'middle') {

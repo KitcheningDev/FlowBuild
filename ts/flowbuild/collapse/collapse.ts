@@ -36,9 +36,10 @@ function collapse_node(index: number, order: Node[], grid: FlowGrid, rules: Set<
 }
 export function collapse(graph: Graph, rules: Set<Rule>): FlowGrid | null {
     const grid = new FlowGrid(graph);
-    const collapse_order = [...graph.nodes].filter((node: Node) => !node.is_start() && !node.is_end());
+    const collapse_order = [...graph.nodes].filter((node: Node) => !node.is_start() && !node.is_last_step() && !node.is_end());
+    collapse_order.push(graph.last_step);
     while (!collapse_node(0, collapse_order, grid, rules, graph)) {
-        console.warn("collapse failed with width=", grid.get_size().x);
+        console.warn("collapse failed with width =", grid.get_size().x);
         grid.set_size(grid.get_size().right());
     }
     return grid;

@@ -2,7 +2,7 @@ export function reserve_sync_lines(grid, graph) {
     for (const sync_line of graph.sync_lines) {
         const bounds = grid.get_sync_line_bounds(sync_line);
         if (bounds.width() % 2 == 1) {
-            grid.insert_column(bounds.center().x + 1);
+            // grid.insert_column(bounds.center().x + 1);
         }
     }
 }

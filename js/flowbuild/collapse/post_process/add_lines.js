@@ -1,5 +1,4 @@
 import { Vec2 } from "../../../utils/vec2.js";
-import { log_grid } from "../../log.js";
 export function add_hor_line(from, x_off, grid) {
     if (0 < x_off) {
         for (let x = 0; x < x_off; ++x) {
@@ -65,8 +64,6 @@ function add_normal_line(from, to, grid) {
     }
 }
 function add_backwards_line(from, to, grid) {
-    console.log("bw");
-    log_grid(grid);
     if (from.y - to.y == 1) {
         if (from.x == to.x) {
             add_ver_line(from, -1, grid);
@@ -86,8 +83,8 @@ function add_backwards_line(from, to, grid) {
         add_ver_line(to.down(), -1, grid);
     }
 }
-function add_loop_top_line(from, to, grid) {
-    if (grid.get(from).sync_lines.top !== null || from.y == to.y) {
+function add_loop_top_line(from, to, grid, supress_insert = false) {
+    if (!false && (grid.get(from).sync_lines.top !== null || from.y == to.y)) {
         grid.insert_row(from.y);
         add_ver_line(from.down(), -1, grid);
         return add_loop_top_line(from, to.down(), grid);
@@ -133,7 +130,7 @@ export function add_lines(grid, graph) {
     // normal lines
     for (const loop of graph.loops) {
         for (const parent of loop.backwards_heads) {
-            add_loop_top_line(grid.get_node_in(parent, graph), grid.get_node_in(loop.loop_top, graph), grid);
+            add_loop_top_line(grid.get_node_in(parent, graph), grid.get_node_in(loop.loop_top, graph), grid, loop.loop_top.task.is_empty());
             break;
         }
     }

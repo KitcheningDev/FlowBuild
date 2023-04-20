@@ -114,12 +114,14 @@ chart.addEventListener('click', (e: MouseEvent) => {
 });
 task_description_input.addEventListener('keypress', (e: KeyboardEvent) => {
     if (e.key == "Enter") {
+        e.preventDefault();
         selected_task.description = task_description_input.innerText;
         draw_recipe(modifier.recipe);
     }
 });
 task_cook_input.addEventListener('keypress', (e: KeyboardEvent) => {
     if (e.key == "Enter") {
+        e.preventDefault();
         if (!selected_task.cook.is_empty()) {
             selected_task.cook = get_cook(task_cook_input.innerText);
             draw_recipe(modifier.recipe);
@@ -128,6 +130,7 @@ task_cook_input.addEventListener('keypress', (e: KeyboardEvent) => {
 });
 task_duration_input.addEventListener('keypress', (e: KeyboardEvent) => {
     if (e.key == "Enter") {
+        e.preventDefault();
         if (!selected_task.cook.is_empty()) {
             selected_task.duration = parseInt(task_duration_input.innerText);
             draw_recipe(modifier.recipe);

@@ -20,6 +20,9 @@ const cook_line_stroke = get_stroke('cook-line', 'width');
 
 // html size
 export function get_node_size(node: Node): Vec2 {
+    if (node.task.is_empty()) {
+        return new Vec2(0, 0);
+    }
     const box = document.createElement('div');
     box.classList.add('flow-task');
     config.apply(box);

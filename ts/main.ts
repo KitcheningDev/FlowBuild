@@ -11,7 +11,6 @@ import { add_start_end } from "./flowbuild/collapse/post_process/add_start_end.j
 import { create_rules } from "./flowbuild/collapse/create_rules.js";
 import { add_connection, recipe, set_cook } from "./test_recipe.js";
 import { log_graph, log_grid } from "./flowbuild/log.js";
-import { local_center } from "./flowbuild/collapse/post_process/center_nodes.js";
 import { MetricGrid } from "./flowbuild/position/metric_grid.js";
 import { draw_recipe } from "./flowbuild/draw_recipe.js";
 import { send_html_request } from "./api/database.js";

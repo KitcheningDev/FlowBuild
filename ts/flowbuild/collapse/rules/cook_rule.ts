@@ -11,11 +11,25 @@ export class CookRule implements Rule {
         return !node.task.cook.is_empty();
     }
     reduce_possible_x(node: Node, possible_x: number[], grid: FlowGrid, graph: Graph): void {
+        const bounds = grid.get_hor_bounds((other_node: Node) => other_node.task.cook == node.task.cook);
         for (const cook of graph.get_cooks()) {
             if (cook != node.task.cook) {
-                const bounds = grid.get_hor_bounds((other_node: Node) => other_node.task.cook == cook);
-                if (bounds) {
-                    filter_in_place(possible_x, (x: number) => bounds.left <= x && x <= bounds.right);
+                const other_bounds = grid.get_hor_bounds((other_node: Node) => other_node.task.cook == cook);
+                if (other_bounds) {
+                    filter_in_place(possible_x, (x: number) => {
+                        if (other_bounds.left <= x && x <= other_bounds.right) {
+                            return true;
+                        }
+                        else if (bounds) {
+                            if (bounds.center() < other_bounds.center() && other_bounds.center() < x) {
+                                return true;
+                            }
+                            else if (other_bounds.center() < bounds.center() && x < other_bounds.center()) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    });
                 }
             }
         }
