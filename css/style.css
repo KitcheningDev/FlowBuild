@@ -1,39 +1,108 @@
 :root {
-    --bg-col: rgb(200, 200, 200);
+    /* col */
+    --highlight-col: rgb(45, 45, 45);
+    --main-col: rgb(245, 245, 245);
+    --bg-col: rgb(255, 255, 255);
+
+    /* text */
+    --header-col: rgb(36, 163, 88);
+    --light-text-col: rgb(245, 245, 245);
+    --dark-text-col: rgb(84, 93, 93);
+
     --light-col: rgb(215, 215, 215);
+    --lighter-col: rgb(210, 210, 210);
+    --thin-light-col: rgb(205, 205, 205);
+    --thin-dark-col: rgb(70, 70, 70);
+    --darker-col: rgb(50, 50, 50);
     --dark-col: rgb(30, 30, 30);
-
-    --chart-width: 1000px;
-    --chart-height: 750px;
 }
 
-/* general */
-* {
-    margin: 0;
-    padding: 0;
-    user-select: none;
-}
-
+/* body */
 body {
+    color: var(--dark-text-col);
     font-family: monospace;
+    font-size: 16px;
+
+    user-select: none;
+    margin: 0;
+    overflow: hidden;
+
+    height: 100vh;
+}
+
+/* tags */
+header {
     font-weight: bold;
+    color: var(--header-col);
+}
+footer {
+    display: flex;
+    vertical-align: bottom;
+}
+label {
+    font-weight: bold;
+}
+input[type="text"] {
+    font-size: 1rem;
 
+    border: 0.2rem solid;
+    border-radius: 0.2rem;
+
+    padding: 0.25rem;
+    height: fit-content;
+    
+    color: var(--dark-text-col);
+    background-color: rgba(255, 255, 255, 0.4);
+}
+input[type="file"] {
+    font-size: 1rem;
+    border: none;
+}
+
+/* icon */
+.icon {
+    display: table;
+}
+.icon > i:hover {
+    cursor: pointer;
+}
+.icon > label {
+    display: table-cell;
+    font-size: 1.25rem;
+    padding: 0.25rem;
+    vertical-align: middle;
+}
+
+/* radio */
+.radio {
+    padding: 0.25rem;
+}
+
+/* body */
+body > header {
+    text-align: center;
+    font-size: 2.5rem;
+    padding: 1rem;
     background-color: var(--bg-col);
-    overflow-y: hidden;
+}
+body > main {
+    position: relative;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-start;
+}
+body > footer {
+    font-weight: bold;
+    font-size: 1.25rem;
+    background-color: var(--bg-col);
 }
 
-#content {
-    text-align: center;
-    justify-content: center;
-}
-#content > * {
-    margin: 20px;
-}
-
-/* header */
-body > h1 {
-    text-align: center;
-    color: var(--light-col);
-    background-color: var(--dark-col);
-    padding: 15px;
+#background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: .6;
+    width: 100%;
+    z-index: -1;
 }

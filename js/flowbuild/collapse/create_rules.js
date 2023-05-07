@@ -15,7 +15,9 @@ export function create_rules(graph, loop_rules = true) {
     }
     for (const node of graph.nodes) {
         if (node.childs.size == 1 && set_element(node.childs).parents.size == 1) {
-            rules.add(new PathRule(node, set_element(node.childs)));
+            if (node.task.cook == set_element(node.childs).task.cook) {
+                rules.add(new PathRule(node, set_element(node.childs)));
+            }
         }
     }
     // if (loop_rules) {

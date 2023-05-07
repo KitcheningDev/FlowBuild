@@ -1,10 +1,6 @@
 :root {
-    --bg-col: rgb(200, 200, 200);
-    --light-col: rgb(215, 215, 215);
-    --dark-col: rgb(30, 30, 30);
-
-    --chart-width: 1000px;
-    --chart-height: 750px;
+    --chart-width: 50rem;
+    --chart-height: 37.5rem;
 
     --editor-connector: visible;
     --editor-add: visible;
@@ -15,9 +11,9 @@
 }
 
 /* container */
-#chart {
+#flowchart {
     position: relative;
-    background-color: var(--light-col);
+    background-color: var(--bg-col);
     border-radius: 15px;
 
     width: var(--chart-width);
@@ -26,10 +22,9 @@
 #flowchart-container {
     display: inline-block;
     position: relative;
-    left: 50%;
     top: 50%;
-    width: 10000px;
-    height: 10000px;
+    left: 50%;
+    width: 800px;
 }
 #flowchart-container > * {
     position: absolute;
@@ -52,7 +47,7 @@
     position: absolute;
     border: 2px solid;
     border-radius: 5px;
-    background-color: var(--light-col);
+    background-color: var(--bg-col);
 
     font-size: 10px;
     font-family: monospace;
@@ -102,7 +97,7 @@
     position: absolute;
     border: 3px solid;
     border-radius: 50%;
-    background-color: var(--light-col);
+    background-color: var(--bg-col);
 
     padding: 6px;
     cursor: pointer;
@@ -112,7 +107,7 @@
     position: absolute;
     border: 6px double;
     border-radius: 50%;
-    background-color: var(--light-col);
+    background-color: var(--bg-col);
 
     padding: 6px;
     z-index: 2;
@@ -176,4 +171,10 @@
 .crossing {
     position: absolute;
     z-index: 1;
+}
+
+/* cook-title */
+.cook-title {
+    font-size: 0.75rem;
+    font-weight: bold;
 }

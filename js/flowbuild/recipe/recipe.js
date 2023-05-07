@@ -18,6 +18,7 @@ class RecipeData {
     constructor() {
         this.title = 'Unnamed';
         this.difficulty = 'default';
+        this.ingredients = new Set();
         this.duration = 0;
         this.prep_time = 0;
         this.image_list = [];
@@ -37,7 +38,7 @@ export class Recipe extends RecipeData {
     load_default() {
         __classPrivateFieldSet(this, _Recipe_connections, new Map(), "f");
         const start = new Task('START', get_cook(''));
-        const task1 = new Task('TASK 1', get_cook('1'));
+        const task1 = new Task('TASK 1', get_cook('Küchenlehrling'));
         const last_step = new Task('LAST STEP', get_cook(''));
         const end = new Task('END', get_cook(''));
         __classPrivateFieldGet(this, _Recipe_connections, "f").set(start, new Set([task1]));

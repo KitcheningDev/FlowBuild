@@ -3,10 +3,12 @@ import { Graph } from "../graph/graph.js";
 import { set_element, set_merge } from "../../utils/set.js";
 import { Cook, get_cook } from "./cook.js";
 import { Tag } from "./tag.js";
+import { Ingredient } from "./ingredient.js";
 
 class RecipeData {
     title: string;
     difficulty: string;
+    ingredients: Set<Ingredient>;
     duration: number;
     prep_time: number;
     image_list: string[];
@@ -19,6 +21,7 @@ class RecipeData {
     constructor() {
         this.title = 'Unnamed';
         this.difficulty = 'default';
+        this.ingredients = new Set<Ingredient>();
         this.duration = 0;
         this.prep_time = 0;
         this.image_list = [];
@@ -41,7 +44,7 @@ export class Recipe extends RecipeData {
     load_default(): void {
         this.#connections = new Map<Task, Set<Task>>();   
         const start = new Task('START', get_cook(''));
-        const task1 = new Task('TASK 1', get_cook('1'));
+        const task1 = new Task('TASK 1', get_cook('Küchenlehrling'));
         const last_step = new Task('LAST STEP', get_cook(''));
         const end = new Task('END', get_cook(''));
         this.#connections.set(start, new Set([task1]));

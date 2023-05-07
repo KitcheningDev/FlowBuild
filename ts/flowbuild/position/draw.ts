@@ -61,6 +61,11 @@ function create_node(node: Node, graph: Graph): HTMLElement {
         return el;
     }
 }
+function create_cook_title(title: string): HTMLElement {
+    const el = create_div('cook-title');
+    el.textContent = title;
+    return el;
+}
 function create_line(dir: LineDir): HTMLElement {
     const el = create_div('line');
     return el;
@@ -124,6 +129,12 @@ export function draw_grid(flow_grid: FlowGrid, metric_grid: MetricGrid, graph: G
     // metric_grid.reduce_x();
     offset = metric_grid.get_grid_center();
 
+    // if (graph.get_cooks().size > 1) {
+    //     for (const cook of graph.get_cooks()) {
+    //         const bounds = metric_grid.get_hor_bounds((node: Node) => node.task.cook == cook, flow_grid);
+    //         draw_element(create_cook_title(cook.name), new Vec2(bounds.center(), 0));
+    //     }
+    // }
     for (const [tile, coords] of flow_grid.get_entries()) {
         const size = get_tile_size(tile, false);
         const pos = metric_grid.get(coords).pos;

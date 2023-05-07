@@ -1,9 +1,0 @@
-{
-    "name": "Pizzateig",
-    "paths":
-    [
-        [ "START", "Mehl mit Hefe mischen", "Öl, Wein &amp; Salz hinzufügen", "Homogene Masse?", "Teig mind. 5 min kneten", "Je Portion einen kleinen Ball formen", "Auf doppelte Größe gehen lassen (ca. 4h)", "END" ],
-        [ "START", "Ausruhen für Pizza", "Auf doppelte Größe gehen lassen (ca. 4h)" ],
-        [ "Homogene Masse?", "Etwas Wasser unterrühren", "Homogene Masse?" ]
-    ]
-}

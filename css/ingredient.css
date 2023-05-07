@@ -1,0 +1,30 @@
+/* main */
+#ingredient-card main {
+    min-height: 20rem;
+}
+
+/* table */
+#ingredient-card table {
+    border-spacing: 0.5rem 0.5rem;
+    text-align: center;
+}
+#ingredient-card th {
+    padding: 0 2rem;
+    border-bottom: 0.125rem solid;
+}
+th, td {
+    padding: 0;
+    font-size: 1rem;
+}
+/* .ingredient-property {
+    max-width: 5rem;
+    overflow-x: auto;
+} */
+
+/* delete button */
+.ingredient-delete {
+    opacity: 0.3;
+}
+.ingredient-delete:hover {
+    opacity: 1;
+}

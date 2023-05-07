@@ -15,7 +15,6 @@
                 "path": "${workspaceFolder}"
             }],
             "tmpDir": "/home/flo/dump/tmp"
-
         }
     ]
 }

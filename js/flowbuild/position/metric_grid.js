@@ -1,4 +1,5 @@
 import { Vec2, vec2_abs, vec2_div, vec2_sub } from "../../utils/vec2.js";
+import { HorBounds } from "../grid/bounds.js";
 import { Grid } from "../grid/grid.js";
 import { get_tile_size } from "./get_tile_size.js";
 class MetricTile {
@@ -31,8 +32,8 @@ export class MetricGrid extends Grid {
     constructor(flow_grid) {
         super(() => { }, () => new MetricTile(), flow_grid.get_size());
         this.set_dim(flow_grid);
-        this.set_pos_y(flow_grid);
         this.set_pos_x(flow_grid);
+        this.set_pos_y(flow_grid);
     }
     set_dim(flow_grid) {
         for (const [tile, coords] of flow_grid.get_entries()) {
@@ -121,7 +122,7 @@ export class MetricGrid extends Grid {
                     let max_y = 0;
                     for (let index = 0; index < flow_grid.get_size().x; ++index) {
                         const index_tile = super.get(new Vec2(index, y - 1));
-                        if (entry.tile.left() <= index_tile.right() && index_tile.left() <= entry.tile.right()) {
+                        if (entry.tile.left() < index_tile.right() && index_tile.left() < entry.tile.right()) {
                             max_y = Math.max(index_tile.bottom(), max_y);
                         }
                     }
@@ -139,6 +140,12 @@ export class MetricGrid extends Grid {
                                 max_y = Math.max(super.get(coords).pos.y, max_y);
                             }
                         }
+                    }
+                    if (tile.lines.top !== null) {
+                        max_y = Math.max(super.get(new Vec2(x, y - 1)).pos.y, max_y);
+                    }
+                    if (tile.lines.bottom !== null) {
+                        max_y = Math.max(super.get(new Vec2(x, y + 1)).pos.y, max_y);
                     }
                     if (tile.lines.left !== null) {
                         max_y = Math.max(super.get(new Vec2(x - 1, y)).pos.y, max_y);
@@ -210,6 +217,32 @@ export class MetricGrid extends Grid {
     }
     diff(coords1, coords2) {
         return vec2_abs(vec2_sub(super.get(coords2).pos, super.get(coords1).pos));
+    }
+    get_hor_bounds(cond, flow_grid) {
+        let left = Infinity;
+        let left_node = null;
+        let right = -Infinity;
+        let right_node = null;
+        for (const [node, pos] of flow_grid.get_node_entries()) {
+            if (cond(node)) {
+                const curr_left = super.get(pos).left();
+                const curr_right = super.get(pos).right();
+                if (curr_left < left) {
+                    left = curr_left;
+                    left_node = node;
+                }
+                if (right < curr_right) {
+                    right = curr_right;
+                    right_node = node;
+                }
+            }
+        }
+        if (left == Infinity || right == -Infinity) {
+            return null;
+        }
+        else {
+            return new HorBounds(left, right, left_node, right_node);
+        }
     }
 }
 //# sourceMappingURL=metric_grid.js.map

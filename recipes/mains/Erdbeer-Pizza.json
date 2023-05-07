@@ -1,9 +1,0 @@
-{
-    "name": "Erdbeer-Pizza",
-    "paths":
-    [
-        [ "START", "Ofen auf 250°C vorheizen", "Pizzateig ausrollen", "Erdbeeren halbieren", "Pesto auf Teig verteilen", "Erdbeeren auf Pesto verteilen", "15 min backen", "Mozzarella verteilen", "Auf vorgewärmten Teller servieren", "END" ],
-        [ "START", "Pistazien in Mixer geben", "Spinat, Zitronensaft &amp; Öl hinzu", "Honig &amp; Salz dazu", "Zu Pesto pürieren", "Pesto auf Teig verteilen" ],
-        [ "START", "Teller vorwärmen", "Auf vorgewärmten Teller servieren" ]
-    ]
-}

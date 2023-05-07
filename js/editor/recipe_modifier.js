@@ -104,7 +104,7 @@ export class RecipeModifier {
         }
         if (to === null) {
             if (cmd == 'add') {
-                const cook = preferred_cook == '0' ? (from.cook.is_empty() ? get_cook('1') : from.cook) : get_cook(preferred_cook);
+                const cook = preferred_cook == '0' ? (from.cook.is_empty() ? get_cook('Küchenlehrling') : from.cook) : get_cook(preferred_cook);
                 this.add_task(from, new Task(get_random_text(), cook));
                 if (true || from.cook == cook) {
                     this.remove_connection(from, this.recipe.get_last_step());
@@ -138,7 +138,7 @@ export class RecipeModifier {
         else {
             if (cmd == 'add') {
                 if (this.recipe.has_conn(from, to)) {
-                    const cook = preferred_cook == '0' ? (from.cook.is_empty() ? get_cook('1') : from.cook) : get_cook(preferred_cook);
+                    const cook = preferred_cook == '0' ? (from.cook.is_empty() ? get_cook('Küchenlehrling') : from.cook) : get_cook(preferred_cook);
                     this.add_task_between(from, new Task(get_random_text(), cook), to);
                 }
                 else {

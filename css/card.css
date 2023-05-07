@@ -1,0 +1,36 @@
+.card {
+    position: relative;
+    color: var(--light-text-col);
+    background-color: var(--highlight-col);
+    
+    padding: 1rem;
+    border-radius: 1rem;
+}
+
+.card input[type="text"] {
+    border-left: none;
+    border-top: none;
+    border-right: none;
+    border-bottom: 0.125rem solid;
+    border-radius: 0;
+
+    text-align: center;
+    color: var(--light-text-col);
+    background-color: transparent;
+}
+
+.card > header {
+    font-size: 1.5rem;
+    padding: 0.5rem;
+}
+.card > footer {
+    margin: 1rem;
+    justify-content: space-between;
+}
+.card main {
+    padding: 1rem;
+}
+.card > main header {
+    font-size: 1.125rem;
+    color: var(--light-text-col);
+}

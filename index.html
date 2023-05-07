@@ -1,31 +1,208 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
+
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <base href=".">
-    
-    <title>flowbuild</title>
 
-    <!-- css imports -->
-    <!--for disabling flaticon error -->
-    <link rel="shortcut icon" href="#">
-    
-    <!-- online -->
+    <!-- title -->
+    <title>FlowBuild.</title>
+    <link rel="shortcut icon" href="icons/tools.ico">
+
+    <!-- css refs -->
+    <link href="./css/style.css" type="text/css" rel="stylesheet">
+    <link href="./css/card.css" type="text/css" rel="stylesheet">
+    <link href="./css/ingredient.css" type="text/css" rel="stylesheet">
+    <link href="./css/task.css" type="text/css" rel="stylesheet">
+    <link href="./css/nav.css" type="text/css" rel="stylesheet">
+    <link href="./css/flowchart.css" type="text/css" rel="stylesheet">
+
+    <!-- font-awesome -->
     <script src="https://kit.fontawesome.com/a26baecaf4.js" crossorigin="anonymous"></script>
-
-    <!-- local -->
-    <link rel="stylesheet" href="./css/style.css">
-    <link rel="stylesheet" href="./css/flowchart.css">
 </head>
+
 <body>
-    <h1>flowbuild</h1>
-    <div id="content">
-        <div id="chart">
-            <span id="flowchart-container"></span>     
+    <header>FlowBuild.</header>
+    <nav>
+        <span class="icon">
+            <i id="create-btn" class="fa-solid fa-circle-plus fa-2x"></i>
+            <label>new</label>
+        </span>
+        <!-- search-bar -->
+        <span id="search-bar">
+            <input id="search-input" type="text" placeholder="search recipes...">
+            <div id="recipe-list" style="display: none;"></div>
+        </span>
+        <span class="icon">
+            <i id="upload-btn" class="fa-solid fa-upload fa-2x"></i>
+            <label>upload</label>
+        </span>
+    </nav>
+    <main>
+        <!-- ingredients -->
+        <div id="ingredient-card" class="card">
+            <header>ingredients</header>
+            <main>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Amount</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ingredient-container"></tbody>
+                </table>
+            </main>
+            <footer>
+                <span class="icon">
+                    <i id="ingredient-add" class="fa-solid fa-circle-plus fa-2x"></i>
+                    <label>add</label>
+                </span>
+            </footer>
         </div>
-    </div>
-    <script src="./js/editor/editor.js" type="module"></script>
+        <!-- flowchart -->
+        <div id="flowchart-card" class="card">
+            <header>flowchart</header>
+            <main id="flowchart">
+                <div id="flowchart-container"></div>
+            </main>
+            <footer>
+                <span id="remove-task" class="icon">
+                    <i class="fa-solid fa-trash fa-2x"></i>
+                    <label>delete</label>
+                </span>
+            </footer>
+        </div>
+        <!-- task -->
+        <div id="task-card" style="display: none;" class="card">
+            <header>task</header>
+            <main>
+                <div>
+                    <header>description</header>
+                    <main>
+                        <input id="description-input" type="text" style="width: 15rem;" placeholder="description...">
+                    </main>
+                </div>
+                <div id="cook-section">
+                    <header>cook</header>
+                    <main id="cook-list">
+                        <div class="radio">
+                            <input type="radio" id="cook-1" name="cook-radio" checked>
+                            <label for="cook-1">Küchenlehrling</label>
+                        </div>
+                        <div class="radio">
+                            <input type="radio" id="cook-2" name="cook-radio">
+                            <label for="cook-2">Küchenmeister</label>
+                        </div>
+                    </main>
+                </div>
+                <div>
+                    <header>duration</header>
+                    <main style="display: flex;">
+                        <input id="duration-input" type="text" style="width: 1.75rem" value="0">
+                        <span id="duration-list">
+                            <div class="radio">
+                                <input type="radio" id="sec" name="duration-radio">
+                                <label for="sec">sec(s)</label>
+                            </div>
+                            <div class="radio">
+                                <input type="radio" id="min" name="duration-radio" checked>
+                                <label for="min">min(s)</label>
+                            </div>
+                            <div class="radio">
+                                <input type="radio" id="hour" name="duration-radio">
+                                <label for="hour">hour(s)</label>
+                            </div>
+                        </span>
+                    </main>
+                </div>
+            </main>
+        </div>
+        <!-- upload -->
+        <div id="upload-card" style="display: none;" class="card">
+            <header>upload</header>
+            <main>
+                <div>
+                    <header>title</header>
+                    <main>
+                        <input id="title-input" type="text" style="width: 15rem;" placeholder="title...">
+                    </main>
+                </div>
+                <div>
+                    <header>image</header>
+                    <main>
+                        <div style="display: flex; align-items: center;">
+                            <label for="image-input" class="fa-regular fa-image fa-2x"></label>
+                            <input id="image-input" type="file" style="margin: 0.5rem; width: 12.5rem;" accept="image/*">
+                        </div>
+                    </main>
+                </div>
+                <div>
+                    <header>difficulty</header>
+                    <main id="difficulty-list">
+                        <div class="radio">
+                            <input type="radio" id="diff1" name="difficulty-radio">
+                            <label for="diff1">idiot sandwich</label>
+                        </div>
+                        <div class="radio">
+                            <input type="radio" id="diff2" name="difficulty-radio">
+                            <label for="diff2">easy</label>
+                        </div>
+                        <div class="radio">
+                            <input type="radio" id="diff3" name="difficulty-radio" checked>
+                            <label for="diff3">medium</label>
+                        </div>
+                        <div class="radio">
+                            <input type="radio" id="diff3" name="difficulty-radio">
+                            <label for="diff3">hard</label>
+                        </div>
+                        <div class="radio">
+                            <input type="radio" id="diff4" name="difficulty-radio">
+                            <label for="diff4">gordon ramsey</label>
+                        </div>
+                    </main>
+                </div>
+                <div>
+                    <header>duration</header>
+                    <main style="display: flex;">
+                        <input id="recipe-duration-input" type="text" style="width: 1.75rem" value="0">
+                        <span id="recipe-duration-unit">
+                            <div class="radio">
+                                <input type="radio" id="recipe-sec" name="recipe-duration-unit">
+                                <label for="recipe-sec">sec(s)</label>
+                            </div>
+                            <div class="radio">
+                                <input type="radio" id="recipe-min" name="recipe-duration-unit" checked>
+                                <label for="recipe-min">min(s)</label>
+                            </div>
+                            <div class="radio">
+                                <input type="radio" id="recipe-hour" name="recipe-duration-unit">
+                                <label for="recipe-hour">hour(s)</label>
+                            </div>
+                        </span>
+                    </main>
+                </div>
+            </main>
+            <footer>
+                <span class="icon">
+                    <i id="recipe-submit" class="fa-solid fa-check fa-2x"></i>
+                    <label>submit</label>
+                </span>
+            </footer>
+        </div>
+    </main>
+
+    <!-- background -->
+    <img id="background" src="https://www.nowleap.com/wp-content/uploads/2020/05/GettyImages-1155240409.jpg">
+
+    <!-- <footer>2022 © KitchenIng. All rights preserved.</footer> -->
+
+    <script src="./js/editor/nav_editor.js" type="module"></script>
+    <script src="./js/editor/upload_editor.js" type="module"></script>
+    <script src="./js/editor/chart_editor.js" type="module"></script>
+    <script src="./js/editor/ingredients_editor.js" type="module"></script>
+    <script src="./js/editor/task_editor.js" type="module"></script>
 </body>
+
 </html>

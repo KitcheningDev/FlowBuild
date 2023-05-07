@@ -1,12 +1,21 @@
 import { Vec2 } from "../../../utils/vec2.js";
 import { Node } from "../../graph/node.js";
 import { FlowGrid } from "../../grid/flow_grid.js";
+import { Tile } from "../../grid/tile.js";
+import { get_cook } from "../../recipe/cook.js";
+import { Task } from "../../recipe/task.js";
 
 export function add_cook_lines(grid: FlowGrid): void {
     const cooks_used = new Set<string>();
     for (const [node, coords] of grid.get_node_entries()) {
         if (!node.task.cook.is_empty() && !cooks_used.has(node.task.cook.name)) {
             const bounds = grid.get_hor_bounds((val: Node) => { return val.task.cook.name == node.task.cook.name });
+            
+            // title
+            // const title = new Tile();
+            // title.node = new Node(new Task(node.task.cook.name, get_cook('')));
+            // grid.set(title, new Vec2(Math.floor(bounds.center()), 0));
+            
             if (grid.in_bounds(new Vec2(bounds.right + 1, 0)) && !grid.get(new Vec2(bounds.right + 1, 0)).cook_line) {
                 grid.insert_column(bounds.right + 1);
                 for (let y = 1; y < grid.get_size().y - 1; ++y) {
