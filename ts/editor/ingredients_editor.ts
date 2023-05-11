@@ -6,7 +6,7 @@ const container = document.getElementById("ingredient-container") as HTMLTableSe
 const add_ingredient = document.getElementById("ingredient-add");
 
 // update
-function update_ingredients(): void {
+export function update_ingredients(): void {
     recipe.ingredients = new Set<Ingredient>();
     for (const row of container.rows) {
         const grocerie = row.children.item(0).textContent.trim();
@@ -15,24 +15,30 @@ function update_ingredients(): void {
         recipe.ingredients.add(new Ingredient(grocerie, parseInt(amount), unit));
     }
 }
+export function load_ingredients(): void {
+    container.textContent = "";
+    for (const ingredient of recipe.ingredients) {
+        add_row(ingredient);
+    }
+}
 container.addEventListener('keypress', (e: KeyboardEvent) => {
     update_ingredients();
 });
 
 // add
-function add_row(): void {
+function add_row(ingredient: Ingredient = new Ingredient('product', 0, 'unit')): void {
     const row = add_cls(container.insertRow(), 'ingredient');
     
     const name = add_cls(row.insertCell(), 'ingredient-property');
-    name.textContent = "product";
+    name.textContent = ingredient.grocerie;
     name.contentEditable = 'true';
 
     const amount = add_cls(row.insertCell(), 'ingredient-property');
-    amount.textContent = "0";
+    amount.textContent = ingredient.amount.toString();
     amount.contentEditable = 'true';
     
     const unit = add_cls(row.insertCell(), 'ingredient-property');
-    unit.textContent = "unit";
+    unit.textContent = ingredient.unit;
     unit.contentEditable = 'true';
     
     append_childs(row.insertCell(), append_childs(create_div('icon'), create('i', 'ingredient-delete', 'fa-solid', 'fa-trash')));

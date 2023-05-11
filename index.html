@@ -17,6 +17,9 @@
     <link href="./css/nav.css" type="text/css" rel="stylesheet">
     <link href="./css/flowchart.css" type="text/css" rel="stylesheet">
 
+    <!-- fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+
     <!-- font-awesome -->
     <script src="https://kit.fontawesome.com/a26baecaf4.js" crossorigin="anonymous"></script>
 </head>
@@ -24,6 +27,7 @@
 <body>
     <header>FlowBuild.</header>
     <nav>
+        <!-- create -->
         <span class="icon">
             <i id="create-btn" class="fa-solid fa-circle-plus fa-2x"></i>
             <label>new</label>
@@ -33,6 +37,7 @@
             <input id="search-input" type="text" placeholder="search recipes...">
             <div id="recipe-list" style="display: none;"></div>
         </span>
+        <!-- upload -->
         <span class="icon">
             <i id="upload-btn" class="fa-solid fa-upload fa-2x"></i>
             <label>upload</label>
@@ -49,6 +54,7 @@
                             <th>Product</th>
                             <th>Amount</th>
                             <th>Unit</th>
+                            <td style="padding: 1rem;"></td>
                         </tr>
                     </thead>
                     <tbody id="ingredient-container"></tbody>
@@ -64,6 +70,7 @@
         <!-- flowchart -->
         <div id="flowchart-card" class="card">
             <header>flowchart</header>
+            <!-- container -->
             <main id="flowchart">
                 <div id="flowchart-container"></div>
             </main>
@@ -78,12 +85,14 @@
         <div id="task-card" style="display: none;" class="card">
             <header>task</header>
             <main>
+                <!-- description -->
                 <div>
                     <header>description</header>
                     <main>
                         <input id="description-input" type="text" style="width: 15rem;" placeholder="description...">
                     </main>
                 </div>
+                <!-- cook -->
                 <div id="cook-section">
                     <header>cook</header>
                     <main id="cook-list">
@@ -97,6 +106,7 @@
                         </div>
                     </main>
                 </div>
+                <!-- duration -->
                 <div>
                     <header>duration</header>
                     <main style="display: flex;">
@@ -123,13 +133,15 @@
         <div id="upload-card" style="display: none;" class="card">
             <header>upload</header>
             <main>
+                <!-- title -->
                 <div>
                     <header>title</header>
                     <main>
                         <input id="title-input" type="text" style="width: 15rem;" placeholder="title...">
                     </main>
                 </div>
-                <div>
+                <!-- image -->
+                <!--div>
                     <header>image</header>
                     <main>
                         <div style="display: flex; align-items: center;">
@@ -137,37 +149,39 @@
                             <input id="image-input" type="file" style="margin: 0.5rem; width: 12.5rem;" accept="image/*">
                         </div>
                     </main>
-                </div>
+                </div-->
+                <!-- difficulty -->
                 <div>
                     <header>difficulty</header>
                     <main id="difficulty-list">
                         <div class="radio">
-                            <input type="radio" id="diff1" name="difficulty-radio">
+                            <input type="radio" id="diff-1" name="difficulty-radio">
                             <label for="diff1">idiot sandwich</label>
                         </div>
                         <div class="radio">
-                            <input type="radio" id="diff2" name="difficulty-radio">
+                            <input type="radio" id="diff-2" name="difficulty-radio">
                             <label for="diff2">easy</label>
                         </div>
                         <div class="radio">
-                            <input type="radio" id="diff3" name="difficulty-radio" checked>
+                            <input type="radio" id="diff-3" name="difficulty-radio" checked>
                             <label for="diff3">medium</label>
                         </div>
                         <div class="radio">
-                            <input type="radio" id="diff3" name="difficulty-radio">
+                            <input type="radio" id="diff-4" name="difficulty-radio">
                             <label for="diff3">hard</label>
                         </div>
                         <div class="radio">
-                            <input type="radio" id="diff4" name="difficulty-radio">
+                            <input type="radio" id="diff-5" name="difficulty-radio">
                             <label for="diff4">gordon ramsey</label>
                         </div>
                     </main>
                 </div>
+                <!-- duration -->
                 <div>
                     <header>duration</header>
                     <main style="display: flex;">
                         <input id="recipe-duration-input" type="text" style="width: 1.75rem" value="0">
-                        <span id="recipe-duration-unit">
+                        <span id="recipe-duration-list">
                             <div class="radio">
                                 <input type="radio" id="recipe-sec" name="recipe-duration-unit">
                                 <label for="recipe-sec">sec(s)</label>
@@ -196,8 +210,7 @@
     <!-- background -->
     <img id="background" src="https://www.nowleap.com/wp-content/uploads/2020/05/GettyImages-1155240409.jpg">
 
-    <!-- <footer>2022 © KitchenIng. All rights preserved.</footer> -->
-
+    <!-- scripts -->
     <script src="./js/editor/nav_editor.js" type="module"></script>
     <script src="./js/editor/upload_editor.js" type="module"></script>
     <script src="./js/editor/chart_editor.js" type="module"></script>

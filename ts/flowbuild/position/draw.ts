@@ -71,7 +71,7 @@ function create_line(dir: LineDir): HTMLElement {
     return el;
 }
 function create_sync_line(type: 'left' | 'middle' | 'right'): HTMLElement {
-    const el = create_div('sync-line-' + type);
+    const el = create_div('sync-line');
     return el;
 }
 function create_cook_line(): HTMLElement {

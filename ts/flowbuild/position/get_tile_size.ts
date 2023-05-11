@@ -8,7 +8,12 @@ export function get_tile_size(tile: Tile, margin: boolean = true): Vec2 {
     if (tile.node !== null && !tile.node.task.is_empty()) {
         size = get_node_size(tile.node);
         if (margin) {
-            size = vec2_add(config.task_margin, size);
+            if (tile.node.is_start()) {
+                size = vec2_add(config.start_margin, size);
+            }
+            else {
+                size = vec2_add(config.task_margin, size);
+            }
         }
     }
     else if (tile.sync_lines.top || tile.sync_lines.bottom) {

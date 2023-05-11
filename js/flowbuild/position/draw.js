@@ -62,7 +62,7 @@ function create_line(dir) {
     return el;
 }
 function create_sync_line(type) {
-    const el = create_div('sync-line-' + type);
+    const el = create_div('sync-line');
     return el;
 }
 function create_cook_line() {

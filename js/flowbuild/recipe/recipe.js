@@ -16,8 +16,9 @@ import { set_element, set_merge } from "../../utils/set.js";
 import { get_cook } from "./cook.js";
 class RecipeData {
     constructor() {
+        this.pk = 0;
         this.title = 'Unnamed';
-        this.difficulty = 'default';
+        this.difficulty = 3;
         this.ingredients = new Set();
         this.duration = 0;
         this.prep_time = 0;
@@ -33,17 +34,18 @@ export class Recipe extends RecipeData {
     constructor() {
         super();
         _Recipe_connections.set(this, void 0);
-        this.load_default();
+        __classPrivateFieldSet(this, _Recipe_connections, new Map(), "f");
     }
     load_default() {
         __classPrivateFieldSet(this, _Recipe_connections, new Map(), "f");
         const start = new Task('START', get_cook(''));
-        const task1 = new Task('TASK 1', get_cook('Küchenlehrling'));
-        const last_step = new Task('LAST STEP', get_cook(''));
+        const task1 = new Task('task', get_cook('Küchenlehrling'));
+        const last_step = new Task('last step', get_cook(''));
         const end = new Task('END', get_cook(''));
         __classPrivateFieldGet(this, _Recipe_connections, "f").set(start, new Set([task1]));
         __classPrivateFieldGet(this, _Recipe_connections, "f").set(task1, new Set([last_step]));
         __classPrivateFieldGet(this, _Recipe_connections, "f").set(last_step, new Set([end]));
+        return this;
     }
     add_connection(from, to) {
         var _a;
@@ -115,6 +117,9 @@ export class Recipe extends RecipeData {
             }
         }
         return null;
+    }
+    is_empty() {
+        return __classPrivateFieldGet(this, _Recipe_connections, "f").size == 0;
     }
     get_tasks() {
         const tasks = new Set();

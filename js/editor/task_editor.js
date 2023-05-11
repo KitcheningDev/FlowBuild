@@ -111,6 +111,7 @@ class TaskEditor {
     }
     hide() {
         task_card.style.display = "none";
+        this.task = null;
     }
 }
 ;
@@ -119,7 +120,13 @@ export const task_editor = new TaskEditor();
 chart.addEventListener('click', (e) => {
     const el = e.target;
     if (el.classList.contains('flow-task')) {
-        task_editor.show(recipe.get_task_by_id(parseInt(el.id)));
+        const task = recipe.get_task_by_id(parseInt(el.id));
+        if (task_editor.task == task) {
+            task_editor.hide();
+        }
+        else {
+            task_editor.show(task);
+        }
     }
 });
 // supress enter

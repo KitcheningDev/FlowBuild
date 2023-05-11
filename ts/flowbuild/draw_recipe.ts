@@ -1,3 +1,4 @@
+import { align, create_paths } from "./align.js";
 import { collapse } from "./collapse/collapse.js";
 import { create_rules } from "./collapse/create_rules.js";
 import { add_cook_lines } from "./collapse/post_process/add_cook_lines.js";
@@ -9,8 +10,16 @@ import { draw_grid } from "./position/draw.js";
 import { MetricGrid } from "./position/metric_grid.js";
 import { Recipe } from "./recipe/recipe.js";
 
+const container = document.getElementById('flowchart');
 export function draw_recipe(recipe: Recipe): void {
     const graph = recipe.create_graph();
+
+    // graph.flatten();
+    // log_graph(graph);
+    // container.innerHTML = "";
+    // console.log(align(graph));
+    // container.appendChild(align(graph).to_html());
+
     log_graph(graph);
     const rules = create_rules(graph);
     
@@ -19,9 +28,9 @@ export function draw_recipe(recipe: Recipe): void {
     flow_grid.shrink_to_fit();
     graph.unflatten();
 
-    log_grid(flow_grid);
+    // log_grid(flow_grid);
     add_sync_lines(flow_grid, graph);
-    log_grid(flow_grid);
+    // log_grid(flow_grid);
     add_lines(flow_grid, graph);
     add_cook_lines(flow_grid);
     add_start_end(flow_grid, graph);

@@ -25,11 +25,11 @@
     top: 50%;
     left: 50%;
     width: 800px;
+    color: var(--dark-col);
 }
 #flowchart-container > * {
     position: absolute;
     transform: translate(-50%, -50%);
-    color: var(--dark-col);
     user-select: none;
 }
 
@@ -43,18 +43,26 @@
 }
 
 /* task */
-.flow-task {
+.flow-task {  
     position: absolute;
-    border: 2px solid;
-    border-radius: 5px;
-    background-color: var(--bg-col);
 
-    font-size: 10px;
-    font-family: monospace;
+    border: 0.25em solid;
+    border-radius: 0.5em;
+    border-top: none;
+    border-left: none;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0;
+
+    box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.15), 3px 3px 10px 0 rgba(0, 0, 0, 0.125);
+    
+    color: black;
+    font-size: 0.75em;
+    font-family: 'Montserrat';
     font-weight: bold;
     text-align: center;
     max-width: 130px;
-
+    
+    background-color: var(--bg-col);
     padding: 7px 5px;
     z-index: 2;
 }
@@ -64,7 +72,7 @@
     position: absolute;
     border: 2px solid;
     border-radius: 50%;
-    background-color: var(--light-col);
+    background-color: var(--main-col);
 
     top: 50%;
     left: 50%;
@@ -89,19 +97,21 @@
 }
 .editor-add::before, .editor-remove::before {
     position: absolute;
-    transform: translate(-6px, 10px);
+    transform: translate(-7px, 10px);
 }
 
 /* start end */
 .flow-start {
     position: absolute;
-    border: 3px solid;
+    border: 0.125em solid;
     border-radius: 50%;
     background-color: var(--bg-col);
 
     padding: 6px;
     cursor: pointer;
     z-index: 2;
+
+    box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.15), 3px 3px 10px 0 rgba(0, 0, 0, 0.125);
 }
 .flow-end {
     position: absolute;
@@ -133,37 +143,26 @@
     transform: translate(calc(-50% - 3px), -50%);
 }
 #flowchart-container .caret-down {
-    transform: translate(-50%, calc(-50% - 2px));
+    transform: translate(-50%, calc(-50% - 3px));
 }
 #flowchart-container .caret-left {
     transform: translate(calc(-50% + 2px), -50%);
 }
 
 /* sync-line */
-.sync-line-left, .sync-line-middle, .sync-line-right {
+.sync-line {
     position: absolute;
-    border: 1px solid;
+    border-radius: 0.25em;
     background-color: black;
-    width: 1px;
-    height: 2px;
+    height: 0.25em;
     z-index: 1;
-}
-.sync-line-left {
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
-}
-.sync-line-right {
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
 }
 
 /* cook-line */
 .cook-line {
     position: absolute;
-    border: 2px dashed;
-    /* background-color: black; */
-    width: 2;
-    height: 2;
+    border: 0.06125em dashed;
+    color: black;
     z-index: 1;
 }
 

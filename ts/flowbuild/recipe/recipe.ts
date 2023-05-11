@@ -6,8 +6,9 @@ import { Tag } from "./tag.js";
 import { Ingredient } from "./ingredient.js";
 
 class RecipeData {
+    pk: number;
     title: string;
-    difficulty: string;
+    difficulty: number;
     ingredients: Set<Ingredient>;
     duration: number;
     prep_time: number;
@@ -19,8 +20,9 @@ class RecipeData {
     tags: Set<Tag>;
 
     constructor() {
+        this.pk = 0;
         this.title = 'Unnamed';
-        this.difficulty = 'default';
+        this.difficulty = 3;
         this.ingredients = new Set<Ingredient>();
         this.duration = 0;
         this.prep_time = 0;
@@ -38,18 +40,19 @@ export class Recipe extends RecipeData {
 
     constructor() {
         super();
-        this.load_default();
+        this.#connections = new Map<Task, Set<Task>>();   
     }
 
-    load_default(): void {
+    load_default(): Recipe {
         this.#connections = new Map<Task, Set<Task>>();   
         const start = new Task('START', get_cook(''));
-        const task1 = new Task('TASK 1', get_cook('Küchenlehrling'));
-        const last_step = new Task('LAST STEP', get_cook(''));
+        const task1 = new Task('task', get_cook('Küchenlehrling'));
+        const last_step = new Task('last step', get_cook(''));
         const end = new Task('END', get_cook(''));
         this.#connections.set(start, new Set([task1]));
         this.#connections.set(task1, new Set([last_step]));
         this.#connections.set(last_step, new Set([end]));
+        return this;
     }
 
     add_connection(from: Task, to: Task): void {
@@ -123,6 +126,9 @@ export class Recipe extends RecipeData {
         return null;
     }
     
+    is_empty(): boolean {
+        return this.#connections.size == 0;
+    }
     get_tasks(): Set<Task> {
         const tasks = new Set<Task>();
         for (const [parent, childs] of this.#connections) {
