@@ -19,47 +19,52 @@ export class IEntry {
 }
 export class Grid {
     constructor(set_function, default_constructor, size = new Vec2(0, 0)) {
+        // member
         _Grid_set_function.set(this, void 0);
         _Grid_default_constructor.set(this, void 0);
         _Grid_data.set(this, void 0);
         _Grid_size.set(this, void 0);
         __classPrivateFieldSet(this, _Grid_set_function, set_function, "f");
         __classPrivateFieldSet(this, _Grid_default_constructor, default_constructor, "f");
-        __classPrivateFieldSet(this, _Grid_data, [], "f");
         __classPrivateFieldSet(this, _Grid_size, size, "f");
-        for (let i = 0; i < size.x * size.y; ++i) {
-            __classPrivateFieldGet(this, _Grid_data, "f").push(default_constructor());
-        }
+        this.clear();
     }
     // access
-    in_bounds(coords) {
+    inBounds(coords) {
         return 0 <= coords.x && coords.x < __classPrivateFieldGet(this, _Grid_size, "f").x && 0 <= coords.y && coords.y < __classPrivateFieldGet(this, _Grid_size, "f").y;
     }
     get(coords) {
-        if (this.in_bounds(coords)) {
-            return __classPrivateFieldGet(this, _Grid_data, "f")[__classPrivateFieldGet(this, _Grid_size, "f").x * coords.y + coords.x].copy();
+        if (this.inBounds(coords)) {
+            return __classPrivateFieldGet(this, _Grid_data, "f")[__classPrivateFieldGet(this, _Grid_size, "f").x * coords.y + coords.x].clone();
         }
-        console.error("invalid input", coords);
+        console.error("INVALID INPUT", coords);
     }
     set(val, coords) {
-        if (this.in_bounds(coords)) {
-            __classPrivateFieldGet(this, _Grid_set_function, "f").call(this, val, coords.copy(), this);
-            __classPrivateFieldGet(this, _Grid_data, "f")[__classPrivateFieldGet(this, _Grid_size, "f").x * coords.y + coords.x] = val.copy();
+        if (this.inBounds(coords)) {
+            __classPrivateFieldGet(this, _Grid_set_function, "f").call(this, val, coords.clone(), this);
+            __classPrivateFieldGet(this, _Grid_data, "f")[__classPrivateFieldGet(this, _Grid_size, "f").x * coords.y + coords.x] = val.clone();
         }
         else {
-            console.error("invalid input", coords);
+            console.error("INVALID INPUT", coords);
         }
     }
-    get_entry(coords) {
-        return new IEntry(this.get(coords), coords);
+    getEntry(coords) {
+        return new IEntry(this.get(coords).clone(), coords.clone());
     }
-    set_entry(entry) {
+    setEntry(entry) {
         this.set(entry.tile, entry.coords);
     }
     remove(coords) {
         this.set(__classPrivateFieldGet(this, _Grid_default_constructor, "f").call(this), coords);
     }
-    get_entries() {
+    clear() {
+        __classPrivateFieldSet(this, _Grid_data, [], "f");
+        for (let i = 0; i < this.size.x * this.size.y; ++i) {
+            __classPrivateFieldGet(this, _Grid_data, "f").push(__classPrivateFieldGet(this, _Grid_default_constructor, "f").call(this));
+        }
+    }
+    // iterate
+    get entries() {
         const entries = new Set;
         for (let y = 0; y < __classPrivateFieldGet(this, _Grid_size, "f").y; ++y) {
             for (let x = 0; x < __classPrivateFieldGet(this, _Grid_size, "f").x; ++x) {
@@ -68,22 +73,25 @@ export class Grid {
         }
         return entries;
     }
+    get tiles() {
+        return __classPrivateFieldGet(this, _Grid_data, "f").values();
+    }
     // size
-    is_empty() {
+    isEmpty() {
         return __classPrivateFieldGet(this, _Grid_size, "f").x == 0 || __classPrivateFieldGet(this, _Grid_size, "f").y == 0;
     }
-    get_size() {
-        return __classPrivateFieldGet(this, _Grid_size, "f").copy();
+    get size() {
+        return __classPrivateFieldGet(this, _Grid_size, "f").clone();
     }
-    set_size(size) {
+    setSize(size) {
         if (size.x < 0 || !Number.isInteger(size.x) || size.y < 0 || !Number.isInteger(size.y)) {
-            console.error("invalid input", size);
+            console.error("INVALID INPUT", size);
             return;
         }
         const grid = new Grid(__classPrivateFieldGet(this, _Grid_set_function, "f"), __classPrivateFieldGet(this, _Grid_default_constructor, "f"), size);
         for (let y = 0; y < size.y; ++y) {
             for (let x = 0; x < size.x; ++x) {
-                if (this.in_bounds(new Vec2(x, y))) {
+                if (this.inBounds(new Vec2(x, y))) {
                     grid.set(this.get(new Vec2(x, y)), new Vec2(x, y));
                 }
                 else {
@@ -93,6 +101,23 @@ export class Grid {
         }
         __classPrivateFieldSet(this, _Grid_data, __classPrivateFieldGet(grid, _Grid_data, "f"), "f");
         __classPrivateFieldSet(this, _Grid_size, size, "f");
+    }
+    shrinkToFit() {
+        if (this.isEmpty()) {
+            return;
+        }
+        while (0 < this.size.y && this.isRowEmpty(0)) {
+            this.removeRow(0);
+        }
+        while (0 < this.size.y && this.isRowEmpty(this.size.y - 1)) {
+            this.removeRow(this.size.y - 1);
+        }
+        while (0 < this.size.x && this.isColumnEmpty(0)) {
+            this.removeColumn(0);
+        }
+        while (0 < this.size.x && this.isColumnEmpty(this.size.x - 1)) {
+            this.removeColumn(this.size.x - 1);
+        }
     }
     // traversal
     every(cond) {
@@ -106,9 +131,9 @@ export class Grid {
         }
         return true;
     }
-    hor_path_every(x1, x2, y, cond) {
+    horEvery(x1, x2, y, cond) {
         if (x2 < x1) {
-            return this.hor_path_every(x2, x1, y, cond);
+            return this.horEvery(x2, x1, y, cond);
         }
         return this.every((tile) => {
             if (x1 <= tile.coords.x && tile.coords.x <= x2 && y == tile.coords.y) {
@@ -117,9 +142,9 @@ export class Grid {
             return true;
         });
     }
-    ver_path_every(y1, y2, x, cond) {
+    verEvery(y1, y2, x, cond) {
         if (y2 < y1) {
-            return this.ver_path_every(y2, y1, x, cond);
+            return this.verEvery(y2, y1, x, cond);
         }
         return this.every((tile) => {
             if (y1 <= tile.coords.y && tile.coords.y <= y2 && x == tile.coords.x) {
@@ -128,41 +153,26 @@ export class Grid {
             return true;
         });
     }
-    row_every(where, cond) {
-        return this.hor_path_every(0, __classPrivateFieldGet(this, _Grid_size, "f").x - 1, where, cond);
+    rowEvery(where, cond) {
+        return this.horEvery(0, __classPrivateFieldGet(this, _Grid_size, "f").x - 1, where, cond);
     }
-    column_every(where, cond) {
-        return this.ver_path_every(0, __classPrivateFieldGet(this, _Grid_size, "f").y - 1, where, cond);
+    columnEvery(where, cond) {
+        return this.verEvery(0, __classPrivateFieldGet(this, _Grid_size, "f").y - 1, where, cond);
     }
-    is_hor_path_empty(x1, x2, y) {
-        return this.hor_path_every(x1, x2, y, (entry) => entry.tile.is_empty());
+    isHorEmpty(x1, x2, y) {
+        return this.horEvery(x1, x2, y, (entry) => entry.tile.isEmpty());
     }
-    is_ver_path_empty(y1, y2, x) {
-        return this.ver_path_every(y1, y2, x, (entry) => entry.tile.is_empty());
+    isVerEmpty(y1, y2, x) {
+        return this.verEvery(y1, y2, x, (entry) => entry.tile.isEmpty());
     }
-    is_row_empty(where) {
-        return this.is_hor_path_empty(0, __classPrivateFieldGet(this, _Grid_size, "f").x - 1, where);
+    isRowEmpty(where) {
+        return this.isHorEmpty(0, __classPrivateFieldGet(this, _Grid_size, "f").x - 1, where);
     }
-    is_column_empty(where) {
-        return this.is_ver_path_empty(0, __classPrivateFieldGet(this, _Grid_size, "f").y - 1, where);
-    }
-    // modify
-    shrink_to_fit() {
-        if (this.is_empty()) {
-            return;
-        }
-        let min_x = __classPrivateFieldGet(this, _Grid_size, "f").x;
-        while (min_x > 0 && this.is_column_empty(min_x - 1)) {
-            min_x--;
-        }
-        let min_y = __classPrivateFieldGet(this, _Grid_size, "f").y;
-        while (min_y > 0 && this.is_row_empty(min_y - 1)) {
-            min_y--;
-        }
-        this.set_size(new Vec2(min_x, min_y));
+    isColumnEmpty(where) {
+        return this.isVerEmpty(0, __classPrivateFieldGet(this, _Grid_size, "f").y - 1, where);
     }
     // shift
-    shift_up(where) {
+    shiftUp(where) {
         for (let x = 0; x < __classPrivateFieldGet(this, _Grid_size, "f").x; ++x) {
             for (let y = where; y < __classPrivateFieldGet(this, _Grid_size, "f").y - 1; ++y) {
                 this.set(this.get(new Vec2(x, y + 1)), new Vec2(x, y));
@@ -172,7 +182,7 @@ export class Grid {
             this.remove(new Vec2(x, __classPrivateFieldGet(this, _Grid_size, "f").y - 1));
         }
     }
-    shift_down(where) {
+    shiftDown(where) {
         for (let x = 0; x < __classPrivateFieldGet(this, _Grid_size, "f").x; ++x) {
             for (let y = __classPrivateFieldGet(this, _Grid_size, "f").y - 1; y > where; --y) {
                 this.set(this.get(new Vec2(x, y - 1)), new Vec2(x, y));
@@ -182,7 +192,7 @@ export class Grid {
             this.remove(new Vec2(x, where));
         }
     }
-    shift_left(where) {
+    shiftLeft(where) {
         for (let y = 0; y < __classPrivateFieldGet(this, _Grid_size, "f").y; ++y) {
             for (let x = where; x < __classPrivateFieldGet(this, _Grid_size, "f").x - 1; ++x) {
                 this.set(this.get(new Vec2(x + 1, y)), new Vec2(x, y));
@@ -192,7 +202,7 @@ export class Grid {
             this.remove(new Vec2(__classPrivateFieldGet(this, _Grid_size, "f").x - 1, y));
         }
     }
-    shift_right(where) {
+    shiftRight(where) {
         for (let y = 0; y < __classPrivateFieldGet(this, _Grid_size, "f").y; ++y) {
             for (let x = __classPrivateFieldGet(this, _Grid_size, "f").x - 1; x > where; --x) {
                 this.set(this.get(new Vec2(x - 1, y)), new Vec2(x, y));
@@ -203,21 +213,21 @@ export class Grid {
         }
     }
     // insert / remove
-    insert_row(where) {
-        this.set_size(__classPrivateFieldGet(this, _Grid_size, "f").down());
-        this.shift_down(where);
+    insertRow(where) {
+        this.setSize(__classPrivateFieldGet(this, _Grid_size, "f").down());
+        this.shiftDown(where);
     }
-    insert_column(where) {
-        this.set_size(__classPrivateFieldGet(this, _Grid_size, "f").right());
-        this.shift_right(where);
+    insertColumn(where) {
+        this.setSize(__classPrivateFieldGet(this, _Grid_size, "f").right());
+        this.shiftRight(where);
     }
-    remove_row(where) {
-        this.shift_up(where);
-        this.set_size(__classPrivateFieldGet(this, _Grid_size, "f").up());
+    removeRow(where) {
+        this.shiftUp(where);
+        this.setSize(__classPrivateFieldGet(this, _Grid_size, "f").up());
     }
-    remove_column(where) {
-        this.shift_right(where);
-        this.set_size(__classPrivateFieldGet(this, _Grid_size, "f").left());
+    removeColumn(where) {
+        this.shiftLeft(where);
+        this.setSize(__classPrivateFieldGet(this, _Grid_size, "f").left());
     }
 }
 _Grid_set_function = new WeakMap(), _Grid_default_constructor = new WeakMap(), _Grid_data = new WeakMap(), _Grid_size = new WeakMap();

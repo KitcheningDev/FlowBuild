@@ -1,34 +1,47 @@
 import { CookRule } from "./rules/cook_rule.js";
+import { sample, setEqual } from "../../utils/set.js";
+import { NeighbourRule } from "./rules/neighbour_rule.js";
 import { ConnRule } from "./rules/conn_rule.js";
-import { SyncLineRule } from "./rules/sync_line_rule.js";
-import { PathRule } from "./rules/path_rule.js";
-import { set_element } from "../../utils/set.js";
-export function create_rules(graph, loop_rules = true) {
+function parentNeighbours(node) {
+    return new Set([...sample(node.parents).childs].filter((neighbour) => setEqual(neighbour.parents, node.parents)));
+}
+function childNeighbours(node) {
+    return new Set([...sample(node.childs).parents].filter((neighbour) => setEqual(neighbour.childs, node.childs)));
+}
+export function createRules(graph) {
     const rules = new Set();
     for (const parent of graph.nodes) {
         for (const child of parent.childs) {
-            rules.add(new ConnRule(parent, child, !graph.is_backwards(parent) && graph.is_backwards(child)));
+            rules.add(new ConnRule(parent, child, !graph.isBackwards(parent) && graph.isBackwards(child)));
         }
     }
-    for (const sync_line of graph.sync_lines) {
-        rules.add(new SyncLineRule(sync_line.members, sync_line.shared));
-    }
     for (const node of graph.nodes) {
-        if (node.childs.size == 1 && set_element(node.childs).parents.size == 1) {
-            if (node.task.cook == set_element(node.childs).task.cook) {
-                rules.add(new PathRule(node, set_element(node.childs)));
+        // parent
+        // if (!node.isStart()) {
+        //     rules.add(new ParentRule(node));
+        // }
+        // neighbour
+        if (!node.isStart()) {
+            const parentNodes = parentNeighbours(node);
+            if (parentNodes.size > 1) {
+                rules.add(new NeighbourRule(parentNodes));
+            }
+        }
+        if (!node.isEnd()) {
+            const childNodes = childNeighbours(node);
+            if (childNodes.size > 1) {
+                rules.add(new NeighbourRule(childNodes));
             }
         }
     }
-    // if (loop_rules) {
-    //     for (const loop of graph.loops) {
-    //         for (const rule of create_loop_rules(loop)) {
-    //             rules.add(rule);
+    // for (const node of graph.nodes) {
+    //     if (node.childs.size == 1 && sample(node.childs).parents.size == 1) {
+    //         if (node.task.cook == sample(node.childs).task.cook) {
+    //             rules.add(new PathRule(node, sample(node.childs)));
     //         }
     //     }
     // }
     rules.add(new CookRule());
-    // rules.add(new EndRule(graph));
     return rules;
 }
 //# sourceMappingURL=create_rules.js.map

@@ -1,9 +1,11 @@
-export function set_element<T>(set: Set<T>): T {
+// sample
+export function sample<T>(set: Set<T>): T {
     for (const val of set) {
         return val;
     }
 }
-export function set_equal<T>(set1: Set<T>, set2: Set<T>): boolean {
+// compare
+export function setEqual<T>(set1: Set<T>, set2: Set<T>): boolean {
     if (set1.size != set2.size) {
         return false;
     }
@@ -14,10 +16,16 @@ export function set_equal<T>(set1: Set<T>, set2: Set<T>): boolean {
     }
     return true;
 }
-export function set_copy<T>(set: Set<T>): Set<T> {
-    return new Set<T>([...set]);
+export function setIncludes<T>(subset: Set<T>, superset: Set<T>): boolean {
+    for (const elem of subset) {
+        if (superset.has(elem)) {
+            return false;
+        }
+    }
+    return true;
 }
-export function set_intersection<T>(set1: Set<T>, set2: Set<T>): Set<T> {
+// operation
+export function setIntersection<T>(set1: Set<T>, set2: Set<T>): Set<T> {
     const intersection = new Set<T>();
     for (const elem of set1) {
         if (set2.has(elem)) {
@@ -26,6 +34,10 @@ export function set_intersection<T>(set1: Set<T>, set2: Set<T>): Set<T> {
     }
     return intersection;
 }
-export function set_merge<T>(set1: Set<T>, set2: Set<T>): Set<T> {
+export function setMerge<T>(set1: Set<T>, set2: Set<T>): Set<T> {
     return new Set([...set1, ...set2]);
+}
+// clone
+export function setClone<T>(set: Set<T>): Set<T> {
+    return new Set<T>([...set]);
 }

@@ -5,7 +5,8 @@ export class Lines {
         this.bottom = bottom;
         this.left = left;
     }
-    has_connector() {
+    // access
+    hasConnector() {
         let line_count = 0;
         for (const dir of ['top', 'right', 'bottom', 'left']) {
             if (this[dir] == 'in') {
@@ -14,16 +15,18 @@ export class Lines {
         }
         return line_count >= 2;
     }
-    is_empty() {
+    isEmpty() {
         return this.top === null && this.right === null && this.bottom === null && this.left === null;
     }
+    // clear
     clear() {
         this.top = null;
         this.right = null;
         this.bottom = null;
         this.left = null;
     }
-    copy() {
+    // clone
+    clone() {
         return new Lines(this.top, this.right, this.bottom, this.left);
     }
 }
@@ -32,39 +35,47 @@ export class SyncLines {
         this.top = top;
         this.bottom = bottom;
     }
-    is_empty() {
+    // access
+    isEmpty() {
         return this.top === null && this.bottom === null;
     }
+    // clear
     clear() {
         this.top = null;
         this.bottom = null;
     }
-    copy() {
+    // clone
+    clone() {
         return new SyncLines(this.top, this.bottom);
     }
 }
 // grid val
 export class Tile {
-    constructor(node = null, lines = new Lines(), sync_lines = new SyncLines(), cook_line = false) {
+    constructor(node = null, lines = new Lines(), sync_lines = new SyncLines(), cook_line = false, cook_title = '') {
         this.node = node;
         this.lines = lines;
         this.sync_lines = sync_lines;
         this.cook_line = cook_line;
+        this.cook_title = cook_title;
     }
-    is_solid() {
-        return (this.node !== null && !this.node.task.is_empty()) || this.lines.has_connector() || !this.sync_lines.is_empty();
+    // access
+    isSolid() {
+        return (this.node !== null && this.node.task !== null) /* || this.lines.hasConnector() */ || !this.sync_lines.isEmpty() || this.cook_title != '';
     }
-    is_empty() {
-        return this.node === null && this.lines.is_empty() && this.sync_lines.is_empty() && this.cook_line == false;
+    isEmpty() {
+        return this.node === null && this.lines.isEmpty() && this.sync_lines.isEmpty() && this.cook_line == false && this.cook_title == '';
     }
+    // clear
     clear() {
         this.node = null;
         this.lines.clear();
         this.sync_lines.clear();
         this.cook_line = false;
+        this.cook_title = '';
     }
-    copy() {
-        return new Tile(this.node, this.lines.copy(), this.sync_lines.copy(), this.cook_line);
+    // clone
+    clone() {
+        return new Tile(this.node, this.lines.clone(), this.sync_lines.clone(), this.cook_line, this.cook_title);
     }
 }
 //# sourceMappingURL=tile.js.map

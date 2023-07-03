@@ -1,9 +1,11 @@
-export function set_element(set) {
+// sample
+export function sample(set) {
     for (const val of set) {
         return val;
     }
 }
-export function set_equal(set1, set2) {
+// compare
+export function setEqual(set1, set2) {
     if (set1.size != set2.size) {
         return false;
     }
@@ -14,10 +16,16 @@ export function set_equal(set1, set2) {
     }
     return true;
 }
-export function set_copy(set) {
-    return new Set([...set]);
+export function setIncludes(subset, superset) {
+    for (const elem of subset) {
+        if (superset.has(elem)) {
+            return false;
+        }
+    }
+    return true;
 }
-export function set_intersection(set1, set2) {
+// operation
+export function setIntersection(set1, set2) {
     const intersection = new Set();
     for (const elem of set1) {
         if (set2.has(elem)) {
@@ -26,7 +34,11 @@ export function set_intersection(set1, set2) {
     }
     return intersection;
 }
-export function set_merge(set1, set2) {
+export function setMerge(set1, set2) {
     return new Set([...set1, ...set2]);
+}
+// clone
+export function setClone(set) {
+    return new Set([...set]);
 }
 //# sourceMappingURL=set.js.map

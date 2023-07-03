@@ -1,10 +1,13 @@
 .card {
+    /* align */
     position: relative;
-    color: var(--light-text-col);
-    background-color: var(--highlight-col);
-    
+    /* spacing */
     padding: 1rem;
+    /* border */
     border-radius: 1rem;
+    /* color */
+    color: var(--light-text);
+    background-color: var(--dark-bg);
 }
 
 .card input[type="text"] {
@@ -12,11 +15,12 @@
     border-top: none;
     border-right: none;
     border-bottom: 0.125rem solid;
-    border-radius: 0;
+    border-radius: 0.25rem;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 
     text-align: center;
     color: var(--light-text-col);
-    background-color: transparent;
 }
 
 .card > header {

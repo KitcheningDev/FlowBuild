@@ -1,27 +1,30 @@
 import { Vec2 } from "../../../utils/vec2.js";
-export function add_cook_lines(grid) {
-    const cooks_used = new Set();
-    for (const [node, coords] of grid.get_node_entries()) {
-        if (!node.task.cook.is_empty() && !cooks_used.has(node.task.cook.name)) {
-            const bounds = grid.get_hor_bounds((val) => { return val.task.cook.name == node.task.cook.name; });
-            // title
-            // const title = new Tile();
-            // title.node = new Node(new Task(node.task.cook.name, get_cook('')));
-            // grid.set(title, new Vec2(Math.floor(bounds.center()), 0));
-            if (grid.in_bounds(new Vec2(bounds.right + 1, 0)) && !grid.get(new Vec2(bounds.right + 1, 0)).cook_line) {
-                grid.insert_column(bounds.right + 1);
-                for (let y = 1; y < grid.get_size().y - 1; ++y) {
-                    const entry = grid.get_entry(new Vec2(bounds.right + 1, y));
-                    entry.tile.cook_line = true;
-                    const left = grid.get(new Vec2(bounds.right, y));
-                    if (left.lines.right !== null) {
-                        entry.tile.lines.right = left.lines.right;
-                        entry.tile.lines.left = left.lines.right == 'in' ? 'out' : 'in';
-                    }
-                    grid.set_entry(entry);
+export function addCookLines(grid, graph) {
+    if (graph.cookCount == 1) {
+        return;
+    }
+    const added = new Set();
+    for (const node of graph.nodes) {
+        const cook = node.task.cook;
+        if (cook && !added.has(cook)) {
+            const bounds = grid.bounds((node) => node.task.cook == cook);
+            if (bounds.left == 0) {
+                const entry = grid.getEntry(new Vec2(0, 0));
+                entry.tile.cook_title = cook.title;
+                grid.setEntry(entry);
+            }
+            if (bounds.right == grid.size.x - 1) {
+                const entry = grid.getEntry(new Vec2(grid.size.x - 1, 0));
+                entry.tile.cook_title = cook.title;
+                grid.setEntry(entry);
+            }
+            if (bounds.right + 1 != grid.size.x) {
+                grid.insertColumn(bounds.right + 1);
+                for (let y = 1; y < grid.size.y - 1; ++y) {
+                    grid.addCookLine(new Vec2(bounds.right + 1, y));
                 }
             }
-            cooks_used.add(node.task.cook.name);
+            added.add(cook);
         }
     }
 }

@@ -1,0 +1,39 @@
+/* text */
+input[type="text"] {
+    font-size: 1rem;
+
+    border: 0.2rem solid;
+    border-radius: 0.2rem;
+
+    padding: 0.25rem;
+    height: fit-content;
+    
+    color: var(--dark-text);
+    background-color: rgba(255, 255, 255, 0.015);
+}
+/* btn */
+.btn {
+    display: table;
+    cursor: pointer;
+}
+.btn * {
+    cursor: pointer;
+}
+.btn > label {
+    display: table-cell;
+    font-size: 1.25rem;
+    padding: 0.25rem;
+    vertical-align: middle;
+}
+/* radio */
+.radio {
+    display: inline-block;
+    padding: 0.25rem;
+    margin: 0.125rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.025);
+}
+.radio * {
+    cursor: pointer;
+}

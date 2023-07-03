@@ -1,42 +1,30 @@
 import { ObjID } from "../../utils/obj_id.js";
-import { set_copy, set_intersection } from "../../utils/set.js";
 import { Node } from "./node.js";
 import { Task } from "../recipe/task.js";
+import { setClone } from "../../utils/set.js";
 
 export class Loop extends ObjID {
-    nodes: Set<Node>;
-    backwards: Set<Node>;
-
-    loop_entries: Set<Node>;
-    loop_exits: Set<Node>;
-
-    loop_top: Node;
-    loop_bottom: Node;
-
-    backwards_heads: Set<Node>;
-    backwards_tails: Set<Node>;
-
     constructor(start: Node, loop_member: Node) {
         super();
 
         // set nodes
         this.nodes = new Set();
-        this.add_node(loop_member);
+        this.addNode(loop_member);
 
         // calc loop properties
-        this.calc_loop_entries();
-        this.calc_loop_exits();
-        this.calc_loop_top(start);
-        this.calc_loop_bottom(start);
+        this.calcLoopEntries();
+        this.calcLoopExits();
+        this.calcLoopTop(start);
+        this.calcLoopBottom(start);
 
         // backwards
-        this.calc_backwards_heads();
-        this.calc_backwards_tails();
-        this.calc_backwards();
+        this.calcBackwardsHeads();
+        this.calcBackwardsTails();
+        this.calcBackwards();
     }
-    thicken(): Set<Node> {
+    dummyfy(): Set<Node> {
         const added = new Set<Node>();
-        // add dummy top if necessary
+        // dummy top
         if (this.loop_top == this.loop_bottom) {
             const top = new Node(new Task('', this.loop_bottom.task.cook), new Set([...this.loop_bottom.parents]), new Set([this.loop_bottom]));
             this.loop_bottom.parents = new Set([top]);
@@ -50,7 +38,7 @@ export class Loop extends ObjID {
             this.loop_entries.add(top);
             added.add(top);
         }
-        // add dummy backwards if necessary
+        // dummy backwards
         if (this.backwards.size == 0) {
             const backwards = new Node(new Task('', this.loop_bottom.task.cook), new Set([this.loop_bottom]), new Set([this.loop_top]));
             this.nodes.add(backwards);
@@ -69,15 +57,14 @@ export class Loop extends ObjID {
         }
         return added;
     }
-    is_flat(): boolean {
-        return !this.loop_bottom.can_reach(this.loop_top);
+    isFlat(): boolean {
+        return !this.loop_bottom.reachable(this.loop_top);
     }
     flatten(): void {
-        if (this.is_flat()) {
+        if (this.isFlat()) {
             return;
         }
-
-        // change parents
+        // parents
         for (const backwards_head of this.backwards_heads) {
             this.loop_top.parents.delete(backwards_head);
         }
@@ -85,10 +72,9 @@ export class Loop extends ObjID {
             for (const parent of this.loop_top.parents) {
                 parent.childs.add(backwards_head);
             }
-            backwards_head.childs = set_copy(this.loop_top.parents);
+            backwards_head.childs = setClone(this.loop_top.parents);
         }
-
-        // change childs
+        // childs
         for (const loop_exit of this.loop_exits) {
             for (const backwards_node of this.backwards) {
                 if (loop_exit.childs.has(backwards_node)) {
@@ -97,7 +83,6 @@ export class Loop extends ObjID {
                 }
             }
         }
-
         // reverse
         for (const node of this.backwards) {
             const temp = node.childs;
@@ -106,18 +91,16 @@ export class Loop extends ObjID {
         }
     }
     unflatten(): void {
-        if (!this.is_flat()) {
+        if (!this.isFlat()) {
             return;
         }
-        
         // reverse
         for (const node of this.backwards) {
             const temp = node.childs;
             node.childs = node.parents;
             node.parents = temp;
         }
-
-        // change childs
+        // childs
         for (const loop_exit of this.loop_exits) {
             for (const backwards_node of this.backwards) {
                 if (loop_exit.parents.has(backwards_node)) {
@@ -126,8 +109,7 @@ export class Loop extends ObjID {
                 }
             }
         }
-
-        // change parents
+        // parents
         for (const backwards_head of this.backwards_heads) {
             for (const parent of this.loop_top.parents) {
                 parent.childs.delete(backwards_head);
@@ -138,24 +120,26 @@ export class Loop extends ObjID {
             this.loop_top.parents.add(backwards_head);
         }
     }
-    private calc_backwards(): void {
+
+    // calc
+    private calcBackwards(): void {
         this.backwards = new Set<Node>();
         for (const head of this.backwards_heads) {
-            this.add_backwards(head);
+            this.addBackwards(head);
         }
     }
-    private add_backwards(node: Node): void {
+    private addBackwards(node: Node): void {
         if (this.loop_exits.has(node)) {
             return;
         }
         this.backwards.add(node);
         for (const parent of node.parents) {
             if (this.nodes.has(parent)) {
-                this.add_backwards(parent);
+                this.addBackwards(parent);
             }
         }
     }
-    private calc_backwards_heads(): void {
+    private calcBackwardsHeads(): void {
         this.backwards_heads = new Set<Node>();
         for (const backwards_head of this.loop_top.parents) {
             if (this.nodes.has(backwards_head)) {
@@ -163,7 +147,7 @@ export class Loop extends ObjID {
             }
         }
     }
-    private calc_backwards_tails(): void {
+    private calcBackwardsTails(): void {
         this.backwards_tails = new Set<Node>();
         for (const backwards_tail of this.loop_bottom.childs) {
             if (this.nodes.has(backwards_tail)) {
@@ -171,52 +155,65 @@ export class Loop extends ObjID {
             }
         }
     }
-    private calc_loop_top(start: Node): void {
+    private calcLoopTop(start: Node): void {
         this.loop_top = null;
         for (const entry of this.loop_entries) {
-            if (this.loop_top === null || start.longest_distance(entry) < start.longest_distance(this.loop_top)) {
+            if (this.loop_top === null || start.maxDistance(entry) < start.minDistance(this.loop_top)) {
                 this.loop_top = entry;
             }
         }
     }
-    private calc_loop_bottom(start: Node): void {
+    private calcLoopBottom(start: Node): void {
         this.loop_bottom = null;
         for (const entry of this.loop_exits) {
-            if (this.loop_bottom === null || start.longest_distance(this.loop_bottom) < start.longest_distance(entry)) {
+            if (this.loop_bottom === null || start.maxDistance(this.loop_bottom) < start.minDistance(entry)) {
                 this.loop_bottom = entry;
             }
         }
     }
-    private calc_loop_entries(): void {
+    private calcLoopEntries(): void {
         this.loop_entries = new Set();
         for (const node of this.nodes) {
             for (const parent of node.parents) {
-                if (!node.can_reach(parent)) {
+                if (!node.reachable(parent)) {
                     this.loop_entries.add(node);
                     break;
                 }
             }
         }
     }
-    private calc_loop_exits(): void {
+    private calcLoopExits(): void {
         this.loop_exits = new Set();
         for (const node of this.nodes) {
             for (const child of node.childs) {
-                if (!child.can_reach(node)) {
+                if (!child.reachable(node)) {
                     this.loop_exits.add(node);
                     break;
                 }
             }
         }
     }
-    private add_node(node: Node): void {
+    private addNode(node: Node): void {
         if (!this.nodes.has(node)) {
             this.nodes.add(node);
             for (const child of node.childs) {
-                if (child.can_reach(node)) {
-                    this.add_node(child);
+                if (child.reachable(node)) {
+                    this.addNode(child);
                 }
             }
         }
     }
+
+    // members
+    nodes: Set<Node>;
+    backwards: Set<Node>;
+
+    loop_entries: Set<Node>;
+    loop_exits: Set<Node>;
+
+    loop_top: Node;
+    loop_bottom: Node;
+
+    backwards_heads: Set<Node>;
+    backwards_tails: Set<Node>;
 }

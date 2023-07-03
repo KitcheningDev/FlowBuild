@@ -25,3 +25,17 @@ th, td {
 .ingredient-delete:hover {
     opacity: 1;
 }
+/* input */
+input[type="text"].ingredient-property {
+    /* spacing */
+    padding: 0.5rem 1rem;
+    /* border */
+    border: none;
+    border-radius: 0.25rem;
+}
+td:nth-child(1) > *, th:nth-child(1) {
+    width: 6rem;
+}
+td:nth-child(2) > *, td:nth-child(3) > *, th:nth-child(2), th:nth-child(3) {
+    width: 3rem;
+}

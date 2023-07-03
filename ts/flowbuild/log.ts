@@ -8,22 +8,26 @@ export function log_graph(graph: Graph): void {
     for (const node of graph.nodes) {
         const childs = [];
         for (const child of node.childs) {
-            childs.push(child.task.description);
+            if (child.task) {
+                childs.push(child.task.description);
+            }
         }
         const parents = [];
         for (const parent of node.parents) {
-            parents.push(parent.task.description);
+            if (parent.task) {
+                parents.push(parent.task.description);
+            }
         }
         console.log('\t', node.task.description);
         console.log('\t\tPARENTS:', ...parents);
         console.log('\t\tCHILDS:', ...childs);
     }
 }
-export function log_grid(grid: FlowGrid): void {
+export function log_grid(grid: FlowGrid, msg: string = ""): void {
     let description_data = [] as string[][];
-    for (let y = 0; y < grid.get_size().y; ++y) {
+    for (let y = 0; y < grid.size.y; ++y) {
         const row = [];
-        for (let x = 0; x < grid.get_size().x; ++x) {
+        for (let x = 0; x < grid.size.x; ++x) {
             const tile = grid.get(new Vec2(x, y));
 
             let text = ' ';
@@ -35,7 +39,9 @@ export function log_grid(grid: FlowGrid): void {
                     text = "<DUMMY>";
                 }
             }
-
+            if (tile.cook_title) {
+                text += tile.cook_title;
+            }
             // arrows
             if (tile.lines.left == 'in') {
                 text = '▶' + text;
@@ -83,13 +89,14 @@ export function log_grid(grid: FlowGrid): void {
         }
         description_data.push(row);
     }
+    console.log("GRID " + msg);
     console.table(description_data);
 }
 export function log_metric_grid(grid: MetricGrid): void {
     let data = [] as string[][];
-    for (let y = 0; y < grid.get_size().y; ++y) {
+    for (let y = 0; y < grid.size.y; ++y) {
         const row = [];
-        for (let x = 0; x < grid.get_size().x; ++x) {
+        for (let x = 0; x < grid.size.x; ++x) {
             const tile = grid.get(new Vec2(x, y));
             
             row.push("POS " + Math.floor(tile.pos.x).toString() + " " + Math.floor(tile.pos.y).toString() + " DIM " + Math.floor(tile.dim.x).toString() + " " + Math.floor(tile.dim.y).toString());

@@ -1,29 +1,25 @@
-import { Vec2, vec2_sub } from "../../../utils/vec2.js";
+import { Vec2, vec2Sub } from "../../../utils/vec2.js";
 import { Graph } from "../../graph/graph.js";
 import { FlowGrid } from "../../grid/flow_grid.js";
 import { Rule } from "../rule.js";
 import { Node } from "../../graph/node.js";
-import { set_equal } from "../../../utils/set.js";
-import { filter_in_place } from "../../../utils/array.js";
+import { setEqual } from "../../../utils/set.js";
+import { filterInPlace } from "../../../utils/array.js";
+import { depth } from "../../graph/depth_map.js";
 
 export class ConnRule implements Rule {
-    parent: Node;
-    child: Node;
-    bw: boolean;
-
     constructor(parent: Node, child: Node, bw: boolean) {
         this.parent = parent;
         this.child = child;
         this.bw = bw;
     }
-
-    intersects_coords(from1: Vec2, to1: Vec2, from2: Vec2, to2: Vec2, reverse1: boolean, reverse2: boolean): boolean {
-        from1 = from1.copy();
-        to1 = to1.copy();
-        from2 = from2.copy();
-        to2 = to2.copy();
+    intersects(from1: Vec2, to1: Vec2, from2: Vec2, to2: Vec2, reverse1: boolean, reverse2: boolean): boolean {
+        from1 = from1.clone();
+        to1 = to1.clone();
+        from2 = from2.clone();
+        to2 = to2.clone();
         // console.log(from1, to1, from2, to2);
-        const diff1 = vec2_sub(to1, from1);
+        const diff1 = vec2Sub(to1, from1);
         if (reverse1) {
             if (diff1.x != 0) {
                 from1.x += Math.sign(diff1.x);
@@ -40,7 +36,7 @@ export class ConnRule implements Rule {
                 from1.x += Math.sign(diff1.x);
             }
         }
-        const diff2 = vec2_sub(to2, from2);
+        const diff2 = vec2Sub(to2, from2);
         if (reverse2) {
             if (diff2.x != 0) {
                 from2.x += Math.sign(diff2.x);
@@ -92,39 +88,39 @@ export class ConnRule implements Rule {
         }
         return false;
     }
-    should_compare(from1: Node, to1: Node, from2: Node, to2: Node): boolean {
-        return !set_equal(from1.childs, from2.childs) && !set_equal(to1.parents, to2.parents);
+    shouldCompare(from1: Node, to1: Node, from2: Node, to2: Node): boolean {
+        return !setEqual(from1.childs, from2.childs) && !setEqual(to1.parents, to2.parents);
     }
-
-    restricts(node: Node): boolean {
+    affects(node: Node): boolean {
         return this.parent == node || this.child == node;
     }
-    reduce_possible_x(node: Node, possible_x: number[], grid: FlowGrid, graph: Graph): void {
-        // console.log("reduce", this.parent.task.description, this.child.task.description);
-        if (!grid.has_node(this.parent) && !grid.has_node(this.child)) {
-            return;
+    possibleX(node: Node, possible_x: number[], grid: FlowGrid, graph: Graph): number[] {
+        if (!grid.hasNode(this.parent) && !grid.hasNode(this.child)) {
+            return possible_x;
         }
-
-        filter_in_place(possible_x, (x: number) => {
-            const parent_coords = grid.has_node(this.parent) ? grid.get_node_coords(this.parent) : new Vec2(x, graph.get_depth(this.parent));
-            const child_coords = grid.has_node(this.child) ? grid.get_node_coords(this.child) : new Vec2(x, graph.get_depth(this.child));
-            return this.bw && parent_coords.x == child_coords.x;
-        });
-
-        for (const [child, child2_coords] of grid.get_node_entries()) {
+        // filter_in_place(possible_x, (x: number) => {
+        //     const parent_coords = grid.has_node(this.parent) ? grid.get_node_coords(this.parent) : new Vec2(x, graph.get_depth(this.parent));
+        //     const child_coords = grid.has_node(this.child) ? grid.get_node_coords(this.child) : new Vec2(x, graph.get_depth(this.child));
+        //     return this.bw && parent_coords.x == child_coords.x;
+        // });
+        for (const [child, child2_coords] of grid.nodeEntries) {
             for (const parent of child.parents) {
-                if (grid.has_node(parent)) {
-                    const parent2_coords = grid.get_node_coords(parent);
-                    // console.log("compare", parent.task.description, child.task.description);
-                    if (this.should_compare(this.parent, this.child, parent, child)) {
-                        filter_in_place(possible_x, (x: number) => {
-                            const parent_coords = grid.has_node(this.parent) ? grid.get_node_coords(this.parent) : new Vec2(x, graph.get_depth(this.parent));
-                            const child_coords = grid.has_node(this.child) ? grid.get_node_coords(this.child) : new Vec2(x, graph.get_depth(this.child));
-                            return this.intersects_coords(parent_coords, child_coords, parent2_coords, child2_coords, graph.is_backwards(this.child), graph.is_backwards(child));
+                if (grid.hasNode(parent)) {
+                    const parent2_coords = grid.nodeCoords(parent);
+                    if (this.shouldCompare(this.parent, this.child, parent, child)) {
+                        filterInPlace(possible_x, (x: number) => {
+                            const parent_coords = grid.hasNode(this.parent) ? grid.nodeCoords(this.parent) : new Vec2(x, depth(this.parent));
+                            const child_coords = grid.hasNode(this.child) ? grid.nodeCoords(this.child) : new Vec2(x, depth(this.child));
+                            return this.intersects(parent_coords, child_coords, parent2_coords, child2_coords, graph.isBackwards(this.child), graph.isBackwards(child));
                         });
                     }
                 }
             }
         }
+        return possible_x;
     }
+    // members
+    parent: Node;
+    child: Node;
+    bw: boolean;
 }

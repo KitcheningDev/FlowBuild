@@ -1,242 +1,493 @@
-import { set_element, set_equal, set_merge } from "../utils/set.js";
+import { setIntersection } from "../utils/set.js";
+import { Vec2 } from "../utils/vec2.js";
+import { depth } from "./graph/depth_map.js";
 import { Graph } from "./graph/graph.js";
 import { Node } from "./graph/node.js";
+import { FlowGrid } from "./grid/flow_grid.js";
+import { Recipe } from "./recipe/recipe.js";
+import { Cook, Cook1, Cook2 } from "./recipe/task.js";
 
-function create_div(...cls: string[]): HTMLDivElement {
-    const div = document.createElement('div');
-    div.classList.add(...cls);
-    return div;
-}
-function create_line(): HTMLElement {
-    const wrapper = create_div('path');
-    wrapper.appendChild(create_div('path-line'));
-    wrapper.appendChild(create_div('path-angle', 'fa-solid', 'fa-angle-down', 'fa-xs'));
-    return wrapper;
-}
-
-export class Alignment {
-    members: (Alignment | Node)[];
-    type: 'hor' | 'ver' | 'path';
-    in: Set<Node>;
-    out: Set<Node>;
-    parents: Set<Node>;
-    childs: Set<Node>;
-
-    constructor(members: (Alignment | Node)[], type: 'hor' | 'ver' | 'path') {
-        this.members = members;
-        this.type = type;
-
-        this.in = new Set();
-        this.out = new Set();
-        this.parents = new Set();
-        this.childs = new Set();
-        if (type == 'hor') {
-            for (const member of members as Array<Alignment>) {
-                this.in = set_merge(this.in, member.in);
-                this.out = set_merge(this.out, member.out);
-                this.parents = set_merge(this.parents, member.parents);
-                this.childs = set_merge(this.childs, member.childs);
+function isMidCook(node: Node): boolean {
+    if (node.task.cook == Cook2) {
+        for (const parent of node.parents) {
+            if (parent.task.cook == Cook1) {
+                return true;
             }
         }
-        else if (type == 'ver') {
-            this.in = (members[0] as Alignment).in;
-            this.out = (members[members.length - 1] as Alignment).out;
-            this.parents = (members[0] as Alignment).parents;
-            this.childs = (members[members.length - 1] as Alignment).childs;
-        }
-        else if (type == 'path') {
-            this.in = new Set([members[0] as Node]);
-            this.out = new Set([members[members.length - 1] as Node]);
-            this.parents = set_merge(this.parents, (members[0] as Node).parents);
-            this.childs = set_merge(this.childs, (members[members.length - 1] as Node).childs);
+        for (const child of node.childs) {
+            if (child.task.cook == Cook1) {
+                return true;
+            }
         }
     }
-
-    to_html(): HTMLDivElement {
-        const div = create_div('align-' + this.type);
-        if (this.type == 'path') {
-            if (!(this.members[0] as Node).is_start()) {
-                const line = create_line();
-                const line_wrapper = create_div('wrapper');
-                line_wrapper.appendChild(line);
-                div.appendChild(line_wrapper);
-            }
-            for (const member of this.members as Node[]) {
-                const box = create_div('flow-task');
-                box.id = member.task.id.toString();
-                box.textContent = member.task.description;
-                if (member == this.members[0]) {
-                    box.classList.add('top');
-                }
-                if (member == this.members[this.members.length - 1]) {
-                    box.classList.add('bottom');
-                }
-
-                // connectors
-                box.append(create_div('editor-add', 'fa-solid', 'fa-plus', 'fa-sharp', 'fa-xl'));
-                box.append(create_div('editor-remove', 'fa-solid', 'fa-minus', 'fa-sharp', 'fa-xl'));
-                if (!member.is_last_step()) {
-                    box.appendChild(create_div('editor-connector'));
-                }
-
-                const wrapper = create_div('wrapper');
-                wrapper.appendChild(box);
-                div.appendChild(wrapper);
-
-                const line = create_line();
-                const line_wrapper = create_div('wrapper');
-                if (member == this.members[this.members.length - 1]) {
-                    if (member.is_end()) {
-                        break;
+    return false;
+}
+function isvalid(tree: Node[][]): boolean {
+    const set = new Set<Node>();
+    for (const row of tree) {
+        let foundMidCook2 = false;
+        let foundRealCook2 = false;
+        for (const el of row) {
+            if (el.task.cook == Cook2) {
+                if (isMidCook(el)) {
+                    if (foundRealCook2) {
+                        return false;
                     }
-                    line.classList.add('end');
-                    line_wrapper.classList.add('end');
+                    foundMidCook2 = true;
                 }
-                line_wrapper.appendChild(line);
-                div.appendChild(line_wrapper);
-            }
-        }
-        else if (this.type == 'hor') {
-            for (const member of this.members as Alignment[]) {
-                div.appendChild(member.to_html());
-            }
-        }
-        else if (this.type == 'ver') {
-            for (const member of this.members as Alignment[]) {
-                const member_html = member.to_html();
-                if (member == this.members[0]) {
-                    member_html.classList.add('top');
-                }
-                if (member == this.members[this.members.length - 1]) {
-                    member_html.classList.add('bottom');
-                }
-
-                const wrapper = create_div('wrapper');
-                if (member == this.members[this.members.length - 1]) {
-                    member_html.classList.add('end');
-                    wrapper.classList.add('end');
-                }
-                wrapper.appendChild(member_html);
-                div.appendChild(wrapper);
-            }
-        }
-        return div;
-    }
-};
-
-export function create_paths(graph: Graph): Set<Alignment> {
-    const relation_map = new Map<Node, Set<Node>>();
-    for (const node of graph.nodes) {
-        relation_map.set(node, new Set([node]));
-    }
-    for (const parent of graph.nodes) {
-        if (parent.childs.size == 1) {
-            const child = set_element(parent.childs);
-            if (child.parents.size == 1) {
-                let set = set_merge(relation_map.get(parent), relation_map.get(child));
-                for (const node of set) {
-                    relation_map.set(node, set);
+                else {
+                    foundRealCook2 = true;
                 }
             }
+            if (el.task.cook == Cook1 && (foundMidCook2 || foundRealCook2)) {
+                return false;
+            }
+            if (set.has(el)) {
+                return false;
+            }
+            set.add(el);
         }
     }
-
-    const paths = new Set<Alignment>();
-    const visited = new Set<Set<Node>>();
-    for (const [node, set] of relation_map) {
-        if (!visited.has(set)) {
-            paths.add(new Alignment([...set].sort((a: Node, b: Node) => graph.get_depth(a) - graph.get_depth(b)), 'path'));
-            visited.add(set);
-        }
-    }
-    return paths;
+    return true;
 }
-export function hor_merge(ver_aligns: Set<Alignment>, rigorous: boolean = true): Set<Alignment> {
-    const relation_map = new Map<Alignment, Set<Alignment>>();
-    for (const align of ver_aligns) {
-        relation_map.set(align, new Set([align]));
-    }
-    for (const align1 of ver_aligns) {
-        for (const align2 of ver_aligns) {
-            if (set_equal(align1.parents, align2.parents) && (!rigorous || set_equal(align1.childs, align2.childs))) {
-                const set = set_merge(relation_map.get(align1), relation_map.get(align2));
-                for (const align of set) {
-                    relation_map.set(align, set);
+function overlaps<T>(tree1: T[][], tree2: T[][]): boolean {
+    for (const row1 of tree1) {
+        for (const el1 of row1) {
+            for (const row2 of tree2) {
+                for (const el2 of row2) {
+                    if (el1 == el2) {
+                        return true;
+                    }
                 }
             }
         }
     }
-
-    const hor_aligns = new Set<Alignment>();
-    const visited = new Set<Set<Alignment>>();
-    for (const [align, set] of relation_map) {
-        if (!visited.has(set)) {
-            if (set.size == 1) {
-                hor_aligns.add(set_element(set));
+    return false;
+}
+function cut<T>(l1: T[], l2: T[]): T[] {
+    const out = [];
+    for (const el1 of l1) {
+        for (const el2 of l2) {
+            if (el1 == el2) {
+                out.push(el1);
             }
-            else {
-                hor_aligns.add(new Alignment([...set], 'hor'));
-            }
-            visited.add(set);
         }
     }
-    return hor_aligns;
+    return out;
 }
-export function ver_merge(hor_aligns: Set<Alignment>, rigorous: boolean = true): Set<Alignment> {
-    const relation_map = new Map<Alignment, Set<Alignment>>();
-    for (const align of hor_aligns) {
-        relation_map.set(align, new Set([align]));
+function matches<T>(left: T[], right: T[]): boolean {
+    const length = cut(left, right).length;
+    for (let i = 0; i < length; ++i) {
+        if (left[(left.length - length) + i] != right[i]) {
+            return false;
+        }
     }
-    for (const align1 of hor_aligns) {
-        for (const align2 of hor_aligns) {
-            if (set_equal(align1.childs, align2.in) && set_equal(align1.out, align2.parents)) {
-                const set = set_merge(relation_map.get(align1), relation_map.get(align2));
-                for (const align of set) {
-                    relation_map.set(align, set);
+    return true;
+}
+function dockable<T>(tree1: T[][], tree2: T[][]): number {
+    let docking = NaN;
+    for (let i1 = 0; i1 < tree1.length; ++i1) {
+        for (let i2 = 0; i2 < tree2.length; ++i2) {
+            if (0 < cut(tree1[i1], tree2[i2]).length) {
+                if (matches(tree1[i1], tree2[i2])) {
+                    docking = i1 - i2;
+                }
+                else {
+                    return NaN;
                 }
             }
         }
     }
-
-    const ver_aligns = new Set<Alignment>();
-    const visited = new Set<Set<Alignment>>();
-    for (const [align, set] of relation_map) {
-        if (!visited.has(set)) {
-            if (set.size == 1) {
-                ver_aligns.add(set_element(set));
+    return docking;
+}
+function merge<T>(left: T[], right: T[]): T[] {
+    return [...left, ...right.slice(cut(left, right).length)];
+}
+function dock<T>(tree1: T[][], tree2: T[][], where: number): T[][] {
+    const out = [];
+    if (where < 0) {
+        for (let i = 0; i < -where; ++i) {
+            out.push([]);
+        }
+        out.push(...tree1);
+        for (let i = 0; i < tree2.length; ++i) {
+            if (i == out.length) {
+                out.push([]);
             }
-            else {
-                ver_aligns.add(new Alignment([...set], 'ver'));
-            }
-            visited.add(set);
+            out[i] = merge(out[i], tree2[i]);
         }
     }
-    return ver_aligns;
+    else {
+        out.push(...tree1);
+        for (let i = 0; i < tree2.length; ++i) {
+            if (out.length <= i + where) {
+                out.push([]);
+            }
+            out[i + where] = merge(out[i + where], tree2[i]);
+        }
+    }
+    return out;
 }
-export function align(graph: Graph): Alignment {
-    let aligns = create_paths(graph);
-    let rigorous = true;
-    while (true) {
-        const hor_aligns = hor_merge(aligns, rigorous);
-        if (hor_aligns.size < aligns.size) {
-            aligns = hor_aligns;
-            rigorous = true;
-            continue;
+function replace<T>(lists: T[][][], left: T[][], right: T[][], where: number): T[][][] {
+    return [...lists, dock(left, right, where)].filter((val: T[][]) => val != left && val != right);
+}
+function rigidResolve<T>(trees: T[][][]): T[][][] | null {
+    for (const tree1 of trees) {
+        for (const tree2 of trees) {
+            if (tree1 == tree2) {
+                continue;
+            }
+            if (overlaps(tree1, tree2)) {
+                const docking1 = dockable(tree1, tree2);
+                if (!isNaN(docking1) && isvalid(dock(tree1, tree2, docking1) as Node[][])) {
+                    return rigidResolve(replace(trees, tree1, tree2, docking1));
+                }
+                const docking2 = dockable(tree2, tree1);
+                if (!isNaN(docking2) && isvalid(dock(tree2, tree1, docking2) as Node[][])) {
+                    return rigidResolve(replace(trees, tree2, tree1, docking2));
+                }
+                return null;
+            }
         }
-        const ver_aligns = ver_merge(aligns, rigorous);
-        if (ver_aligns.size < aligns.size) {
-            aligns = ver_aligns;
-            rigorous = true;
-            continue;
-        }
+    }
+    return trees;
+}
 
-        if (rigorous) {
-            rigorous = false;
+function swap<T>(list: T[], i1: number, i2: number): void {
+    const temp = list[i1];
+    list[i1] = list[i2];
+    list[i2] = temp;
+}
+function permuate<T>(list: T[], callback: (list: T[]) => boolean, index: number = 0): boolean {
+    if (index == Math.min(list.length, 4)) {
+        return callback(list);
+    }
+    for (let i = index; i < list.length; ++i) {
+        swap(list, index, i);
+        if (permuate(list, callback, index + 1)) {
+            return true;
+        }
+        swap(list, index, i);
+    }
+}
+function resolve<T>(trees: T[][][], graph: Graph): T[][] | null {
+    let out = null;
+    const rows = [] as T[][];
+    for (const tree of trees) {
+        for (const row of tree) {
+            if (1 < row.length) {
+                rows.push(row);
+            }
+        }
+    }
+    const tryResolve = () => {
+        const resolved = rigidResolve(trees);
+        if (resolved) {
+            out = [];
+            for (let i = 0; i <= graph.maxDepth; ++i) {
+                out.push([]);
+            }
+            for (const tree of resolved) {
+                out = dock(out, tree, depth(tree[0][0] as Node));
+            }
+            return true;
         }
         else {
-            break;
+            return false;
         }
     }
-    console.log(...aligns);
-    return set_element(aligns);
+    const callback = (list: T[]) => {
+        let foundbw = false;
+        for (const node of list) {
+            if (graph.isBackwards(node as Node)) {
+                foundbw = true;
+            }
+            else if (foundbw) {
+                return false;
+            }
+        }
+        const index = rows.findIndex((val: T[]) => val == list);
+        if (index + 1 == rows.length) {
+            // console.warn('ITERATION');
+            // for (const tree of trees) {
+            //     console.warn("\t", "TREE");
+            //     for (const row of tree) {
+            //         const rowlog = [];
+            //         for (const el of row) {
+            //             rowlog.push(el.task.description);
+            //         }
+            //         console.warn("\t\t", ...rowlog);
+            //     }
+            // }
+            return tryResolve();
+        }
+        else {
+            return permuate(rows[index + 1], callback);
+        }
+    };
+    if (0 < rows.length) {
+        permuate(rows[0], callback);
+    }
+    else {
+        tryResolve();
+    }
+    // permuate(trees, () => {
+    //     return permuate(trees[0], callback);
+    // });
+    return out;
+}
+
+function createAligns(graph: Graph): any[][][] {
+    const aligns = [];
+    for (const node of graph.nodes) {
+        for (const nodes of [new Set([...node.parents, node]), new Set([...node.childs, node])]) {
+            if (nodes.size == 1) {
+                continue;
+            }
+            if (nodes.size == 2) {
+                const other = [...nodes].find((other: Node) => other != node);
+                if (node.parents.has(other)) {
+                    if (1 < other.childs.size) {
+                        continue;
+                    }
+                }
+                else if (node.childs.has(other)) {
+                    if (1 < other.parents.size) {
+                        continue;
+                    }
+                }
+            }
+            let miny = Infinity;
+            let maxy = -Infinity;
+            for (const node of nodes) {
+                if (depth(node) < miny) {
+                    miny = depth(node);
+                }
+                if (maxy < depth(node)) {
+                    maxy = depth(node);
+                }
+            }
+            const tree = [];
+            for (let i = 0; i <= maxy - miny; ++i) {
+                tree.push([]);
+            }
+            for (const node of nodes) {
+                tree[depth(node) - miny].push(node);
+            }
+            aligns.push(tree);
+        }
+    }
+    for (const loop of graph.loops) {
+        const textlist = [];
+        for (const node of [...loop.loop_entries, ...loop.backwards_heads]) {
+            textlist.push(node);
+        }
+        aligns.push([textlist]);
+    }
+    return aligns;
+}
+
+function getDependancies<T>(aligns: T[][][]): T[][] {
+    const out = [];
+    for (const align of aligns) {
+        const dep = [];
+        for (const row of align) {
+            dep.push(...row);
+        }
+        out.push(dep);
+    }
+    return out;
+}
+function weigh(aligns: Node[][][], resolved: Node[][], graph: Graph): Map<Node, number> {
+    const weights = new Map<Node, number>();
+    for (const align of aligns) {
+        for (const row of align) {
+            for (const node of row) {
+                weights.set(node, 0);
+            }
+        }
+    }
+    const dep = getDependancies(aligns);
+    console.log("DEP", ...dep);
+    console.log("ALIGNS", ...aligns);
+    function change(): boolean {
+        let changed = false;
+        // order
+        for (const row of resolved) {
+            for (let i = 1; i < row.length; ++i) {
+                if (weights.get(row[i]) <= weights.get(row[i - 1])) {
+                    weights.set(row[i], weights.get(row[i - 1]) + 1);
+                    console.log("ORDER CHANGE", row[i - 1].task.description, row[i].task.description);
+                    changed = true;
+                }
+            }
+        }
+        // bw
+        for (const node of graph.nodes) {
+            if (graph.isBackwards(node)) {
+                for (const child of node.childs) {
+                    if (!graph.isBackwards(child) && weights.get(node) <= weights.get(child)) {
+                        weights.set(node, weights.get(child) + 1);
+                        console.log("BW CHANGE", node.task.description, child.task.description);
+                        changed = true;
+                    }
+                }
+            }
+        }
+        // parent child
+        let parentchild = false;
+        for (const list of dep) {
+            if (parentchild) {
+                break;
+            }
+            let minDepth = Infinity;
+            let maxDepth = -Infinity;
+            let minWeight = Infinity;
+            let maxWeight = -Infinity;
+            for (const node of list) {
+                const weight = weights.get(node);
+                const d = depth(node as Node);
+                if (weight < minWeight) {
+                    minWeight = weight;
+                }
+                if (maxWeight < weight) {
+                    maxWeight = weight;
+                }
+                if (d < minDepth) {
+                    minDepth = d;
+                }
+                if (maxDepth < d) {
+                    maxDepth = d;
+                }
+            }
+            for (let y = minDepth; y <= maxDepth; ++y) {
+                for (const node of resolved[y]) {
+                    const weight = weights.get(node);
+                    if (minWeight <= weight && weight <= maxWeight) {
+                        if (!list.includes(node)) {
+                            if (0.5 < Math.random()) {
+                                for (const otherlist of dep) {
+                                    if (otherlist.includes(node) && setIntersection(new Set(list), new Set(otherlist)).size == 0) {
+                                        for (const othernode of otherlist) {
+                                            weights.set(othernode, Math.max(weights.get(othernode), maxWeight + 1));
+                                        }
+                                    }
+                                }
+                                weights.set(node, maxWeight + 1);
+                            }
+                            else {
+                                for (const othernode of list) {
+                                    weights.set(othernode, weights.get(node) + 1);
+                                }
+                            }
+                            console.log("PARENT CHANGE", list, node.task.description);
+                            console.log("PARENT CHILD");
+                            for (const row of resolved) {
+                                const rowlog = [];
+                                for (const el of row) {
+                                    rowlog.push(el.task.description, weights.get(el));
+                                }
+                                console.log("\t", ...rowlog);
+                            }
+                    
+                            changed = true;
+                            parentchild = true;
+                        }
+                    }
+                }
+            }
+        }
+        // cook
+        for (const node of weights.keys()) {
+            if (node.task.cook == Cook1) {
+                for (const other of [...weights.keys()]) {
+                    if (other.task.cook == Cook2) {
+                        if (weights.get(other) <= weights.get(node)) {
+                            weights.set(other, weights.get(node) + 1);
+                        }
+                    }
+                }
+            }
+        }
+        console.log("CHANGE");
+        for (const row of resolved) {
+            const rowlog = [];
+            for (const el of row) {
+                rowlog.push(el.task.description, weights.get(el));
+            }
+            console.log("\t", ...rowlog);
+        }
+        // for (const align of aligns) {
+        //     if (1 < align.length) {
+        //         // avg
+        //         if (align[0].length == 1 && 1 < align[1].length) {
+        //             const weight = weights.get(align[0][0]);
+        //             const left = weights.get(align[1][0]);
+        //             const right = weights.get(align[1][align[1].length - 1]);
+        //             if (weight <= left) {
+        //                 weights.set(align[0][0], (left + right) / 2);
+        //                 changed = true;
+        //             }
+        //             else if (right <= weight) {
+        //                 weights.set(align[1][0], weight - align[1].length / 2);
+        //                 changed = true;
+        //             }
+        //         }
+        //         else if (align[1].length == 1 && 1 < align[0].length) {
+        //             const weight = weights.get(align[1][0]);
+        //             const left = weights.get(align[0][0]);
+        //             const right = weights.get(align[0][align[0].length - 1]);
+        //             if (weight <= left) {
+        //                 weights.set(align[1][0], (left + right) / 2);
+        //                 changed = true;
+        //             }
+        //             else if (right <= weight) {
+        //                 weights.set(align[0][0], weight - align[0].length / 2);
+        //                 changed = true;
+        //             }
+        //         }
+        //         else if (align[0].length == 1 && align[1].length == 1){
+        //             const max = Math.max(weights.get(align[0][0]), weights.get(align[1][0]));
+        //             weights.set(align[0][0], max);
+        //             weights.set(align[1][0], max);
+        //             changed = true;
+        //         }
+        //     }
+        // }
+        return changed;
+    }
+    let iteration = 0;
+    while (change() && iteration++ < 20) {
+        continue;
+    }
+    if (20 <= iteration) {
+        console.error("ITERATION LIMIT REACHED");
+    }
+    return weights;
+}
+export function createGrid(graph: Graph): FlowGrid {
+    const map = weigh(createAligns(graph), resolve(createAligns(graph), graph), graph);
+    console.log("RESOLVED");
+    for (const row of resolve(createAligns(graph), graph)) {
+        const rowlog = [];
+        for (const el of row) {
+            rowlog.push(el.task.description, map.get(el));
+        }
+        console.log("\t\t", ...rowlog);
+    }
+    const order = [...map.entries()].sort((a: [Node, number], b: [Node, number]) => a[1] - b[1]);
+    console.log("ORDER");
+    for (const [node, weight] of order) {
+        console.log("\t", node.task.description, weight);
+    }
+    const grid = new FlowGrid(graph);
+    grid.setSize(new Vec2(order.length, graph.maxDepth + 1));
+    let x = 0;
+    for (let i = 0; i < order.length; ++i) {
+        if (i != 0 && order[i - 1][1] < order[i][1]) {
+            x += 1;
+        }
+        grid.setNode(order[i][0], new Vec2(i, depth(order[i][0])));
+    }
+    return grid;
 }

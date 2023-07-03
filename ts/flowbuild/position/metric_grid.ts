@@ -1,263 +1,294 @@
-import { Vec2, vec2_abs, vec2_div, vec2_sub } from "../../utils/vec2.js";
+import { sample, setEqual } from "../../utils/set.js";
+import { Vec2, vec2Abs, vec2Sub } from "../../utils/vec2.js";
+import { createCenterOrder } from "../collapse/post_process/center.js";
+import { Graph } from "../graph/graph.js";
 import { Node } from "../graph/node.js";
-import { HorBounds } from "../grid/bounds.js";
-import { FlowGrid } from "../grid/flow_grid.js";
-import { Grid, ITile } from "../grid/grid.js";
-import { get_tile_size } from "./get_tile_size.js";
-
-class MetricTile implements ITile {
-    pos: Vec2;
-    dim: Vec2;
-    no_margin: Vec2;
-
-    constructor(pos: Vec2 = new Vec2(0, 0), dim: Vec2 = new Vec2(0, 0), no_margin: Vec2 = new Vec2(0, 0)) {
-        this.pos = pos;
-        this.dim = dim;
-        this.no_margin = no_margin;
-    }
-
-    is_empty(): boolean {
-        return this.dim.x == 0 && this.dim.y == 0;
-    }
-    copy(): any {
-        return new MetricTile(this.pos.copy(), this.dim.copy(), this.no_margin.copy());
-    }
-
-    top(): number {
-        return this.pos.y - this.dim.y / 2;
-    }
-    right(): number {
-        return this.pos.x + this.dim.x / 2;
-    }
-    bottom(): number {
-        return this.pos.y + this.dim.y / 2;
-    }
-    left(): number {
-        return this.pos.x - this.dim.x / 2;
-    }
-};
+import { Bounds, HorBounds, VerBounds } from "../grid/bounds.js";
+import { Entry, FlowGrid } from "../grid/flow_grid.js";
+import { Grid } from "../grid/grid.js";
+import { createMetricTile } from "./html_size.js";
+import { MetricTile } from "./metric_tile.js";
 
 export class MetricGrid extends Grid<MetricTile> {
-    constructor(flow_grid: FlowGrid) {
-        super(() => {}, () => new MetricTile(), flow_grid.get_size());
-        this.set_dim(flow_grid);
-        this.set_pos_x(flow_grid);
-        this.set_pos_y(flow_grid);
-        // center start, last step
-        const start_entry = super.get_entry(new Vec2(0, 0));
-        start_entry.tile.pos.x = this.get_grid_center().x;
-        super.set_entry(start_entry);
-        const last_step_entry = super.get_entry(new Vec2(0, flow_grid.get_size().y - 1));
-        last_step_entry.tile.pos.x = start_entry.tile.pos.x;
-        super.set_entry(last_step_entry);        
-    }
-    
-    set_dim(flow_grid: FlowGrid): void {
-        for (const [tile, coords] of flow_grid.get_entries()) {
-            const entry = super.get_entry(coords);
-            entry.tile.dim = get_tile_size(tile);
-            entry.tile.no_margin = get_tile_size(tile, false);
-            super.set_entry(entry);
+    constructor(flow_grid: FlowGrid, graph: Graph) {
+        super(() => {}, () => new MetricTile(), flow_grid.size);
+        for (const [tile, coords] of flow_grid.entries) {
+            this.set(createMetricTile(tile), coords);
         }
-    }
-    set_pos_x(flow_grid: FlowGrid): void {
-        for (let y = 0; y  < flow_grid.get_size().y; ++y) {
-            const entry = super.get_entry(new Vec2(0, y));
-            entry.tile.pos.x = 0;
-            super.set_entry(entry);
-        }
-        for (let x = 1; x < flow_grid.get_size().x; ++x) {
-            while (true) {
-                let has_changed = false;
-                for (let y = 0; y  < flow_grid.get_size().y; ++y) {
-                    const tile = flow_grid.get(new Vec2(x, y));
-                    let max_x = super.get(new Vec2(x - 1, y)).right() + super.get(new Vec2(x, y)).dim.x / 2;
-                    if (tile.node !== null) {
-                        for (const sibling of [...tile.node.parents, ...tile.node.childs]) {
-                            if (sibling.is_end()) {
-                                continue;
-                            }
-                            const coords = flow_grid.get_node_coords(sibling);
-                            if (coords.x < x) {
-                                max_x = Math.max(super.get(coords).right(), max_x);
-                            }
-                            else if (coords.x == x) {
-                                max_x = Math.max(super.get(coords).pos.x, max_x);
-                            }
-                        }
-                    }
-                    if (tile.lines.top != null) {
-                        max_x = Math.max(super.get(new Vec2(x, y - 1)).pos.x, max_x);
-                    }
-                    if (tile.lines.bottom != null) {
-                        max_x = Math.max(super.get(new Vec2(x, y + 1)).pos.x, max_x);
-                    }
-                    if (tile.sync_lines.top !== null) {
-                        max_x = Math.max(super.get(new Vec2(x, y + 1)).pos.x, max_x);
-                    }
-                    if (tile.sync_lines.bottom !== null) {
-                        max_x = Math.max(super.get(new Vec2(x, y - 1)).pos.x, max_x);
-                    }
-                    if (tile.cook_line) {
-                        max_x = Math.max(super.get(new Vec2(x, y - 1)).pos.x, max_x);
-                        max_x = Math.max(super.get(new Vec2(x, y + 1)).pos.x, max_x);
-                    }
-                    const entry = super.get_entry(new Vec2(x, y));
-                    if (entry.tile.pos.x < max_x) {
-                        has_changed = true;
-                        entry.tile.pos.x = max_x;
-                    }
-                    super.set_entry(entry);
-                }
-                if (!has_changed) {
-                    break;
-                }
+
+        // naive
+        // for (let y = 0; y < flow_grid.size.y; ++y) {
+        //     let maxy = 0;
+        //     for (let x = 0; x < flow_grid.size.x; ++x) {
+        //         maxy = Math.max(this.get(new Vec2(x, y)).height, maxy);
+        //     }
+        //     const posy = (0 < y ? this.get(new Vec2(0, y).up()).bottom : 0) + maxy / 2;
+        //     for (let x = 0; x < flow_grid.size.x; ++x) {
+        //         const entry = this.getEntry(new Vec2(x, y));
+        //         entry.tile.pos.y = posy;
+        //         entry.tile.dim.y = maxy;
+        //         this.setEntry(entry);
+        //     }
+        // }
+        // for (let x = 0; x < flow_grid.size.x; ++x) {
+        //     let maxx = 0;
+        //     for (let y = 0; y < flow_grid.size.y; ++y) {
+        //         maxx = Math.max(this.get(new Vec2(x, y)).width, maxx);
+        //     }
+        //     const posx = (0 < x ? this.get(new Vec2(x, 0).left()).right : 0) + maxx / 2;
+        //     for (let y = 0; y < flow_grid.size.y; ++y) {
+        //         const entry = this.getEntry(new Vec2(x, y));
+        //         entry.tile.pos.x = posx;
+        //         entry.tile.dim.x = maxx;
+        //         this.setEntry(entry);
+        //     }
+        // }
+        this.setPosX(flow_grid);
+        for (const [node, relatives] of createCenterOrder(flow_grid, graph)) {
+            const bounds = flow_grid.bounds((node: Node) => relatives.has(node));
+            let entry = null;
+            if (node.isStart() || setEqual(node.childs, relatives)) {
+                entry = this.getEntry(flow_grid.nodeIn(sample(relatives)).up());
             }
-        }
-    }
-    set_pos_y(flow_grid: FlowGrid): void {
-        for (let x = 0; x  < flow_grid.get_size().x; ++x) {
-            const entry = super.get_entry(new Vec2(x, 0));
-            entry.tile.pos.y = entry.tile.dim.y / 2;
-            super.set_entry(entry);
-        }
-        for (let y = 1; y < flow_grid.get_size().y; ++y) {
-            while (true) {
-                let has_changed = false;
-                for (let x = 0; x  < flow_grid.get_size().x; ++x) {
-                    const tile = flow_grid.get(new Vec2(x, y));
-                    const entry = super.get_entry(new Vec2(x, y));
-
-                    let max_y = 0;
-                    for (let index = 0; index < flow_grid.get_size().x; ++index) {
-                        const index_tile = super.get(new Vec2(index, y - 1));
-                        if (entry.tile.left() < index_tile.right() && index_tile.left() < entry.tile.right()) {
-                            max_y = Math.max(index_tile.bottom(), max_y);
-                        }
-                    }
-                    max_y += super.get(new Vec2(x, y)).dim.y / 2;
-
-                    if (tile.node !== null) {
-                        for (const sibling of [...tile.node.parents, ...tile.node.childs]) {
-                            if (sibling.is_end()) {
-                                continue;
-                            }
-                            const coords = flow_grid.get_node_coords(sibling);
-                            if (coords.y < y) {
-                                max_y = Math.max(super.get(coords).bottom(), max_y);
-                            }
-                            else if (coords.y ==  y && coords.x < x) {
-                                max_y = Math.max(super.get(coords).pos.y, max_y);
-                            }
-                        }
-                    }
-                    if (tile.lines.top !== null) {
-                        max_y = Math.max(super.get(new Vec2(x, y - 1)).bottom(), max_y);
-                    }
-                    if (tile.lines.bottom !== null) {
-                        max_y = Math.max(super.get(new Vec2(x, y + 1)).bottom(), max_y);
-                    }
-                    if (tile.lines.left !== null) {
-                        max_y = Math.max(super.get(new Vec2(x - 1, y)).pos.y, max_y);
-                    }
-                    if (tile.lines.right !== null) {
-                        max_y = Math.max(super.get(new Vec2(x + 1, y)).pos.y, max_y);
-                    }
-                    if (tile.sync_lines.top) {
-                        if (tile.sync_lines.top != 'left' && 0 < x) {
-                            max_y = Math.max(super.get(new Vec2(x - 1, y)).pos.y, max_y);
-                        }
-                        if (tile.sync_lines.top != 'right' && x < super.get_size().x - 1) {
-                            max_y = Math.max(super.get(new Vec2(x + 1, y)).pos.y, max_y);
-                        }
-                    }
-                    if (tile.sync_lines.bottom) {
-                        if (tile.sync_lines.bottom != 'left' && 0 < x) {
-                            max_y = Math.max(super.get(new Vec2(x - 1, y)).pos.y, max_y);
-                        }
-                        if (tile.sync_lines.bottom != 'right' && x < super.get_size().x - 1) {
-                            max_y = Math.max(super.get(new Vec2(x + 1, y)).pos.y, max_y);
-                        }
-                    }
-
-                    if (entry.tile.pos.y < max_y) {
-                        entry.tile.pos.y = max_y;
-                        has_changed = true;
-                    }
-                    super.set_entry(entry);
-                }
-                if (!has_changed) {
-                    break;
-                }
+            else {
+                entry = this.getEntry(flow_grid.nodeOut(sample(relatives)).down());
             }
+            const left = this.get(flow_grid.nodeCoords(bounds.left_node)).left;
+            const right = this.get(flow_grid.nodeCoords(bounds.right_node)).right;
+            // console.log(node.task.description, (left + right) / 2);
+            entry.tile.pos.x = Math.max((left + right) / 2, entry.tile.pos.x);
+            this.setEntry(entry);
+            this.setPosX(flow_grid);
         }
-        // const last_step_entry = super.get_entry(new Vec2(0, flow_grid.get_size().y - 1));
-        // last_step_entry.tile.pos.y = super.get_entry(new Vec2(0, flow_grid.get_size().y - 2)).tile.pos.y;
-        // last_step_entry.tile.pos.y += last_step_entry.tile.dim.y / 2;
-        // super.set_entry(last_step_entry);
+        this.setPosY(flow_grid);
+
+        // cook title
+        if (flow_grid.get(new Vec2(0, 0)).cook_title != '') {
+            const entry = this.getEntry(new Vec2(0, 0));
+            entry.tile.pos.x = this.bounds.left + entry.tile.width / 2;
+            this.setEntry(entry);
+        }
+        if (flow_grid.get(new Vec2(flow_grid.size.x - 1, 0)).cook_title != '') {
+            const entry = this.getEntry(new Vec2(flow_grid.size.x - 1, 0));
+            entry.tile.pos.x = this.bounds.right - entry.tile.width / 2;
+            this.setEntry(entry);
+        }
     }
-
-    get_grid_dim(): Vec2 {
-        let max_x = -Infinity;
-        let min_x = Infinity;
-        let max_y = -Infinity;
-        let min_y = Infinity;
-        for (let y = 0; y < super.get_size().y; ++y) {
-            max_x = Math.max(super.get(new Vec2(super.get_size().x - 1, y)).right(), max_x);
-            min_x = Math.min(super.get(new Vec2(0, y)).left(), min_x);
-        }
-        for (let x = 0; x < super.get_size().x; ++x) {
-            max_y = Math.max(super.get(new Vec2(x, super.get_size().y - 1)).bottom(), max_y);
-            min_y = Math.min(super.get(new Vec2(x, 0)).top(), min_y);
-        }
-        return new Vec2(max_x - min_x, max_y - min_y);
+    intersect(tile1: MetricTile, tile2: MetricTile): boolean {
+        const xintersect = (tile1.left <= tile2.right && tile2.left <= tile1.right);
+        const yintersect = (tile1.top <= tile2.bottom && tile2.top <= tile1.bottom);
+        return xintersect && yintersect;
     }
-    get_grid_center(): Vec2 {
-        let max_x = -Infinity;
-        let min_x = Infinity;
-        let max_y = -Infinity;
-        let min_y = Infinity;
-        for (let y = 0; y < super.get_size().y; ++y) {
-            max_x = Math.max(super.get(new Vec2(super.get_size().x - 1, y)).right(), max_x);
-            min_x = Math.min(super.get(new Vec2(0, y)).left(), min_x);
-        }
-        for (let x = 0; x < super.get_size().x; ++x) {
-            max_y = Math.max(super.get(new Vec2(x, super.get_size().y - 1)).bottom(), max_y);
-            min_y = Math.min(super.get(new Vec2(x, 0)).top(), min_y);
-        }
-        return vec2_div(new Vec2(max_x + min_x, max_y + min_y), 2);
-    }
-
-    diff(coords1: Vec2, coords2: Vec2): Vec2 {
-        return vec2_abs(vec2_sub(super.get(coords2).pos, super.get(coords1).pos));
-    }
-
-    get_hor_bounds(cond: (node: Node) => boolean, flow_grid: FlowGrid): HorBounds | null{
-        let left = Infinity;
-        let left_node = null;
-        let right = -Infinity;
-        let right_node = null;
-        for (const [node, pos] of flow_grid.get_node_entries()) {
-            if (cond(node)) {
-                const curr_left = super.get(pos).left();
-                const curr_right = super.get(pos).right();
-
-                if (curr_left < left) {
-                    left = curr_left;
-                    left_node = node;
-                }
-                if (right < curr_right) {
-                    right = curr_right;
-                    right_node = node;
-                }
-            }
-        }
-
-        if (left == Infinity || right == -Infinity) {
-            return null;
+    // set x
+    updatePosX(coords: Vec2, flow_grid: FlowGrid): boolean {
+        let posx = null;
+        if (0 < coords.x) {
+            posx = this.get(coords.left()).right + Math.floor(this.get(coords).width / 2);
         }
         else {
-            return new HorBounds(left, right, left_node, right_node);
+            posx = Math.ceil(this.get(coords).width / 2);
+        }
+        const tile = flow_grid.get(coords);
+        // lines
+        if (tile.lines.top != null && tile.sync_lines.isEmpty() && flow_grid.get(coords.up()).sync_lines.isEmpty()) {
+            posx = Math.max(super.get(coords.up()).pos.x, posx);
+        }
+        if (tile.lines.bottom != null && flow_grid.get(coords.down()).sync_lines.isEmpty()) {
+            posx = Math.max(super.get(coords.down()).pos.x, posx);
+        }
+        // cook line
+        if (tile.cook_line) {
+            posx = Math.max(super.get(coords.up()).pos.x, super.get(coords.down()).pos.x, posx);
+        }
+        // cook title
+        if (tile.cook_title != '') {
+            posx = Math.max(super.get(coords.down()).pos.x, posx);
+        }
+        // update
+        const entry = super.getEntry(coords);
+        if (entry.tile.pos.x < posx) {
+            entry.tile.pos.x = posx;
+            super.setEntry(entry);
+            return true;
+        }
+        else {
+            return false;
         }
     }
+    setPosX(flow_grid: FlowGrid): void {
+        for (let x = 0; x < flow_grid.size.x; ++x) {
+            let updated = true;
+            while (updated) {
+                updated = false;
+                for (let y = 0; y < flow_grid.size.y; ++y) {
+                    const coords = new Vec2(x, y);
+                    updated ||= this.updatePosX(coords, flow_grid);
+                }
+            }
+        }
+    }
+    // set y
+    updatePosY(coords: Vec2, flow_grid: FlowGrid): boolean {
+        const metrictile = this.get(coords);
+        let posy = this.get(coords.up()).bottom + Math.ceil(this.get(coords).height / 2);
+        // above
+        for (let index = 0; index < flow_grid.size.x; ++index) {
+            const index_tile = super.get(new Vec2(index, coords.y).up());
+            if (metrictile.left < index_tile.right && index_tile.left < metrictile.right) {
+                posy = Math.max(index_tile.bottom, posy);
+            }
+        }
+        const tile = flow_grid.get(coords);
+        // node
+        if (tile.node !== null) {
+            for (const parent of tile.node.parents) {
+                const parent_coords = flow_grid.nodeCoords(parent);
+                if (parent_coords.y < coords.y) {
+                    posy = Math.max(super.get(parent_coords).bottom, posy);
+                }
+            }
+        }
+        // line
+        if (tile.lines.left !== null) {
+            posy = Math.max(super.get(coords.left()).pos.y, posy);
+        }
+        if (tile.lines.right !== null) {
+            posy = Math.max(super.get(coords.right()).pos.y, posy);
+        }
+        // sync line
+        if (tile.sync_lines.top) {
+            if (tile.sync_lines.top != 'left') {
+                posy = Math.max(super.get(coords.left()).pos.y, posy);
+            }
+            if (tile.sync_lines.top != 'right') {
+                posy = Math.max(super.get(coords.right()).pos.y, posy);
+            }
+        }
+        if (tile.sync_lines.bottom) {
+            if (tile.sync_lines.bottom != 'left') {
+                posy = Math.max(super.get(coords.left()).pos.y, posy);
+            }
+            if (tile.sync_lines.bottom != 'right') {
+                posy = Math.max(super.get(coords.right()).pos.y, posy);
+            }
+        }
+        // update
+        const entry = super.getEntry(coords);
+        if (entry.tile.pos.y < posy) {
+            entry.tile.pos.y = posy;
+            super.setEntry(entry);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    setPosY(flow_grid: FlowGrid): void {
+        for (let y = 1; y < flow_grid.size.y; ++y) {
+            let updated = true;
+            while (updated) {
+                updated = false;
+                for (let x = 0; x < flow_grid.size.x; ++x) {
+                    updated ||= this.updatePosY(new Vec2(x, y), flow_grid);
+                }
+            }
+        }
+    }
+    // bounds
+    get bounds(): Bounds {
+        let max_x = -Infinity;
+        let min_x = Infinity;
+        let max_y = -Infinity;
+        let min_y = Infinity;
+        for (let y = 0; y < super.size.y; ++y) {
+            max_x = Math.max(super.get(new Vec2(super.size.x - 1, y)).right, max_x);
+            min_x = Math.min(super.get(new Vec2(0, y)).left, min_x);
+        }
+        for (let x = 0; x < super.size.x; ++x) {
+            max_y = Math.max(super.get(new Vec2(x, super.size.y - 1)).bottom, max_y);
+            min_y = Math.min(super.get(new Vec2(x, 0)).top, min_y);
+        }
+        return new Bounds(new HorBounds(min_x, max_x), new VerBounds(min_y, max_y));
+    }
+    get dim(): Vec2 {
+        return this.bounds.dim;
+    }
+    get center(): Vec2 {
+        return this.bounds.center;
+    }
+    // diff
+    diff(coords1: Vec2, coords2: Vec2): Vec2 {
+        return vec2Abs(vec2Sub(super.get(coords2).pos, super.get(coords1).pos));
+    }
+    // max
+    maxLeft(coords: Vec2, noMargin: boolean = false): number {
+        const entry = this.getEntry(coords);
+        const left = this.get(coords.left()).right - (noMargin ? this.get(coords.left()).margin.x / 2: 0);
+        return entry.tile.pos.x - left;
+    }
+    maxRight(coords: Vec2, noMargin: boolean = false): number {
+        const entry = this.getEntry(coords);
+        const right = this.get(coords.right()).left + (noMargin ? this.get(coords.right()).margin.x / 2: 0);
+        return right - entry.tile.pos.x;
+    }
+    maxX(coords: Vec2): number {
+        if (coords.x == 0) {
+            return this.maxRight(coords);
+        }
+        else if (coords.x + 1 == this.size.x) {
+            return this.maxLeft(coords);
+        }
+        const left = this.get(coords.left()).right
+        const right = this.get(coords.right()).left;
+        return right - left;
+    }
+    maxTop(coords: Vec2, noMargin: boolean = false): number {
+        const entry = this.getEntry(coords);
+        const top = this.get(coords.up()).bottom  - (noMargin ? this.get(coords.up()).margin.y / 2: 0);
+        return entry.tile.pos.y - top;
+    }
+    maxBottom(coords: Vec2, noMargin: boolean = false): number {
+        const entry = this.getEntry(coords);
+        const bottom = this.get(coords.down()).top  + (noMargin ? this.get(coords.down()).margin.y / 2: 0);
+        return bottom - entry.tile.pos.y;
+    }
+    maxY(coords: Vec2): number {
+        if (coords.y == 0) {
+            return this.maxBottom(coords);
+        }
+        else if (coords.y + 1 == this.size.y) {
+            return this.maxTop(coords);
+        }
+        const top = this.get(coords.up()).bottom;
+        const bottom = this.get(coords.down()).top;
+        return bottom - top;
+    }
+    // get_hor_bounds(cond: (node: Node) => boolean, flow_grid: FlowGrid): HorBounds | null{
+    //     let left = Infinity;
+    //     let left_node = null;
+    //     let right = -Infinity;
+    //     let right_node = null;
+    //     for (const [node, pos] of flow_grid.nodeEntries) {
+    //         if (cond(node)) {
+    //             const curr_left = super.get(pos).left();
+    //             const curr_right = super.get(pos).right();
+
+    //             if (curr_left < left) {
+    //                 left = curr_left;
+    //                 left_node = node;
+    //             }
+    //             if (right < curr_right) {
+    //                 right = curr_right;
+    //                 right_node = node;
+    //             }
+    //         }
+    //     }
+
+    //     if (left == Infinity || right == -Infinity) {
+    //         return null;
+    //     }
+    //     else {
+    //         return new HorBounds(left, right, left_node, right_node);
+    //     }
+    // }
 }

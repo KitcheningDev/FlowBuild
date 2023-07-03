@@ -1,137 +1,20 @@
-import { Task } from "./task.js";
+import { Cook, Cook1, Task } from "./task.js";
 import { Graph } from "../graph/graph.js";
-import { set_element, set_merge } from "../../utils/set.js";
-import { Cook, get_cook } from "./cook.js";
-import { Tag } from "./tag.js";
-import { Ingredient } from "./ingredient.js";
-
-class RecipeData {
-    pk: number;
-    title: string;
-    difficulty: number;
-    ingredients: Set<Ingredient>;
-    duration: number;
-    prep_time: number;
-    image_list: string[];
-    num_shares: number;
-    num_likes: number;
-    user: string;
-    visibiliy: string;
-    tags: Set<Tag>;
-
-    constructor() {
-        this.pk = 0;
-        this.title = 'Unnamed';
-        this.difficulty = 3;
-        this.ingredients = new Set<Ingredient>();
-        this.duration = 0;
-        this.prep_time = 0;
-        this.image_list = [];
-        this.num_shares = 0;
-        this.num_likes = 0;
-        this.user = 'Henrik';
-        this.visibiliy = 'public';
-        this.tags = new Set();
-    }
-}
+import { RecipeData } from "./recipe_data.js";
+import { ID } from "../../utils/obj_id.js";
 
 export class Recipe extends RecipeData {
-    #connections: Map<Task, Set<Task>>;
-
     constructor() {
         super();
-        this.#connections = new Map<Task, Set<Task>>();   
+        this.loadDefault();
     }
-
-    load_default(): Recipe {
-        this.#connections = new Map<Task, Set<Task>>();   
-        const start = new Task('START', get_cook(''));
-        const task1 = new Task('task', get_cook('Küchenlehrling'));
-        const last_step = new Task('last step', get_cook(''));
-        const end = new Task('END', get_cook(''));
-        this.#connections.set(start, new Set([task1]));
-        this.#connections.set(task1, new Set([last_step]));
-        this.#connections.set(last_step, new Set([end]));
-        return this;
+    // access
+    get conns(): IterableIterator<[Task, Set<Task>]> {
+        return this.#connections.entries();
     }
-
-    add_connection(from: Task, to: Task): void {
-        if (!this.#connections.has(from)) {
-            this.#connections.set(from, new Set());
-        }
-        this.#connections.get(from)?.add(to);
-    }
-    remove_connection(from: Task, to: Task): void {
-        const childs = this.#connections.get(from);
-        if (childs !== undefined) {
-            childs.delete(to);
-            if (childs.size == 0) {
-                this.#connections.delete(from);
-            }
-        }
-    }
-    has_conn(from: Task, to: Task): boolean {
-        const childs = this.#connections.get(from);
-        if (childs === undefined) {
-            return false;
-        }
-        else {
-            return childs.has(to);
-        }
-    }
-    remove_task(task: Task): void {
-        if (this.#connections.has(task)) {
-            const task_childs = this.#connections.get(task) as Set<Task>;
-            for (const [parent, childs] of this.#connections) {
-                if (childs.has(task)) {
-                    childs.delete(task);
-                    this.#connections.set(parent, set_merge(childs, task_childs));
-                }
-            }
-            this.#connections.delete(task);
-        }
-    }
-    has_task(task: Task): boolean {
-        for (const [parent, childs] of this.#connections) {
-            if (parent == task || childs.has(task)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    get_task_by_id(id: number): Task | null {
-        for (const [task, childs] of this.#connections) {
-            if (task.id == id) {
-                return task;
-            }
-            for (const child of childs) {
-                if (child.id == id) {
-                    return child;
-                }
-            }
-        }
-        return null;
-    }
-    get_cook_by_id(id: number): Cook | null {
-        for (const [task, childs] of this.#connections) {
-            if (task.cook.id == id) {
-                return task.cook;
-            }
-            for (const child of childs) {
-                if (child.cook.id == id) {
-                    return child.cook;
-                }
-            }
-        }
-        return null;
-    }
-    
-    is_empty(): boolean {
-        return this.#connections.size == 0;
-    }
-    get_tasks(): Set<Task> {
+    get tasks(): Set<Task> {
         const tasks = new Set<Task>();
-        for (const [parent, childs] of this.#connections) {
+        for (const [parent, childs] of this.conns) {
             tasks.add(parent);
             for (const child of childs) {
                 tasks.add(child);
@@ -139,58 +22,128 @@ export class Recipe extends RecipeData {
         }
         return tasks;
     }
-    get_parents(task: Task): Set<Task> {
+    get cooks(): Set<Cook> {
+        const cooks = new Set<Cook>();
+        for (const task of this.tasks) {
+            if (task.cook) {
+                cooks.add(task.cook);
+            }
+        }
+        return cooks;
+    }
+    hasTask(task: Task): boolean {
+        return this.tasks.has(task);
+    }
+    byID(id: ID): Task | null {
+        for (const task of this.tasks) {
+            if (task.id == id) {
+                return task;
+            }
+        }
+        return null;
+    }
+    // relatives
+    parents(task: Task): Set<Task> {
         const parents = new Set<Task>();
-        for (const [parent, childs] of this.#connections) {
+        for (const [parent, childs] of this.conns) {
             if (childs.has(task)) {
                 parents.add(parent);
             }
         }
         return parents;
     }
-    get_childs(task: Task): Set<Task> {
-        if (this.#connections.has(task)) {
-            return this.#connections.get(task);
+    childs(task: Task): Set<Task> {
+        for (const [parent, childs] of this.conns) {
+            if (parent == task) {
+                return new Set([...childs]);
+            }
         }
-        else {
-            return new Set();
-        }
+        return new Set();
     }
-    get_start(): Task {
-        for (const task of this.get_tasks()) {
-            if (this.get_parents(task).size == 0) {
+    // global
+    get start(): Task | null{
+        for (const task of this.tasks) {
+            if (this.parents(task).size == 0) {
                 return task;
             }
         }
+        return null;
     }
-    get_end(): Task {
-        for (const task of this.get_tasks()) {
-            if (this.get_childs(task).size == 0) {
+    get end(): Task | null{
+        for (const task of this.tasks) {
+            if (this.childs(task).size == 0) {
                 return task;
             }
         }
+        return null;
     }
-    get_last_step(): Task {
-        return set_element(this.get_parents(this.get_end()));
+    // modify
+    clear(): void {
+        this.#connections = new Map<Task, Set<Task>>();
     }
-
-    get_cooks(): Set<Cook> {
-        const cooks = new Set<Cook>();
-        for (const [task, childs] of this.#connections) {
-            cooks.add(task.cook);
+    deleteTask(task: Task): void {
+        const parents = this.parents(task);
+        const childs = this.childs(task);
+        for (const parent of parents) {
+            this.removeConn(parent, task);
+        }
+        for (const child of childs) {
+            this.removeConn(task, child);
+        }
+        for (const parent of parents) {
             for (const child of childs) {
-                cooks.add(child.cook);
+                if (parent == this.start && child == this.end) {
+                    continue;
+                }
+                if (parent == this.start && 0 < this.parents(child).size) {
+                    continue;
+                }
+                if (child == this.end && 0 < this.childs(parent).size) {
+                    continue;
+                }
+                this.addConn(parent, child);
             }
         }
-        cooks.delete(this.get_start().cook);
-        return cooks;
-
     }
-    get_num_cooks(): number {
-        return this.get_cooks().size;
+    addConn(from: Task, to: Task, ...rest: Task[]): void {
+        // create entry
+        if (!this.#connections.has(from)) {
+            this.#connections.set(from, new Set());
+        }
+        // add connection
+        this.#connections.get(from).add(to);
+        // recursion
+        if (rest.length > 0) {
+            return this.addConn(to, rest[0], ...rest.slice(1));
+        }
     }
-
-    create_graph(): Graph {
+    removeConn(from: Task, to: Task, ...rest: Task[]): void {
+        // remove connection
+        this.#connections.get(from).delete(to);
+        // delete entry
+        if (this.#connections.get(from).size == 0) {
+            this.#connections.delete(from);
+        }
+        // recursion
+        if (rest.length > 0) {
+            return this.removeConn(to, rest[0], ...rest.slice(1));
+        }
+    }
+    loadDefault(): void {
+        this.clear();
+        const t1 = new Task('task1', Cook1);
+        const t2 = new Task('task2', Cook1);
+        const t3 = new Task('task3', Cook1);
+        const t4 = new Task('task4', Cook1);
+        const t5 = new Task('task5', Cook1);
+        this.addConn(new Task('START'), t1, t2, new Task('END'));
+        this.addConn(this.start, t3, t4, this.end);
+        this.addConn(this.start, t3, t5, this.end);
+    }
+    // graph
+    createGraph(): Graph {
         return new Graph(this.#connections);
     }
+    // member
+    #connections: Map<Task, Set<Task>>;
 }

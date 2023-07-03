@@ -3,44 +3,60 @@ import { Graph } from "../graph/graph.js";
 import { FlowGrid } from "../grid/flow_grid.js";
 import { Rule } from "./rule.js";
 import { Node } from "../graph/node.js";
+import { depth } from "../graph/depth_map.js";
 
-export function get_possible_x(node: Node, grid: FlowGrid, graph: Graph, rules: Set<Rule>): number[] {
+// possible x
+export function possibleX(node: Node, grid: FlowGrid, graph: Graph, rules: Set<Rule>): number[] {
     let possible_x = [] as number[];
-    const y = graph.get_depth(node);
-    for (let x = 0; x < grid.get_size().x; ++x) {
-        if (grid.get(new Vec2(x, y)).is_empty()) {
+    const y = depth(node);
+    for (let x = 0; x < grid.size.x; ++x) {
+        if (grid.get(new Vec2(x, y)).isEmpty()) {
             possible_x.push(x);
         }
     }
     for (const rule of rules) {
-        if (rule.restricts(node) && possible_x.length > 0) {
-            rule.reduce_possible_x(node, possible_x, grid, graph);
+        if (rule.affects(node) && possible_x.length > 0) {
+            possible_x = rule.possibleX(node, possible_x, grid, graph);
         }
     }
     return possible_x;
 }
-
-function collapse_node(index: number, order: Node[], grid: FlowGrid, rules: Set<Rule>, graph: Graph): boolean {
+// collapse order
+function collapseOrder(node: Node, order: Node[] = []): Node[] {
+    if (order.includes(node)) {
+        return order;
+    }
+    for (const parent of node.parents) {
+        collapseOrder(parent, order);
+    }
+    order.push(node);
+    return order;
+}
+// collapse
+function collapseNode(index: number, order: Node[], grid: FlowGrid, rules: Set<Rule>, graph: Graph): boolean {
     if (index == order.length) {
         return true;
     }
     const node = order[index];
-    for (const x of get_possible_x(node, grid, graph, rules)) {
-        grid.set_node(node, new Vec2(x, graph.get_depth(node)));
-        if (collapse_node(index + 1, order, grid, rules, graph)) {
+    for (const x of possibleX(node, grid, graph, rules)) {
+        grid.setNode(node, new Vec2(x, depth(node)));
+        if (collapseNode(index + 1, order, grid, rules, graph)) {
             return true;
         }
-        grid.remove_node(node);
+        grid.removeNode(node);
     }
     return false;
 }
+let iteration = 0;
 export function collapse(graph: Graph, rules: Set<Rule>): FlowGrid | null {
+    iteration = 0;
     const grid = new FlowGrid(graph);
-    const collapse_order = [...graph.nodes].filter((node: Node) => !node.is_start() && !node.is_last_step() && !node.is_end());
-    collapse_order.push(graph.last_step);
-    while (!collapse_node(0, collapse_order, grid, rules, graph)) {
-        console.warn("collapse failed with width =", grid.get_size().x);
-        grid.set_size(grid.get_size().right());
+    while (!collapseNode(0, collapseOrder(graph.end), grid, rules, graph)) {
+        console.warn("COLLAPSE FAILED", grid.size.x);
+        grid.setSize(grid.size.right());
+        if (iteration++ == 15) {
+            break;
+        }
     }
     return grid;
 }

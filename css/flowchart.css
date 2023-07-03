@@ -1,20 +1,16 @@
 :root {
     --chart-width: 50rem;
     --chart-height: 37.5rem;
-
-    --editor-connector: visible;
-    --editor-add: visible;
-    --editor-remove: hidden;
-    
-    --connector-opacity: 1;
-    --add-opacity: 1;
 }
 
 /* container */
-#flowchart {
-    position: relative;
-    background-color: var(--bg-col);
-    border-radius: 15px;
+#flowchart-canvas {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    background-color: var(--light-bg);
+    border-radius: 2rem;
 
     width: var(--chart-width);
     height: var(--chart-height);
@@ -22,158 +18,163 @@
 #flowchart-container {
     display: inline-block;
     position: relative;
-    top: 50%;
-    left: 50%;
-    width: 800px;
-    color: var(--dark-col);
+    font-family: 'Montserrat';
+    width: 100%;
+    height: 100%;
+    color: var(--dark-text);
 }
 #flowchart-container > * {
     position: absolute;
     transform: translate(-50%, -50%);
     user-select: none;
-}
-
-#remove-task {
-    position: absolute;
-    margin: 10px;
-    left: 0;
-    bottom: 0;
-    opacity: calc(1 - var(--connector-opacity));
-    cursor: pointer;
+    background-color: var(--light-bg);
+    box-shadow: 0.125rem 0.125rem 0.25rem 0 rgba(0, 0, 0, 0.15), 0.25rem 0.25rem 0.75rem 0 rgba(0, 0, 0, 0.125);
 }
 
 /* task */
-.flow-task {  
-    position: absolute;
-
-    border: 0.25em solid;
-    border-radius: 0.5em;
-    border-top: none;
-    border-left: none;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 0;
-
-    box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.15), 3px 3px 10px 0 rgba(0, 0, 0, 0.125);
-    
-    color: black;
+#flowchart-container > .flow-start, #flowchart-container > .flow-task {
+    margin: 1em 2em;
+    z-index: 2;
+    cursor: pointer;
+}
+#flowchart-container > .flow-start {
+    margin: 0.5em 0em;
+}
+.flow-start {
+    border-radius: 50%;
+    padding: 0.5em;
+    cursor: pointer;
+}
+.flow-task {
     font-size: 0.75em;
-    font-family: 'Montserrat';
     font-weight: bold;
     text-align: center;
-    max-width: 130px;
+    min-width: 2rem;
+    min-height: 1rem;
+    max-width: 5rem;
     
-    background-color: var(--bg-col);
-    padding: 7px 5px;
-    z-index: 2;
+    border-right: solid 0.125rem;
+    border-bottom: solid 0.125rem;
+    border-top-left-radius: 0.5rem;
+    /* border-bottom-right-radius: 0.5rem; */
+
+    padding: 0.5rem 0.25rem;
 }
-.editor-connector, .editor-add, .editor-remove {
+
+/* editor */
+.editor-connect, .editor-trash, .editor-add, .editor-remove, .cook-new {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     opacity: 0;
-    cursor: pointer;
-    position: absolute;
-    border: 2px solid;
-    border-radius: 50%;
-    background-color: var(--main-col);
+    pointer-events: none;
+    border-radius: 40%;
+    margin: 0 0.25rem;
 
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    transform: translate(-50%, -50%);
-}
-.editor-connector {
+    width: 1.75rem;
+    height: 1.75rem;
     z-index: 3;
-}
-.editor-add, .editor-remove {
-    z-index: 4;
-}
-.flow-task:hover > .editor-connector {
-    opacity: calc(var(--connector-opacity) * 0.7);
-}
-.flow-task:hover > .editor-add {
-    opacity: calc(calc(1 - var(--connector-opacity)) * var(--add-opacity));
-}
-.flow-task:hover > .editor-remove {
-    opacity: calc(calc(1 - var(--connector-opacity)) * calc(1 - var(--add-opacity)));
-}
-.editor-add::before, .editor-remove::before {
-    position: absolute;
-    transform: translate(-7px, 10px);
-}
 
-/* start end */
-.flow-start {
-    position: absolute;
-    border: 0.125em solid;
-    border-radius: 50%;
-    background-color: var(--bg-col);
-
-    padding: 6px;
+    transition: opacity 0.25s;
+}
+#flowchart-container:hover > .editor-connect.selected,
+#flowchart-container:hover > .editor-trash.selected,
+#flowchart-container:hover > .editor-add.selected,
+#flowchart-container:hover > .editor-remove.selected,
+#flowchart-container:hover > .cook-new.selected {
+    opacity: 1;
     cursor: pointer;
-    z-index: 2;
-
-    box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.15), 3px 3px 10px 0 rgba(0, 0, 0, 0.125);
+    pointer-events: all;
 }
-.flow-end {
-    position: absolute;
-    border: 6px double;
-    border-radius: 50%;
-    background-color: var(--bg-col);
-
-    padding: 6px;
-    z-index: 2;
+#flowchart-container > .editor-connect, #flowchart-container > .editor-add, #flowchart-container > .editor-trash {
+    transform: translate(0, -50%);
 }
 
 /* line */
-.line {
-    position: absolute;
-    border: 1px solid;
+#flowchart-container > .line {
     background-color: black;
     width: 0;
     height: 0;
     z-index: 1;
 }
-.caret-up, .caret-right, .caret-down, .caret-left {
-    position: absolute;
+#flowchart-container > .line.top {
+    transform: translate(0, -100%);
+}
+#flowchart-container > .line.right {
+    transform: translate(0, 0);
+}
+#flowchart-container > .line.bottom {
+    transform: translate(0, 0);
+}
+#flowchart-container > .line.left {
+    transform: translate(-100%, 0);
+}
+/* caret */
+#flowchart-container > .caret-up, #flowchart-container > .caret-right, #flowchart-container > .caret-down, #flowchart-container > .caret-left {
+    background-color: transparent;
+    box-shadow: none;
     z-index: 1;
 }
-#flowchart-container .caret-up {
+#flowchart-container > .caret-up {
     transform: translate(-50%, calc(-50% + 4px));
 }
-#flowchart-container .caret-right {
+#flowchart-container > .caret-right {
     transform: translate(calc(-50% - 3px), -50%);
 }
-#flowchart-container .caret-down {
-    transform: translate(-50%, calc(-50% - 3px));
+#flowchart-container > .caret-down {
+    transform: translate(calc(-50% + 0px), calc(-50% - 3px));
 }
-#flowchart-container .caret-left {
+#flowchart-container > .caret-left {
     transform: translate(calc(-50% + 2px), -50%);
 }
 
 /* sync-line */
-.sync-line {
-    position: absolute;
-    border-radius: 0.25em;
+#flowchart-container > .sync-line {
     background-color: black;
-    height: 0.25em;
-    z-index: 1;
+    height: 0.25rem;
+    margin: 0.5rem 0rem;
+    border-radius: 2px;
+    z-index: 2;
 }
 
 /* cook-line */
-.cook-line {
-    position: absolute;
+#flowchart-container > .cook-line {
     border: 0.06125em dashed;
-    color: black;
+    color: rgba(0, 0, 0, 0.5);
+    box-shadow: none;
     z-index: 1;
+    margin: 1rem;
 }
 
-/* crossing */
-.crossing {
-    position: absolute;
-    z-index: 1;
+/* connector */
+#flowchart-container > .connector {
+    margin: 0.25rem;
+    padding: 0;
+    width: 9px;
+    height: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+    z-index: 2;
 }
 
 /* cook-title */
-.cook-title {
+#flowchart-container > .cook-title {
+    max-width: 4rem;
+    margin: 0.25rem 1rem;
+    text-align: center;
+    color: rgb(0, 0, 0);
     font-size: 0.75rem;
     font-weight: bold;
+    z-index: 1;
+    box-shadow: none;
+}
+#flowchart-container > .cook-new {
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+    pointer-events: all;
+    box-shadow: 0.125rem 0.125rem 0.25rem 0 rgba(0, 0, 0, 0.075), 0.25rem 0.25rem 0.75rem 0 rgba(0, 0, 0, 0.06125);
 }

@@ -1,46 +1,45 @@
-import { ObjID } from "../../utils/obj_id.js";
-import { set_element } from "../../utils/set.js";
+import { sample, setEqual } from "../../utils/set.js";
 import { Task } from "../recipe/task.js";
 
-export class Node extends ObjID {
-    task: Task;
-    parents: Set<Node>;
-    childs: Set<Node>;
-
-    constructor(task: Task, parents: Set<Node> = new Set(), childs: Set<Node> = new Set()) {
-        super();
+export class Node {
+    constructor(task: Task | null = null, parents: Set<Node> = new Set(), childs: Set<Node> = new Set()) {
         this.task = task;
         this.parents = parents;
         this.childs = childs;
     }
-
     // graph properties
-    is_start(): boolean {
+    isStart(): boolean {
         return this.parents.size == 0;
     }
-    is_end(): boolean {
+    isEnd(): boolean {
         return this.childs.size == 0;
     }
-    is_last_step(): boolean {
-        return this.childs.size == 1 && set_element(this.childs).is_end();
+    allNodes(nodes: Set<Node> = new Set()): Set<Node> {
+        if (nodes.has(this)) {
+            return nodes;
+        }
+        nodes.add(this);
+        for (const relative of [...this.parents, ...this.childs]) {
+            relative.allNodes(nodes);
+        }
+        return nodes;
     }
-
-    // graph traversal
-    can_reach(to: Node, visited: Set<Node> = new Set()) {
+    // traversal
+    reachable(to: Node, visited: Set<Node> = new Set()): boolean {
         if (visited.has(this)) {
             return false;
         }
         visited.add(this);
         for (const child of this.childs) {
-            if (child == to || child.can_reach(to, visited))
+            if (child == to || child.reachable(to, visited))
                 return true;
         }
         return false;
     }
-    in_loop(): boolean {
-        return this.can_reach(this);
+    inLoop(): boolean {
+        return this.reachable(this);
     }
-    find_shortest_path(to: Node): Node[] {
+    shortestPath(to: Node): Node[] {
         let paths = new Set<Node[]>([[this]]);
         while (true) {
             const new_paths = new Set<Node[]>();
@@ -56,7 +55,7 @@ export class Node extends ObjID {
             paths = new_paths;
         }
     }
-    find_longest_path(to: Node): Node[] {
+    longestPath(to: Node): Node[] {
         let longest_path = [] as Node[];
         let paths = new Set<Node[]>([[this]]);
         while (paths.size > 0) {
@@ -78,10 +77,60 @@ export class Node extends ObjID {
         }
         return longest_path;
     }
-    shortest_distance(to: Node): number {
-        return this.find_shortest_path(to).length - 1;
+    minDistance(to: Node): number {
+        return this.shortestPath(to).length - 1;
     }
-    longest_distance(to: Node): number {
-        return this.find_longest_path(to).length - 1;
+    maxDistance(to: Node): number {
+        return this.longestPath(to).length - 1;
     }
+    // neighbours
+    get topNeighbours(): Set<Node> {
+        if (this.parents.size) {
+            return new Set([...sample(this.parents).childs].filter((neighbour: Node) => setEqual(neighbour.parents, this.parents)));
+        }
+        else {
+            return new Set();
+        }
+    }
+    get bottomNeighbours(): Set<Node> {
+        if (this.childs.size) {
+            return new Set([...sample(this.childs).parents].filter((neighbour: Node) => setEqual(neighbour.childs, this.childs)));
+        }
+        else {
+            return new Set();
+        }
+    }
+    // syncline
+    get topSyncline(): Set<Node> {
+        if (this.parents.size == 0) {
+            return new Set();
+        }
+        if (sample(this.parents).isStart()) {
+            return new Set([...this.allNodes()].filter((node: Node) => !node.isStart()));
+        }
+        else {
+            return new Set([...this.topNeighbours].filter((neighbour: Node) => neighbour.task.cook == this.task.cook));
+        }
+    }
+    get bottomSyncline(): Set<Node> {
+        if (this.childs.size == 0) {
+            return new Set();
+        }
+        if (sample(this.childs).isEnd()) {
+            return new Set([...this.allNodes()].filter((node: Node) => !node.isEnd()));
+        }
+        else {
+            return new Set([...this.bottomNeighbours].filter((neighbour: Node) => neighbour.task.cook == this.task.cook));
+        }
+    }
+    get hasTopSyncline(): boolean {
+        return 1 < this.topSyncline.size || sample(this.parents)?.isStart();
+    }
+    get hasBottomSyncline(): boolean {
+        return 1 < this.bottomSyncline.size || sample(this.childs)?.isEnd();
+    }
+    // members
+    task: Task | null;
+    parents: Set<Node>;
+    childs: Set<Node>;
 }

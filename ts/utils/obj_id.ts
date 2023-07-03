@@ -1,8 +1,15 @@
-let obj_counter = 0;
+// id
 export type ID = number;
+// bounds
+export const MinID = 1000;
+export const MaxID = 1000000;
+export function randomID(): number {
+    return Math.floor(MinID + Math.random() * MaxID);
+}
 export class ObjID {
-    readonly id: ID
     constructor() {
-        this.id = ++obj_counter;
+        this.id = randomID();
     }
+    // member
+    readonly id: ID;
 }
