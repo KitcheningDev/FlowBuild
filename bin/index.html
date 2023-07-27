@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- title -->
+    <title>FlowBuild.</title>
+    <link rel="shortcut icon" href="icons/favicon.ico">
+    <!-- css refs -->
+    <!-- <link href="./css/style.css" type="text/css" rel="stylesheet">
+    <link href="./css/card.css" type="text/css" rel="stylesheet">
+    <link href="./css/ingredient.css" type="text/css" rel="stylesheet">
+    <link href="./css/task.css" type="text/css" rel="stylesheet">
+    <link href="./css/nav.css" type="text/css" rel="stylesheet">
+    <link href="./css/input.css" type="text/css" rel="stylesheet">
+    <link href="./css/flowchart.css" type="text/css" rel="stylesheet">
+    <link href="./css/align.css" type="text/css" rel="stylesheet"> -->
+    <link href="./css/style.css" type="text/css" rel="stylesheet">
+    <link href="./css/flowchart.css" type="text/css" rel="stylesheet">
+    <!-- fonts -->
+    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat"> -->
+    <!-- font-awesome -->
+    <script src="https://kit.fontawesome.com/a26baecaf4.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <!-- content -->
+    <div class="content">
+        <!-- header -->
+        <div class="header">
+            <!-- title -->
+            <a class="title" href="/bin">Flowbuild.</a>
+            <!-- nav -->
+            <div class="nav">
+                <!-- search-bar -->
+                <div class="search">
+                    <div class="search-bar">
+                        <div id="search-input" class="search-input" role="textbox" spellcheck="false" contenteditable>
+                        </div>
+                        <div id="loading-icon" class="search-icon fa-solid fa-circle-notch fa-spin"></div>
+                    </div>
+                    <div id="search-result-list" class="search-result-list">
+                        <!-- <div class="search-result">
+                            <img src="https://cdn.pixabay.com/photo/2016/09/21/20/18/pumpkin-soup-1685574_960_720.jpg"
+                                alt="">
+                            <div class="result-title">Pumpkin Soup</div>
+                            <div class="ver-sep">
+                                <div class="inner"></div>
+                            </div>
+
+                            <div class="wrapper">
+
+                                <div class="hor-align">
+                                    <div class="hor-align recipe-property">
+                                        <div class="icon fa-regular fa-clock"></div>
+                                        <div class="time">30min</div>
+                                    </div>
+                                    <div class="hor-align">
+                                        <div class="difficulty-icon">
+                                            <div class="diff-1">
+                                                <div class="not-selected icon fa-regular fa-square"></div>
+                                                <div class="selected icon fa-solid fa-square"></div>
+                                            </div>
+                                            <div class="diff-2">
+                                                <div class="not-selected icon fa-regular fa-square"></div>
+                                                <div class="selected icon fa-solid fa-square"></div>
+                                            </div>
+                                            <div class="diff-3">
+                                                <div class="not-selected icon fa-regular fa-square"></div>
+                                                <div class="selected icon fa-solid fa-square"></div>
+                                            </div>
+                                            <div class="diff-4">
+                                                <div class="not-selected icon fa-regular fa-square"></div>
+                                                <div class="selected icon fa-solid fa-square"></div>
+                                            </div>
+                                            <div class="diff-5 selected">
+                                                <div class="not-selected icon fa-regular fa-square"></div>
+                                                <div class="selected icon fa-solid fa-square"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="search-result">
+                            result2
+                        </div> -->
+                    </div>
+                </div>
+                <div class="nav-sep"></div>
+                <div class="hor-align">
+                    <!-- new -->
+                    <div class="underline-wrap-ver">
+                        <div id="create-btn" class="nav-btn">
+                            <div class="icon fa-regular fa-square-plus"></div>
+                            <div class="label">new</div>
+                        </div>
+                        <div class="underline-ver"></div>
+                    </div>
+                    <!-- upload -->
+                    <div class="underline-wrap-ver">
+                        <div id="upload-btn" class="nav-btn">
+                            <div class="icon fa-regular fa-square-caret-up"></div>
+                            <div class="label">upload</div>
+                        </div>
+                        <div class="underline-ver"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- main -->
+        <div class="main">
+            <!-- ingredients -->
+            <div id="ingredient-card" class="section">
+                <div class="section-head">ingredients</div>
+                <div class="section-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div class="cat">product</div>
+                                </th>
+                                <th>
+                                    <div class="cat">amount</div>
+                                </th>
+                                <th>
+                                    <div class="cat">unit</div>
+                                </th>
+                                <td class="w-5"></td>
+                            </tr>
+                        </thead>
+                        <tbody id="ingredient-container"></tbody>
+                    </table>
+                </div>
+                <div class="section-foot">
+                    <div id="ingredient-add" class="nav-btn">
+                        <div class="icon fa-regular fa-square-plus"></div>
+                        <div class="label">add</div>
+                    </div>
+                </div>
+            </div>
+            <!-- flowchart -->
+            <div id="flowchart-card" class="section">
+                <div class="section-head">flowchart</div>
+                <!-- container -->
+                <div class="section-body">
+                    <div id="flowchart-canvas" class="flowchart-canvas">
+                        <div id="flowchart-container" class="flowchart-container"></div>
+                    </div>
+                </div>
+                <div class="section-foot">
+                    <div id="ingredient-add" class="nav-btn">
+                        <i class="fa-solid fa-rotate-left fa-xl"></i>
+                        <div class="label" id="undo-btn">undo</div>
+                    </div>
+                </div>
+            </div>
+            <div id="task-upload-pop-up" class="pop-up hide">
+                <!-- task -->
+                <div id="task-card" class="section hidden">
+                    <div class="section-head">task</div>
+                    <div class="section-body">
+                        <!-- description -->
+                        <div class="subsection">
+                            <div class="subsection-head">description</div>
+                            <div class="subsection-body">
+                                <div class="underline-wrap-hor">
+                                    <div class="underline-hor"></div>
+                                    <input id="task-description-input" type="text" placeholder="describe...">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- cook -->
+                        <div id="task-cook-section" class="subsection">
+                            <div class="subsection-head">cook</div>
+                            <div class="subsection-body">
+                                <!-- <div class="scroll-wrap">
+                                    <div class="scroll-container">
+                                        <div class="scroll-item">küchenlehrling</div>
+                                        <div class="scroll-item">küchenmeister</div>
+                                    </div>
+                                    <div class="icon fa-solid fa-arrows-up-down"></div>
+                                </div> -->
+                                <div id="task-cook-list" style="/*display: none;*/">
+                                    <div>
+                                        <label class="radio" for="task-cook-1">
+                                            <input type="radio" id="task-cook-1" name="cook-radio" checked>
+                                            <label for="task-cook-1">küchenlehrling</label>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="radio" for="task-cook-2">
+                                            <input type="radio" id="task-cook-2" name="cook-radio">
+                                            <label for="task-cook-2">küchenmeister</label>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- duration -->
+                        <div class="subsection">
+                            <div class="subsection-head">duration</div>
+                            <div class="subsection-body">
+                                <div class="top-align">
+                                    <div class="underline-wrap-hor">
+                                        <div class="underline-hor"></div>
+                                        <input id="task-duration-input" class="w-12" type="text" value="0">
+                                    </div>
+                                    <!-- <div class="scroll-wrap">
+                                        <div class="scroll-container">
+                                            <div class="scroll-item">sec(s)</div>
+                                            <div class="scroll-item">min(s)</div>
+                                            <div class="scroll-item">hour(s)</div>
+                                        </div>
+                                        <div class="icon fa-solid fa-arrows-up-down"></div>
+                                    </div> -->
+                                    <div id="duration-list" class="left-align" style="/*display: none;*/">
+                                        <label class="radio" for="task-sec">
+                                            <input type="radio" id="task-sec" name="duration-radio">
+                                            <label class="label" for="task-sec">sec(s)</label>
+                                        </label>
+                                        <label class="radio" for="task-min">
+                                            <input type="radio" id="task-min" name="duration-radio" checked>
+                                            <label class="label" for="task-min">min(s)</label>
+                                        </label>
+                                        <label class="radio" for="task-hour">
+                                            <input type="radio" id="task-hour" name="duration-radio">
+                                            <label class="label" for="task-hour">hour(s)</label>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- upload -->
+                <div id="upload-card" class="section hidden">
+                    <div class="section-head">upload</div>
+                    <div class="section-body">
+                        <!-- title -->
+                        <div class="subsection">
+                            <div class="subsection-head">title</div>
+                            <div class="subsection-body">
+                                <div class="underline-wrap-hor">
+                                    <div class="underline-hor"></div>
+                                    <input id="recipe-title-input" type="text" style="width: 15rem;"
+                                        placeholder="title">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- image -->
+                        <div class="subsection">
+                            <div class="subsection-head">image</div>
+                            <div class="subsection-body">
+                                <input type="file" id="image" name="image" accept="image/png, image/jpeg" multiple="multiple">
+                            </div>
+                        </div>
+                        <!-- difficulty -->
+                        <div class="subsection">
+                            <div class="subsection-head">difficulty</div>
+                            <div class="subsection-body">
+                                <!-- <div class="scroll-wrap">
+                                    <div class="scroll-container">
+                                        <div class="scroll-item">very easy</div>
+                                        <div class="scroll-item">easy</div>
+                                        <div class="scroll-item">medium</div>
+                                        <div class="scroll-item">difficult</div>
+                                        <div class="scroll-item">very difficult</div>
+                                    </div>
+                                    <div class="icon fa-solid fa-arrows-up-down"></div>
+                                </div> -->
+                                <div class="left-align" id="recipe-difficulty-list" style="/*display: none;*/">
+                                    <label class="radio" for="recipe-difficulty-1">
+                                        <input type="radio" id="recipe-difficulty-1" name="difficulty-radio">
+                                        <label class="label" for="recipe-difficulty-1">very easy</label>
+                                    </label>
+                                    <label class="radio" for="recipe-difficulty-2">
+                                        <input type="radio" id="recipe-difficulty-2" name="difficulty-radio">
+                                        <label class="label" for="recipe-difficulty-2">easy</label>
+                                    </label>
+                                    <label class="radio" for="recipe-difficulty-3">
+                                        <input type="radio" id="recipe-difficulty-3" name="difficulty-radio" checked>
+                                        <label class="label" for="recipe-difficulty-3">medium</label>
+                                    </label>
+                                    <label class="radio" for="recipe-difficulty-4">
+                                        <input type="radio" id="recipe-difficulty-4" name="difficulty-radio">
+                                        <label class="label" for="recipe-difficulty-4">difficult</label>
+                                    </label>
+                                    <label class="radio" for="recipe-difficulty-5">
+                                        <input type="radio" id="recipe-difficulty-5" name="difficulty-radio">
+                                        <label class="label" for="recipe-difficulty-5">very difficult</label>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- duration -->
+                        <div class="subsection">
+                            <div class="subsection-head">duration</div>
+                            <div class="subsection-body">
+                                <div class="hor-align">
+                                    <div class="underline-wrap-hor">
+                                        <div class="underline-hor"></div>
+                                        <input id="recipe-duration-input" class="w-12" type="text" value="0">
+                                    </div>
+                                    <!-- <div class="scroll-wrap">
+                                        <div class="scroll-container">
+                                            <div class="scroll-item">min(s)</div>
+                                            <div class="scroll-item">hour(s)</div>
+                                        </div>
+                                        <div class="icon fa-solid fa-arrows-up-down"></div>
+                                    </div> -->
+                                    <div id="recipe-duration-list" class="left-align" style="/*display: none;*/">
+                                        <label class="radio" for="recipe-min">
+                                            <input type="radio" id="recipe-min" name="recipe-duration-unit" checked>
+                                            <label class="label" for="recipe-min">min(s)</label>
+                                        </label>
+                                        <label class="radio" for="recipe-hour">
+                                            <input type="radio" id="recipe-hour" name="recipe-duration-unit">
+                                            <label class="label" for="recipe-hour">hour(s)</label>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- submit -->
+                    <div class="section-foot">
+                        <div id="recipe-submit" class="nav-btn">
+                            <div class="icon fa-regular fa-square-caret-up"></div>
+                            <div class="label">upload</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- background -->
+    <img class="bg" src="https://www.nowleap.com/wp-content/uploads/2020/05/GettyImages-1155240409.jpg">
+    <!-- scripts -->
+    <script src="./js/editor/editor.js" type="module"></script>
+    <script src="./js/editor/server.js" type="module"></script>
+
+    <!-- domtoimage -->
+    <script src="./bower_components/dom-to-image/src/dom-to-image.js"></script>
+    <!-- <script src="./bower_components/file-saver/dist/FileSaver.js"></script> -->
+    <script>
+        // document.addEventListener('keypress', (ev) => {
+        //     if (ev.key == 'Enter') {
+        //         domtoimage.toPng(document.getElementById('flowchart-canvas'))
+        //             .then(function (dataUrl) {
+        //                 var img = new Image();
+        //                 console.log(dataUrl);
+        //                 img.src = dataUrl;
+        //                 document.body.appendChild(img);
+        //             })
+        //             .catch(function (error) {
+        //                 console.error('oops, something went wrong!', error);
+        //             });
+        //         // domtoimage.toBlob(document.getElementById('flowchart-canvas'))
+        //         //     .then(function (blob) {
+        //         //         console.log(blob);
+        //         //         // window.saveAs(blob, 'flowchart.png');
+        //         //     });
+        //     }
+        // })
+    </script>
+</body>
+
+</html>

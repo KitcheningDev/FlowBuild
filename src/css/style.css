@@ -1,0 +1,362 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* align */
+.hor-align {
+    @apply flex flex-row justify-evenly items-center;
+}
+.ver-align {
+    @apply flex flex-col justify-evenly items-center;
+}
+.top-align {
+    @apply flex flex-row justify-evenly items-start;
+}
+.left-align {
+    @apply flex flex-col justify-center items-start;
+}
+
+/* sep */
+.nav-sep {
+    @apply border border-black;
+    @apply mx-8;
+    @apply h-8;
+}
+.main-sep {
+    @apply border border-black;
+    @apply h-4/5 mx-16;
+}
+
+/* color */
+.highlight-text {
+    @apply text-green-600;
+}
+.light-text {
+    @apply text-white;
+}
+.semi-light-text {
+    @apply text-neutral-50;
+}
+.dark-text {
+    @apply text-neutral-700;
+}
+.light-bg {
+    @apply bg-white;
+}
+.semi-light-bg {
+    @apply bg-neutral-50;
+}
+.dark-bg {
+    @apply bg-neutral-700;
+}
+
+/* body */
+body {
+    @apply w-screen h-screen overflow-hidden;
+    @apply semi-light-bg;
+}
+
+/* input */
+input[type="text"] {
+    @apply outline-none bg-transparent;
+    @apply rounded p-1;
+    @apply shadow-sm;
+}
+
+/* radio */
+.radio {
+    @apply rounded m-0.5 p-0.5;
+    @apply select-none cursor-pointer;
+    @apply shadow-sm;
+}
+.radio * {
+    @apply select-none cursor-pointer;
+}
+
+/* content */
+.content {
+    @apply w-full h-full;
+    @apply flex flex-col;
+}
+.main {
+    @apply w-full grow mt-8 ml-8;
+    @apply flex justify-start items-start;
+}
+
+/* header */
+.header {
+    @apply flex justify-between items-center;
+    @apply p-6;
+    @apply light-bg;
+}
+
+/* title */
+.title {
+    @apply text-5xl font-semibold highlight-text;
+}
+
+/* nav */
+.nav {
+    @apply hor-align;
+    @apply m-2;
+}
+
+/* nav-btn */
+.nav-btn {
+    @apply hor-align;
+    @apply rounded-t p-2;
+    @apply cursor-pointer select-none;
+}
+.nav-btn:hover {
+    @apply semi-light-bg;
+    @apply border-opacity-100;
+}
+.nav-btn > * {
+    @apply mx-1;
+}
+.nav-btn > .icon {
+    @apply text-3xl;
+}
+.nav-btn > .label {
+    @apply text-lg font-bold;
+}
+
+/* search-bar */
+.search {
+    @apply relative;
+}
+.search-bar {
+    @apply hor-align;
+    @apply px-2 border-2 border-black rounded;
+}
+.search-bar > * {
+    @apply m-1;
+}
+.search-input {
+    @apply text-lg min-w-[2rem];
+    @apply rounded;
+    @apply bg-transparent;
+    @apply overflow-ellipsis;
+    @apply transition-all;
+}
+div[role="textbox"].search-input {
+    @apply outline-none;
+}
+.search:hover .search-input, .search:focus-within .search-input {
+    @apply min-w-[32rem];
+}
+.search-icon {
+    @apply text-2xl;
+}
+.sync-icon {
+    @apply text-2xl mx-2 opacity-70;
+}
+
+/* search-result */
+.search:focus-within > .search-result-list, .search:hover > .search-result-list {
+    @apply opacity-100 pointer-events-auto;
+}
+.search-result-list {
+    @apply light-bg;
+    @apply absolute overflow-auto max-h-[24rem] opacity-0 pointer-events-none transition-opacity w-full;
+}
+.search-result {
+    @apply cursor-pointer;
+    @apply flex justify-between items-center;
+    @apply w-full px-4 py-2;
+    @apply border border-black transition-opacity;
+}
+.search-result:hover {
+    @apply opacity-80;
+}
+.search-result .result-title {
+    @apply text-lg font-bold recipe-property mx-4;
+}
+.search-result .time {
+    @apply m-1;
+}
+.search-result img {
+    @apply w-24 h-16 rounded;
+}
+
+/* section */
+.section {
+    @apply flex flex-col justify-center items-start;
+    @apply rounded-xl p-4 light-bg;
+    @apply mr-24;
+    @apply transition-all;
+}
+.section-head {
+    @apply text-2xl font-bold highlight-text;
+    @apply m-1;
+}
+.section-body {
+    @apply p-2;
+}
+.section.hide {
+    @apply hidden;
+}
+
+/* subsection */
+.subsection {
+    @apply flex flex-col justify-center items-start;
+    @apply my-2;
+}
+.subsection-head {
+    @apply text-lg font-bold;
+}
+.subsection-body {
+    @apply ml-2;
+}
+
+/* ingredients */
+table {
+    @apply text-center;
+    @apply border-spacing-16;
+}
+.cat {
+    @apply w-32 m-1 p-1;
+    @apply border-b-2 border-black;
+}
+#ingredient-card > .section-body {
+    @apply h-96 overflow-y-auto;
+}
+
+
+.ingredient .trash {
+    @apply text-lg;
+    @apply cursor-pointer;
+    @apply opacity-20 transition-colors;
+}
+.ingredient .trash:hover {
+    @apply opacity-100;
+}
+
+.ingredient-property {
+    @apply text-center;
+    @apply rounded m-1 p-1 bg-transparent;
+    @apply w-32;
+    @apply semi-light-bg;
+}
+
+/* #ingredient-card {
+    @apply transition-all;
+}
+#ingredient-card.hide {
+    @apply scale-0 opacity-0;
+} */
+
+.underline-wrap-hor {
+    @apply hor-align;
+}
+.underline-hor {
+    @apply h-6 border-l-2 border-black transition-all;
+}
+.underline-wrap-hor:focus-within > .underline-hor {
+    @apply h-8;
+}
+
+.underline-wrap-ver {
+    @apply ver-align;
+}
+.underline-ver {
+    @apply w-2/3 border-b-2 border-black transition-all;
+}
+.underline-wrap-ver:hover > .underline-ver {
+    @apply w-full;
+}
+
+
+.pop-up {
+    @apply hor-align;
+    @apply transition-all;
+}
+.pop-up.hide {
+    @apply scale-0 opacity-0;
+}
+
+.bg {
+    @apply fixed object-cover top-0;
+    @apply opacity-50;
+    @apply -z-10;
+}
+
+/* scroll */
+.scroll-wrap {
+    @apply hor-align;
+}
+.scroll-wrap > .icon {
+    @apply opacity-0 transition-opacity m-0.5;
+}
+.scroll-wrap:hover > .icon {
+    @apply opacity-100;
+}
+.scroll-container {
+    @apply max-h-[2rem];
+    @apply overflow-auto snap-both snap-mandatory;
+    @apply shadow-sm rounded-lg p-0.5;
+    @apply select-none;
+}
+.scroll-item {
+    @apply text-center p-1;
+    @apply snap-center snap-always;
+}
+
+.recipe-property {
+    @apply p-1 mx-1 rounded-lg semi-light-bg;
+}
+
+.difficulty-icon {
+    @apply flex justify-center items-center recipe-property;
+}
+.difficulty-icon > * {
+    /* @apply absolute; */
+    @apply p-0.5;
+}
+.difficulty-icon > * > .selected {
+    @apply hidden;
+}
+.difficulty-icon > * > .not-selected {
+    @apply flex;
+}
+.difficulty-icon > .selected > .selected {
+    @apply flex;
+}
+.difficulty-icon > .selected > .not-selected {
+    @apply hidden;
+}
+
+.diff-1 {
+    @apply text-xs;
+}
+.diff-1 > .selected {
+    @apply text-green-500;
+}
+.diff-2 {
+    @apply text-base;
+}
+.diff-2 > .selected {
+    @apply text-green-300;
+}
+.diff-3 {
+    @apply text-xl;
+}
+.diff-3 > .selected {
+    @apply text-yellow-500;
+}
+.diff-4 {
+    @apply text-2xl;
+}
+.diff-4 > .selected {
+    @apply text-red-500;
+}
+.diff-5 {
+    @apply text-3xl;
+}
+.diff-5 > .selected {
+    @apply text-red-600;
+}
+
+.ver-sep {
+    @apply flex flex-col h-full;
+}

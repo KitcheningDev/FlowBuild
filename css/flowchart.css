@@ -51,7 +51,7 @@
     text-align: center;
     min-width: 2rem;
     min-height: 1rem;
-    max-width: 5rem;
+    max-width: 4rem;
     
     border-right: solid 0.125rem;
     border-bottom: solid 0.125rem;
@@ -133,7 +133,7 @@
 #flowchart-container > .sync-line {
     background-color: black;
     height: 0.25rem;
-    margin: 0.5rem 0rem;
+    margin: 0.5rem 0.25rem;
     border-radius: 2px;
     z-index: 2;
 }
@@ -163,7 +163,7 @@
 /* cook-title */
 #flowchart-container > .cook-title {
     max-width: 4rem;
-    margin: 0.25rem 1rem;
+    margin: 0.25rem 0.5rem;
     text-align: center;
     color: rgb(0, 0, 0);
     font-size: 0.75rem;

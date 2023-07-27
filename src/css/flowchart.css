@@ -1,0 +1,86 @@
+@tailwind base;
+
+/* root */
+:root {
+    --canvas-size: 40rem;
+}
+
+/* canvas */
+.flowchart-canvas {
+    @apply w-[var(--canvas-size)] h-[var(--canvas-size)];
+    @apply flex justify-center items-center;
+    /* @apply border border-black; */
+    @apply bg-white;
+}
+
+/* container */
+.flowchart-container {
+    @apply relative;
+}
+.flowchart-container > * {
+    @apply absolute -translate-x-1/2 -translate-y-1/2;
+    @apply bg-white shadow;
+}
+
+/* start */
+.flow-start {
+    @apply rounded-full p-2 m-2;
+    @apply z-10;
+}
+
+/* task */
+.flow-task {
+    @apply text-sm;
+    @apply rounded border border-black p-2 mx-4 my-2;
+    @apply cursor-pointer select-none;
+    @apply z-10;
+}
+
+/* sync-line */
+.sync-line {
+    @apply rounded h-0.5 bg-black my-4;
+}
+
+/* editor */
+.editor {
+    @apply text-base;
+    @apply rounded-lg px-1 py-0.5;
+    @apply cursor-pointer;
+    @apply opacity-0 pointer-events-none transition-opacity;
+    @apply z-50;
+}
+.flowchart-canvas:hover .editor.selected {
+    @apply opacity-100 pointer-events-auto;
+}
+.editor.trash {
+    @apply translate-x-[-110%];
+}
+.editor.connect, .editor.add, .editor.remove {
+    @apply translate-x-[10%];
+}
+
+/* line */
+.line {
+    /* @apply translate-x-0 translate-y-0; */
+    @apply bg-black;
+}
+
+/* caret */
+.caret-down {
+    @apply translate-y-[-3px];
+}
+
+/* cook-title */
+.cook-title {
+    @apply text-sm;
+    @apply shadow-none;
+}
+
+/* cook-line */
+.cook-line {
+    @apply border-l-2 border-dashed border-black;
+}
+
+.connector {
+    @apply shadow-none m-2;
+}
