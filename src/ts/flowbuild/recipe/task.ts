@@ -24,16 +24,20 @@ export class Unit {
     name: string;
 };
 export class Ingredient extends ObjID {
-    constructor(product: Product, amount: number, unit: Unit) {
+    constructor(product: Product, amount: number, unit: Unit,cat?:string,PK?:string) {
         super();
         this.product = product;
         this.amount = amount;
         this.unit = unit;
+        this.cat = cat
+        this.PK = PK
     }
     // member
     product: Product;
     amount: number;
     unit: Unit;
+    cat:string
+    PK:string
 }
 export class Task extends ObjID {
     constructor(description: string, cook: Cook | null = null, duration: number = 0, ingredients: Set<Ingredient> = new Set()) {

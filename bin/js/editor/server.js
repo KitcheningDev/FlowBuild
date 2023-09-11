@@ -4,13 +4,50 @@ import { Cook1, Cook2, Ingredient, Product, Task, Unit } from "../flowbuild/reci
 import { randomID } from "../utils/obj_id.js";
 import { editor } from "./editor.js";
 import { html } from "./html.js";
+import { config as prodConfig } from '../environment/config.prod.js';
+import { config as stagingConfig } from '../environment/config.staging.js';
+import { config as devConfig } from '../environment/config.dev.js';
+import { environment } from '../environment/environment.js';
+// Load the appropriate configuration file
+let config;
+switch (environment) {
+    case 'prod':
+        config = prodConfig;
+        break;
+    case 'staging':
+        config = stagingConfig;
+        break;
+    default:
+        config = devConfig;
+        break;
+}
+// Access the configuration for the microservices
+const DEFAULT_API_RECIPE = config.DEFAULT_API_RECIPE;
+const DEFAULT_API_TAG = config.DEFAULT_API_TAG;
+const DEFAULT_API_INGREDIENT = config.DEFAULT_API_INGREDIENT;
+const DEFAULT_API_TASK = config.DEFAULT_API_TASK;
+const DEFAULT_API_IMAGES = config.DEFAULT_API_IMAGES;
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 class Server {
     constructor() {
-        // this.loadRecipes();
+        this.tagsList = [];
+        this.loadRecipes();
         html.search.input.onkeyup = () => this.updateSearchResult();
+        console.log(config);
+        this.initialiseTags();
+    }
+    initialiseTags() {
+        this.httpReq('GET', DEFAULT_API_TAG + "/tag", (list) => {
+            this.tagsList = list;
+            for (const json of list) {
+                const option = document.createElement('option');
+                option.value = json.PK; // Change 'option_value' to your desired value
+                option.textContent = json.tag; // Change 'Option Text' to your desired text
+                html.upload.tags_input.appendChild(option);
+            }
+        }, undefined, true);
     }
     // load 
     get isUpToDate() {
@@ -35,13 +72,14 @@ class Server {
         this.tags = new Map();
         this.ingredients = new Map();
         this.recipes = new Map();
-        this.owners = new Map();
+        this.owner = new Map();
         this.tasks = new Map();
         this.conns = new Map();
         // inload
         this.inload = true;
         // load task related data
-        this.httpReq('GET', "https://ks29sd5rn3.execute-api.us-east-1.amazonaws.com/staging/task", (list) => {
+        this.httpReq('GET', DEFAULT_API_TASK + "/task", (list) => {
+            console.log(list, "takss");
             for (const json of list) {
                 this.loadEntry(json);
             }
@@ -52,26 +90,37 @@ class Server {
             //     console.log("CONN", conn.from, conn.to);
             // }
             // load recipes
-            this.httpReq('GET', "https://7y0a1sogrh.execute-api.us-east-1.amazonaws.com/staging/recipe", (list) => {
-                for (const json of list) {
-                    this.loadEntry(json);
-                }
-                this.inload = false;
-                this.onload();
+            this.httpReq('GET', DEFAULT_API_INGREDIENT + "/ingredient/categories", (categories) => {
+                sessionStorage.setItem('categories', JSON.stringify(categories));
+                this.httpReq('GET', DEFAULT_API_RECIPE + "/recipe", (list) => {
+                    console.log(list, "recipes");
+                    for (const json of list) {
+                        this.loadEntry(json);
+                    }
+                    this.inload = false;
+                    this.onload();
+                }, undefined, true);
             }, undefined, true);
         }, undefined, true);
     }
     // http
-    httpReq(type, str, callback, body, async = false) {
+    httpReq(type, url, callback, data, async = false) {
         const req = new XMLHttpRequest();
         req.onload = () => {
             const response = req.responseText;
-            console.log("BODY", body, "RESPONSE", JSON.parse(response));
+            //console.log("RESPONSE", JSON.parse(response));
             callback(JSON.parse(response));
         };
-        req.open(type, str, async);
-        req.setRequestHeader("Content-Type", "application/json");
-        req.send(JSON.stringify(body));
+        req.open(type, url, async);
+        if (data instanceof FormData) {
+            // If data is FormData, no need to set Content-Type header; it will be automatically set for multipart/form-data
+        }
+        else if (data) {
+            // If data is a regular object, set the Content-Type header to JSON
+            req.setRequestHeader("Content-Type", "application/json");
+            data = JSON.stringify(data);
+        }
+        req.send(data);
     }
     // decode
     decodeTag(json) {
@@ -81,7 +130,7 @@ class Server {
     }
     decodeIngredient(json) {
         const id = parseInt(json['SK'].slice("PROD#".length));
-        const ingredient = new Ingredient(new Product(json['grocerie']), json['quantity'], new Unit(json['unit']));
+        const ingredient = new Ingredient(new Product(json['grocerie']), json['quantity'], new Unit(json['unit']), "option2", json['SK']);
         return [id, ingredient];
     }
     decodeOwner(json) {
@@ -137,14 +186,20 @@ class Server {
             recipe.tasks.add(this.tasks.get(taskID));
         }
         for (const ingredientJson of json['ingredients']) {
-            recipe.ingredients.add(this.loadEntry(ingredientJson)[1]);
+            if (ingredientJson && ingredientJson["SK"])
+                recipe.ingredients.add(this.loadEntry(ingredientJson)[1]);
         }
         for (const tagJson of json['tags']) {
-            recipe.tags.add(this.loadEntry(tagJson)[1]);
+            if (tagJson && tagJson["SK"])
+                recipe.tags.add(this.loadEntry(tagJson)[1]);
         }
-        for (const ownerJson of json['owner']) {
-            recipe.owners.add(this.loadEntry(ownerJson)[1]);
-        }
+        if (Object.keys(json['owner']).length !== 0)
+            recipe.owner = this.loadEntry(json['owner'])[1];
+        else
+            recipe.owner = {};
+        /*for (const ownerJson of json['owner']) {
+            recipe.owner.add(this.loadEntry(ownerJson)[1] as Owner);
+        }*/
         return [id, recipe];
     }
     loadEntry(json) {
@@ -160,7 +215,7 @@ class Server {
         }
         else if (json['SK'].startsWith('OWNER')) {
             const [id, owner] = this.decodeOwner(json);
-            this.owners.set(id, owner);
+            this.owner.set(id, owner);
             return [id, owner];
         }
         else if (json['SK'].startsWith('TASK')) {
@@ -239,70 +294,193 @@ class Server {
     }
     uploadBase64(base64, callback) {
         console.log(`{ "file": "${base64}"}`);
-        this.httpReq('POST', 'https://26mq4gqu64.execute-api.us-east-1.amazonaws.com/staging/images/upload', (json) => {
+        this.httpReq('POST', DEFAULT_API_IMAGES + "/images/upload", (json) => {
             callback(json['imageUrl']);
         }, { file: base64 });
     }
-    uploadRecipe(recipe) {
-        const image_urls = [];
-        this.flowchartImageBase64((base64) => {
-            this.uploadBase64(base64, (url) => {
-                image_urls.push(base64);
-            });
-        });
-        for (const file of html.upload.image_input.files) {
-            const FR = new FileReader();
-            FR.onloadend = function () {
-                server.uploadBase64(FR.result.toString(), (url) => {
-                    image_urls.push(url);
-                });
-            };
-            FR.readAsDataURL(file);
+    async flowchartImage(callback) {
+        try {
+            const blob = await window['domtoimage'].toBlob(document.getElementById('flowchart-canvas'));
+            callback(blob);
         }
-        // recipe
-        this.httpReq('POST', "https://7y0a1sogrh.execute-api.us-east-1.amazonaws.com/staging/recipe", () => {
-            // tasks
-            for (const task of recipe.tasks) {
-                const json = this.encodeTask(task.id, task);
-                json['PK'] = 'RECIPE#' + recipe.id;
-                this.httpReq('POST', "https://7y0a1sogrh.execute-api.us-east-1.amazonaws.com/staging/recipe", () => { }, json);
-                const ownjson = this.encodeTask(task.id, task);
-                ownjson['PK'] = 'TASK#' + task.id;
-                this.httpReq('POST', "https://ks29sd5rn3.execute-api.us-east-1.amazonaws.com/staging/task", () => { }, ownjson);
-            }
-            for (const ingredient of recipe.ingredients) {
-                const json = this.encodeIngredient(ingredient.id, ingredient);
-                json['PK'] = 'RECIPE#' + recipe.id;
-                this.httpReq('POST', "https://7y0a1sogrh.execute-api.us-east-1.amazonaws.com/staging/recipe", () => { }, json);
-            }
-            // owners
-            for (const owner of recipe.owners) {
-                const json = this.encodeOwner(owner.id, owner);
-                json['PK'] = 'RECIPE#' + recipe.id;
-                this.httpReq('POST', "https://ks29sd5rn3.execute-api.us-east-1.amazonaws.com/staging/task", () => { }, json);
-            }
-            // tags
-            for (const tag of recipe.tags) {
-                const json = this.encodeTag(tag.id, tag);
-                json['PK'] = 'RECIPE#' + recipe.id;
-                this.httpReq('POST', "https://7y0a1sogrh.execute-api.us-east-1.amazonaws.com/staging/recipe", () => { }, json);
-            }
-            // conns
-            for (const [parent, childs] of recipe.conns) {
-                // conn
-                const conn = { from: new Set(), to: new Set() };
-                conn.from.add(parent.id);
-                for (const child of childs) {
-                    conn.to.add(child.id);
-                }
-                // json
-                const json = this.encodeConn(randomID(), conn);
-                json['PK'] = 'TASK#' + parent.id;
-                this.httpReq('POST', "https://ks29sd5rn3.execute-api.us-east-1.amazonaws.com/staging/task", () => { }, json);
-            }
-            console.log('UPLOAD SUCCESS', recipe.title);
-        }, this.encodeRecipe(recipe.id, recipe));
+        catch (error) {
+            console.error('Oops, something went wrong!', error);
+            throw error; // Rethrow the error to propagate it
+        }
     }
+    async uploadimage(blob) {
+        const formData = new FormData();
+        formData.append('image', blob, 'image.png'); // 'image.png' is the desired filename on the server
+        try {
+            const json = await new Promise((resolve, reject) => {
+                this.httpReq('POST', DEFAULT_API_IMAGES + "/images/uploadmulter", resolve, formData);
+            });
+            return json['imageUrl'];
+        }
+        catch (error) {
+            console.error('Oops, something went wrong!', error);
+            throw error; // Rethrow the error to propagate it
+        }
+    }
+    async uploadAllImages(files) {
+        const imageUrls = [];
+        try {
+            for (const file of files) {
+                const blob = file;
+                const imageUrl = await this.uploadimage(blob);
+                imageUrls.push(imageUrl);
+            }
+        }
+        catch (error) {
+            console.error('Oops, something went wrong with uploading an image!', error);
+            throw error; // Rethrow the error to propagate it
+        }
+        return imageUrls;
+    }
+    async uploadFullRecipe(recipe) {
+        console.log(this.encodeRecipeData(recipe));
+        /*try {
+            // Call flowchartImage to capture the canvas image
+            await this.flowchartImage((blob: any) => {
+                // Continue with image upload after capturing the canvas image
+                const filesWithCanvasImage = [blob, ...Array.from(html.upload.image_input.files)];
+
+                this.uploadAllImages(filesWithCanvasImage)
+                    .then((imageUrls: string[]) => {
+                        recipe.image_flowChart = imageUrls.shift();
+                        recipe.image_list = imageUrls; // Set image URLs after all images are uploaded
+                        const json = this.encodeRecipeData(recipe);
+                        console.log(json);
+                        this.httpReq('POST', DEFAULT_API_RECIPE+"/recipe/full", () => { }, json);
+                    })
+                    .catch((error) => {
+                        // Handle any errors in the image upload process
+                        console.error('Oops, something went wrong with uploading images!', error);
+                    });
+            });
+        } catch (error) {
+            // Handle any errors in capturing the canvas image
+            console.error('Oops, something went wrong with capturing the canvas image!', error);
+        }*/
+    }
+    encodeRecipeData(recipe) {
+        const recipeData = {
+            recipe: { 'PK': 'RECIPE#' + recipe.id,
+                'SK': 'RECIPE#' + recipe.id,
+                'title': recipe.title,
+                'duration': recipe.duration,
+                'difficulty': recipe.difficulty,
+                'imageList': recipe.image_list,
+                "imageFlowChart": recipe.image_flowChart,
+                'numLikes': recipe.num_likes,
+                'numShares': recipe.num_shares,
+            },
+            "owner": recipe.owner,
+            'tasks': [],
+            'ingredients': [],
+            'user': "USER#1",
+            'tags': [],
+            'conns': [],
+        };
+        // Encode and append tasks
+        for (const task of recipe.tasks) {
+            const taskData = this.encodeTask(task.id, task);
+            taskData['PK'] = 'TASK#' + task.id;
+            recipeData['tasks'].push(taskData);
+        }
+        // Encode and append ingredients
+        for (const ingredient of recipe.ingredients) {
+            const ingredientData = this.encodeIngredient(ingredient.id, ingredient);
+            ingredientData['PK'] = 'RECIPE#' + recipe.id;
+            recipeData['ingredients'].push(ingredientData);
+        }
+        // Encode and append owner
+        /*for (const owner of recipe.owner) {
+            const ownerData = this.encodeOwner(owner.id, owner);
+            ownerData['PK'] = 'RECIPE#' + recipe.id;
+            recipeData['owner'].push(ownerData);
+        }*/
+        // Encode and append tags
+        for (const tag of recipe.tags) {
+            const tagData = this.encodeTag(tag.id, tag);
+            tagData['PK'] = 'RECIPE#' + recipe.id;
+            recipeData['tags'].push(tagData);
+        }
+        // Encode and append conns
+        for (const [parent, childs] of recipe.conns) {
+            const conn = { from: new Set(), to: new Set() };
+            conn.from.add(parent.id);
+            for (const child of childs) {
+                conn.to.add(child.id);
+            }
+            const connData = this.encodeConn(randomID(), conn);
+            connData['PK'] = 'TASK#' + parent.id;
+            recipeData['conns'].push(connData);
+        }
+        return recipeData;
+    }
+    /* uploadRecipe(recipe: Recipe): void {
+         const image_urls = [] as string[];
+         
+         this.flowchartImage((blob: any) => {
+             console.log(blob);
+             
+             this.uploadimage(blob, (image: any) => {
+                 image_urls.push(image.url);
+             })
+         })
+         for (const file of html.upload.image_input.files) {
+             const blob = file;
+             server.uploadimage(blob, (image: any) => {
+                 image_urls.push(image.url);
+             });
+         }
+         // recipe
+         this.httpReq('POST', DEFAULT_API_RECIPE+"/recipe", () => {
+             // tasks
+             for (const task of recipe.tasks) {
+                 const json = this.encodeTask(task.id, task);
+                 json['PK'] = 'RECIPE#' + recipe.id;
+                 this.httpReq('POST', DEFAULT_API_RECIPE+"/recipe", () => { }, json);
+ 
+                 const ownjson = this.encodeTask(task.id, task);
+                 ownjson['PK'] = 'TASK#' + task.id;
+                 this.httpReq('POST', DEFAULT_API_TASK+"/task", () => { }, ownjson);
+             }
+             for (const ingredient of recipe.ingredients) {
+                 const json = this.encodeIngredient(ingredient.id, ingredient);
+                 json['PK'] = 'RECIPE#' + recipe.id;
+                 this.httpReq('POST', DEFAULT_API_RECIPE+"/recipe", () => { }, json);
+             }
+             // owner
+             for (const owner of recipe.owner) {
+                 const json = this.encodeOwner(owner.id, owner);
+                 json['PK'] = 'RECIPE#' + recipe.id;
+                 this.httpReq('POST', DEFAULT_API_TASK+"/task", () => { }, json);
+             }
+             // tags
+             for (const tag of recipe.tags) {
+                 const json = this.encodeTag(tag.id, tag);
+                 json['PK'] = 'RECIPE#' + recipe.id;
+                 this.httpReq('POST', DEFAULT_API_RECIPE+"/recipe", () => { }, json);
+             }
+             // conns
+             for (const [parent, childs] of recipe.conns) {
+                 // conn
+                 const conn = { from: new Set<number>(), to: new Set<number>() };
+                 conn.from.add(parent.id);
+                 for (const child of childs) {
+                     conn.to.add(child.id);
+                 }
+                 // json
+                 const json = this.encodeConn(randomID(), conn);
+                 json['PK'] = 'TASK#' + parent.id;
+                 this.httpReq('POST', DEFAULT_API_TASK+"/task", () => { }, json);
+             }
+             console.log('UPLOAD SUCCESS', recipe.title);
+         },
+             this.encodeRecipe(recipe.id, recipe));
+     }*/
     // search
     matchingRecipes(query) {
         const list = [];
@@ -375,10 +553,27 @@ class Server {
             const wrap = html.appendChilds(html.createDiv('wrap'), align);
             // item
             const item = html.appendChilds(html.createDiv('search-result'), html.appendChilds(html.createDiv('hor-align'), img, title), versep, wrap);
-            item.onclick = () => {
+            item.onclick = async () => {
                 // for (const task of recipe.tasks) {
                 //     console.log(task.id, task.description);
                 // }
+                console.log(recipe);
+                try {
+                    console.log(Array.from(recipe.ingredients)[0].PK);
+                    const data = { pks: Array.from(recipe.ingredients).map(value => ({ SK: value.PK })) };
+                    console.log(data);
+                    const json = await new Promise((resolve, reject) => {
+                        this.httpReq('POST', DEFAULT_API_INGREDIENT + "/ingredient/getCategories", resolve, data);
+                    });
+                    sessionStorage.setItem("search", JSON.stringify({
+                        search: true,
+                        recipeCategories: json
+                    }));
+                }
+                catch (error) {
+                    console.error('Oops, something went wrong!', error);
+                    throw error; // Rethrow the error to propagate it
+                }
                 editor.loadRecipe(recipe);
             };
             // add
@@ -391,8 +586,9 @@ class Server {
 export const server = new Server();
 document.addEventListener('keypress', (ev) => {
     if (ev.key == 'Enter') {
-        server.flowchartImageBase64((base64) => {
-            server.uploadBase64(base64, (url) => {
+        server.flowchartImage((blob) => {
+            console.log(blob);
+            server.uploadimage(blob).then((url) => {
                 console.log(url);
             });
         });

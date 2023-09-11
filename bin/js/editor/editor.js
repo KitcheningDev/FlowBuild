@@ -1,5 +1,6 @@
 import { drawRecipe } from "../flowbuild/draw_recipe.js";
 import { Recipe } from "../flowbuild/recipe/recipe.js";
+import { Tag } from "../flowbuild/recipe/recipe_data.js";
 import { Cook1, Cook2, Ingredient, Product, Task, Unit } from "../flowbuild/recipe/task.js";
 import { html } from "./html.js";
 import { server } from "./server.js";
@@ -47,7 +48,8 @@ class RecipeEditor {
         html.upload.toggle.onpointerdown = () => { this.loadUploadEditor(); this.toggleUploadEditor(); };
         html.upload.submit.onpointerdown = () => {
             console.log("UPLOADING...");
-            server.uploadRecipe(recipe);
+            //server.uploadRecipe(recipe);
+            server.uploadFullRecipe(recipe);
             this.hideUploadEditor();
         };
         html.upload.title_input.onkeyup = () => this.updateRecipeTitle();
@@ -59,6 +61,8 @@ class RecipeEditor {
         html.upload.duration_input.onkeyup = () => this.updateRecipeDuration();
         html.upload.min.parentElement.onpointerup = () => this.updateRecipeDuration();
         html.upload.hr.parentElement.onpointerup = () => this.updateRecipeDuration();
+        html.upload.owner_input.onkeyup = () => this.updateRecipeOwner();
+        html.upload.tags_input.onclick = () => this.updateRecipetags();
         // flowchart editor
         html.flowchart.canvas.onpointerdown = (ev) => {
             const target = ev.target;
@@ -189,11 +193,12 @@ class RecipeEditor {
     updateRecipeIngredients() {
         this.recipe.ingredients = new Set();
         for (const row of html.ingredient.container.rows) {
-            const [product, amount, unit] = row.getElementsByClassName('ingredient-property');
-            this.recipe.ingredients.add(new Ingredient(new Product(product.value.trim()), parseFloat(amount.value.trim()), new Unit(unit.value.trim())));
+            const [product, amount, unit, cat] = row.getElementsByClassName('ingredient-property');
+            this.recipe.ingredients.add(new Ingredient(new Product(product.value.trim()), parseFloat(amount.value.trim()), new Unit(unit.value.trim()), cat.value));
         }
+        //console.log(this.recipe.ingredients);
     }
-    addIngredientRow(ingredient = new Ingredient(new Product('product'), 0, new Unit('unit'))) {
+    addIngredientRow(ingredient = new Ingredient(new Product('product'), 0, new Unit('unit'), "categorie")) {
         const row = html.addCls(html.ingredient.container.insertRow(), 'ingredient');
         row.onkeyup = () => this.updateRecipeIngredients();
         // product
@@ -211,6 +216,21 @@ class RecipeEditor {
         unit.value = ingredient.unit.name;
         unit.type = 'text';
         html.appendChilds(row.insertCell(), unit);
+        console.log(ingredient.product);
+        //categorie products
+        const categorie = html.create('select', 'ingredient-property');
+        const categories = JSON.parse(sessionStorage.getItem("categories"));
+        const search = JSON.parse(sessionStorage.getItem("search")).recipeCategories;
+        categories.forEach((element) => {
+            const option = document.createElement('option');
+            option.value = element.PK;
+            option.text = element.name;
+            const isProductInCategory = search.some((searchCategory) => searchCategory.products.some((product) => product.grocerie === ingredient.product.name && searchCategory.PK === element.PK));
+            option.selected = isProductInCategory;
+            categorie.appendChild(option);
+        });
+        categorie.onchange = () => this.updateRecipeIngredients();
+        html.appendChilds(row.insertCell(), categorie);
         // onkeydown
         product.onkeydown = (ev) => {
             if (ev.key == 'Enter') {
@@ -565,6 +585,32 @@ class RecipeEditor {
         }
         else {
             this.showUplaodEditor();
+        }
+    }
+    // owner
+    updateRecipeOwner() {
+        this.recipe.owner.name = html.upload.owner_input.value.trim();
+    }
+    updateRecipetags() {
+        const selectedOptions = Array.from(html.upload.tags_input.selectedOptions).map(option => option.textContent);
+        const selectedOptionsPKs = Array.from(html.upload.tags_input.selectedOptions).map(option => option.value);
+        const tag = Array.from(this.recipe.tags).map(tag => tag.name);
+        if (!tag.includes(selectedOptionsPKs[0])) {
+            const paragraph = html.upload.chosen_tags;
+            if (paragraph.textContent.length > 0) {
+                paragraph.textContent = paragraph.textContent + " ," + selectedOptions[0];
+            }
+            else {
+                paragraph.textContent = selectedOptions[0];
+            }
+            console.log('Selected options:', selectedOptions);
+            for (const selectedTag of selectedOptionsPKs) {
+                this.recipe.tags.add(new Tag(selectedTag));
+            }
+            console.log('recipe tags:', this.recipe.tags);
+        }
+        else {
+            console.log(" already chosen");
         }
     }
 }

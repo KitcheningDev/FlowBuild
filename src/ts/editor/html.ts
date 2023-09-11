@@ -1,6 +1,8 @@
 // generic event listeners
 document.addEventListener('focusin', (ev: FocusEvent) => {
-    (ev.target as HTMLInputElement).select();
+    if (ev.target instanceof HTMLInputElement) {
+        ev.target.select();
+    }
 });
 // html
 export namespace html {
@@ -83,5 +85,8 @@ export namespace html {
         export const diff5 = document.getElementById('recipe-difficulty-5') as HTMLInputElement;
         export const min = document.getElementById('recipe-min') as HTMLInputElement;
         export const hr = document.getElementById('recipe-hour') as HTMLInputElement;
+        export const owner_input = document.getElementById('recipe-owner-input') as HTMLInputElement;
+        export const tags_input = document.getElementById('recipe-tags-input') as HTMLSelectElement;
+        export const chosen_tags = document.getElementById('chosen-tags') as HTMLElement;
     }
 }

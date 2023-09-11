@@ -17,11 +17,13 @@ export class Unit {
 }
 ;
 export class Ingredient extends ObjID {
-    constructor(product, amount, unit) {
+    constructor(product, amount, unit, cat, PK) {
         super();
         this.product = product;
         this.amount = amount;
         this.unit = unit;
+        this.cat = cat;
+        this.PK = PK;
     }
 }
 export class Task extends ObjID {

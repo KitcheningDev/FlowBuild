@@ -1,6 +1,8 @@
 // generic event listeners
 document.addEventListener('focusin', (ev) => {
-    ev.target.select();
+    if (ev.target instanceof HTMLInputElement) {
+        ev.target.select();
+    }
 });
 // html
 export var html;
@@ -94,6 +96,9 @@ export var html;
         upload.diff5 = document.getElementById('recipe-difficulty-5');
         upload.min = document.getElementById('recipe-min');
         upload.hr = document.getElementById('recipe-hour');
+        upload.owner_input = document.getElementById('recipe-owner-input');
+        upload.tags_input = document.getElementById('recipe-tags-input');
+        upload.chosen_tags = document.getElementById('chosen-tags');
     })(upload = html.upload || (html.upload = {}));
 })(html || (html = {}));
 //# sourceMappingURL=html.js.map

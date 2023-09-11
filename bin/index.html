@@ -128,6 +128,9 @@
                                 <th>
                                     <div class="cat">unit</div>
                                 </th>
+                                <th>
+                                    <div class="cat">categorie</div>
+                                </th>
                                 <td class="w-5"></td>
                             </tr>
                         </thead>
@@ -234,11 +237,17 @@
                             </div>
                         </div>
                     </div>
+                    <div class="section-foot">
+                        <div id="recipe-submit" class="nav-btn">
+                            <div class="icon fa-regular fa-square-caret-up"></div>
+                            <div class="label">upload</div>
+                        </div>
+                    </div>
                 </div>
                 <!-- upload -->
                 <div id="upload-card" class="section hidden">
                     <div class="section-head">upload</div>
-                    <div class="section-body">
+                    <div class="section-body" style="max-height: 70vh;overflow-y: scroll;">
                         <!-- title -->
                         <div class="subsection">
                             <div class="subsection-head">title</div>
@@ -324,6 +333,31 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- owner -->
+                        <div class="subsection">
+                            <div class="subsection-head">Recipe creator</div>
+                            <div class="subsection-body">
+                                <div class="underline-wrap-hor">
+                                    <div class="underline-hor"></div>
+                                    <input id="recipe-owner-input" type="text" style="width: 15rem;"
+                                        placeholder="recipe creator name">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- tags -->
+                        <div class="subsection">
+                            <div class="subsection-head">Tags</div>
+                            <div class="subsection-body">
+                                    <select name="tags" multiple id="recipe-tags-input" style="width: 300px;">
+                                    </select>
+                            </div>
+                        </div>
+                        <div class="subsection">
+                            <div class="subsection-head">chosen tags</div>
+                            <div class="subsection-body">
+                                    <div id="chosen-tags"></div>
+                            </div>
+                        </div>
                     </div>
                     <!-- submit -->
                     <div class="section-foot">
@@ -332,6 +366,8 @@
                             <div class="label">upload</div>
                         </div>
                     </div>
+                </div>
+                    
                 </div>
             </div>
         </div>
