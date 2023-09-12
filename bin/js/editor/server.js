@@ -35,7 +35,6 @@ class Server {
         this.tagsList = [];
         this.loadRecipes();
         html.search.input.onkeyup = () => this.updateSearchResult();
-        console.log(config);
         this.initialiseTags();
     }
     initialiseTags() {
@@ -79,7 +78,6 @@ class Server {
         this.inload = true;
         // load task related data
         this.httpReq("GET", DEFAULT_API_TASK + "/task", (list) => {
-            console.log(list, "takss");
             for (const json of list) {
                 this.loadEntry(json);
             }
@@ -93,7 +91,6 @@ class Server {
             this.httpReq("GET", DEFAULT_API_INGREDIENT + "/ingredient/categories", (categories) => {
                 sessionStorage.setItem("categories", JSON.stringify(categories));
                 this.httpReq("GET", DEFAULT_API_RECIPE + "/recipe", (list) => {
-                    console.log(list, "recipes");
                     for (const json of list) {
                         this.loadEntry(json);
                     }
@@ -108,7 +105,6 @@ class Server {
         const req = new XMLHttpRequest();
         req.onload = () => {
             const response = req.responseText;
-            //console.log("RESPONSE", JSON.parse(response));
             callback(JSON.parse(response));
         };
         req.open(type, url, async);
@@ -294,7 +290,6 @@ class Server {
         });
     }
     uploadBase64(base64, callback) {
-        console.log(`{ "file": "${base64}"}`);
         this.httpReq("POST", DEFAULT_API_IMAGES + "/images/upload", (json) => {
             callback(json["imageUrl"]);
         }, { file: base64 });
@@ -339,7 +334,6 @@ class Server {
         return imageUrls;
     }
     async uploadFullRecipe(recipe) {
-        console.log(this.encodeRecipeData(recipe));
         try {
             // Call flowchartImage to capture the canvas image
             await this.flowchartImage((blob) => {
@@ -353,7 +347,6 @@ class Server {
                     recipe.image_flowChart = imageUrls.shift();
                     recipe.image_list = imageUrls; // Set image URLs after all images are uploaded
                     const json = this.encodeRecipeData(recipe);
-                    console.log(json);
                     this.httpReq("POST", DEFAULT_API_RECIPE + "/recipe/full", () => { }, json);
                 })
                     .catch((error) => {
@@ -428,8 +421,6 @@ class Server {
           const image_urls = [] as string[];
           
           this.flowchartImage((blob: any) => {
-              console.log(blob);
-              
               this.uploadimage(blob, (image: any) => {
                   image_urls.push(image.url);
               })
@@ -565,15 +556,12 @@ class Server {
                 // for (const task of recipe.tasks) {
                 //     console.log(task.id, task.description);
                 // }
-                console.log(recipe);
                 try {
-                    console.log(Array.from(recipe.ingredients)[0].PK);
                     const data = {
                         pks: Array.from(recipe.ingredients).map((value) => ({
                             SK: value.PK,
                         })),
                     };
-                    console.log(data);
                     const json = await new Promise((resolve, reject) => {
                         this.httpReq("POST", DEFAULT_API_INGREDIENT + "/ingredient/getCategories", resolve, data);
                     });
@@ -597,7 +585,6 @@ export const server = new Server();
 document.addEventListener("keypress", (ev) => {
     if (ev.key == "Enter") {
         server.flowchartImage((blob) => {
-            console.log(blob);
             server.uploadimage(blob).then((url) => {
                 console.log(url);
             });
