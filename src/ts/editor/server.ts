@@ -417,29 +417,43 @@ class Server {
   public async uploadFullRecipe(recipe: Recipe): Promise<void> {
     console.log(this.encodeRecipeData(recipe));
 
-    /*try {
-            // Call flowchartImage to capture the canvas image
-            await this.flowchartImage((blob: any) => {
-                // Continue with image upload after capturing the canvas image
-                const filesWithCanvasImage = [blob, ...Array.from(html.upload.image_input.files)];
+    try {
+      // Call flowchartImage to capture the canvas image
+      await this.flowchartImage((blob: any) => {
+        // Continue with image upload after capturing the canvas image
+        const filesWithCanvasImage = [
+          blob,
+          ...Array.from(html.upload.image_input.files),
+        ];
 
-                this.uploadAllImages(filesWithCanvasImage)
-                    .then((imageUrls: string[]) => {
-                        recipe.image_flowChart = imageUrls.shift();
-                        recipe.image_list = imageUrls; // Set image URLs after all images are uploaded
-                        const json = this.encodeRecipeData(recipe);
-                        console.log(json);
-                        this.httpReq('POST', DEFAULT_API_RECIPE+"/recipe/full", () => { }, json);
-                    })
-                    .catch((error) => {
-                        // Handle any errors in the image upload process
-                        console.error('Oops, something went wrong with uploading images!', error);
-                    });
-            });
-        } catch (error) {
-            // Handle any errors in capturing the canvas image
-            console.error('Oops, something went wrong with capturing the canvas image!', error);
-        }*/
+        this.uploadAllImages(filesWithCanvasImage)
+          .then((imageUrls: string[]) => {
+            recipe.image_flowChart = imageUrls.shift();
+            recipe.image_list = imageUrls; // Set image URLs after all images are uploaded
+            const json = this.encodeRecipeData(recipe);
+            console.log(json);
+            this.httpReq(
+              "POST",
+              DEFAULT_API_RECIPE + "/recipe/full",
+              () => {},
+              json
+            );
+          })
+          .catch((error) => {
+            // Handle any errors in the image upload process
+            console.error(
+              "Oops, something went wrong with uploading images!",
+              error
+            );
+          });
+      });
+    } catch (error) {
+      // Handle any errors in capturing the canvas image
+      console.error(
+        "Oops, something went wrong with capturing the canvas image!",
+        error
+      );
+    }
   }
 
   private encodeRecipeData(recipe: Recipe): any {
