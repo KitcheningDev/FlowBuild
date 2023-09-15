@@ -224,26 +224,25 @@ class RecipeEditor {
         unit.value = ingredient.unit.name;
         unit.type = 'text';
         html.appendChilds(row.insertCell(), unit);
-
-        console.log(ingredient.product);
         
         //categorie products
         const categorie = html.create('select', 'ingredient-property') as HTMLSelectElement;
         const categories = JSON.parse(sessionStorage.getItem("categories"));
-        const search =  JSON.parse(sessionStorage.getItem("search")).recipeCategories;
-        
+       
         categories.forEach((element:any) => {
             const option = document.createElement('option');
             option.value = element.PK;
             option.text = element.name;
-            const isProductInCategory = search.some((searchCategory: any) =>
-                searchCategory.products.some((product: any) =>
-                    product.grocerie === ingredient.product.name && searchCategory.PK === element.PK
-                )
-            );
-
-            option.selected = isProductInCategory;
-
+            if(sessionStorage.getItem("search")){
+                const search =  JSON.parse(sessionStorage.getItem("search")).recipeCategories;
+                const isProductInCategory = search.some((searchCategory: any) =>
+                    searchCategory.products.some((product: any) =>
+                        product.grocerie === ingredient.product.name && searchCategory.PK === element.PK
+                    )
+                );
+    
+                option.selected = isProductInCategory;
+            }
             categorie.appendChild(option);
        });
         categorie.onchange = ()=>this.updateRecipeIngredients()
