@@ -7,5 +7,5 @@ export const config = {
 
     DEFAULT_API_TASK : 'https://qxbz08syjg.execute-api.us-east-1.amazonaws.com/prod',
 
-    DEFAULT_API_IMAGES : 'https://uegpaga7l7.execute-api.us-east-1.amazonaws.com/prod',
+    DEFAULT_API_IMAGES : 'https://0vf694nk01.execute-api.us-east-1.amazonaws.com/prod',
   };
