@@ -228,6 +228,9 @@ class RecipeEditor {
                 const isProductInCategory = search.some((searchCategory) => searchCategory.products.some((product) => product.grocerie === ingredient.product.name && searchCategory.PK === element.PK));
                 option.selected = isProductInCategory;
             }
+            else {
+                categorie.selectedIndex = 0;
+            }
             categorie.appendChild(option);
         });
         categorie.onchange = () => this.updateRecipeIngredients();

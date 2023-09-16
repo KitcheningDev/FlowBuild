@@ -428,6 +428,8 @@ class Server {
               () => {},
               json
             );
+            console.log("FINISHED UPLOADing ^_^");
+            
           })
           .catch((error) => {
             // Handle any errors in the image upload process

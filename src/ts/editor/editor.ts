@@ -48,7 +48,7 @@ class RecipeEditor {
         html.task.min.parentElement.onmouseup = () => this.updateTaskDuration();
         html.task.hr.parentElement.onmouseup = () => this.updateTaskDuration();
         // upload editor
-        html.upload.toggle.onpointerdown = () => { this.loadUploadEditor(); this.toggleUploadEditor(); };
+        html.upload.toggle.onpointerdown = () => { this.loadUploadEditor(); this.toggleUploadEditor(); };        
         html.upload.submit.onpointerdown = () => {
             console.log("UPLOADING...");
             //server.uploadRecipe(recipe);
@@ -242,6 +242,8 @@ class RecipeEditor {
                 );
     
                 option.selected = isProductInCategory;
+            }else{
+                categorie.selectedIndex = 0;
             }
             categorie.appendChild(option);
        });

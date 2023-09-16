@@ -348,6 +348,7 @@ class Server {
                     recipe.image_list = imageUrls; // Set image URLs after all images are uploaded
                     const json = this.encodeRecipeData(recipe);
                     this.httpReq("POST", DEFAULT_API_RECIPE + "/recipe/full", () => { }, json);
+                    console.log("FINISHED UPLOADing ^_^");
                 })
                     .catch((error) => {
                     // Handle any errors in the image upload process
