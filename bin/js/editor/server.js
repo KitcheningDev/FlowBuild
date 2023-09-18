@@ -22,11 +22,11 @@ switch (environment) {
         break;
 }
 // Access the configuration for the microservices
-const DEFAULT_API_RECIPE = config.DEFAULT_API_RECIPE;
-const DEFAULT_API_TAG = config.DEFAULT_API_TAG;
-const DEFAULT_API_INGREDIENT = config.DEFAULT_API_INGREDIENT;
-const DEFAULT_API_TASK = config.DEFAULT_API_TASK;
-const DEFAULT_API_IMAGES = config.DEFAULT_API_IMAGES;
+const DEFAULT_API_RECIPE = prodConfig.DEFAULT_API_RECIPE;
+const DEFAULT_API_TAG = prodConfig.DEFAULT_API_TAG;
+const DEFAULT_API_INGREDIENT = prodConfig.DEFAULT_API_INGREDIENT;
+const DEFAULT_API_TASK = prodConfig.DEFAULT_API_TASK;
+const DEFAULT_API_IMAGES = prodConfig.DEFAULT_API_IMAGES;
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -358,20 +358,16 @@ class Server {
                     recipe.image_flowChart = imageUrls.shift();
                     recipe.image_list = imageUrls; // Set image URLs after all images are uploaded
                     const json = this.encodeRecipeData(recipe);
-                    /* this.httpReq(
-                       "POST",
-                       DEFAULT_API_RECIPE + "/recipe/full",
-                       () => {},
-                       json
-                     );*/
-                    console.log("FINISHED UPLOADing ^_^");
-                    const textelemnt = document.getElementById("loader-text");
-                    textelemnt.textContent = "Recipe uploaded";
-                    const icon = document.getElementById("loader");
-                    icon.className = "loader-icon fa-solid fa-circle-check";
-                    setTimeout(() => {
-                        html.loader.style.display = "none";
-                    }, 1000);
+                    this.httpReq("POST", DEFAULT_API_RECIPE + "/recipe/full", () => {
+                        console.log("FINISHED UPLOADing ^_^");
+                        const textelemnt = document.getElementById("loader-text");
+                        textelemnt.textContent = "Recipe uploaded";
+                        const icon = document.getElementById("loader");
+                        icon.className = "loader-icon fa-solid fa-circle-check";
+                        setTimeout(() => {
+                            html.loader.style.display = "none";
+                        }, 1000);
+                    }, json);
                 })
                     .catch((error) => {
                     // Handle any errors in the image upload process
