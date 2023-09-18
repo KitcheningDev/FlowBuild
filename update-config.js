@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 // Read the content of the file
-fs.readFile('src/ts/server.ts', 'utf8', (err, data) => {
+fs.readFile('src/ts/editor/server.ts', 'utf8', (err, data) => {
     if (err) {
         console.error(err);
         return;
