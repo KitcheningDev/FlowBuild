@@ -30,7 +30,7 @@ fs.readFile('src/ts/editor/server.ts', 'utf8', (err, data) => {
     );
 
     // Write the updated content back to the file
-    fs.writeFile('src/ts/server.ts', data, 'utf8', (err) => {
+    fs.writeFile('src/ts/editor/server.ts', data, 'utf8', (err) => {
         if (err) {
             console.error(err);
         } else {
