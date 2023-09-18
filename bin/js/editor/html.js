@@ -44,6 +44,7 @@ export var html;
     html.parent = parent;
     // create
     html.create_recipe_btn = document.getElementById('create-btn');
+    html.loader = document.getElementById('loader-container');
     let search;
     (function (search) {
         search.input = document.getElementById('search-input');

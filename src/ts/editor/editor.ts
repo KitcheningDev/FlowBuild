@@ -51,6 +51,10 @@ class RecipeEditor {
         html.upload.toggle.onpointerdown = () => { this.loadUploadEditor(); this.toggleUploadEditor(); };        
         html.upload.submit.onpointerdown = () => {
             console.log("UPLOADING...");
+            html.loader.style.display = "flex";
+            const newTextElement = document.getElementById('loader-text');
+            newTextElement.textContent = "UPLOADING..."
+            html.loader.appendChild(newTextElement)
             //server.uploadRecipe(recipe);
             server.uploadFullRecipe(recipe)
             this.hideUploadEditor();

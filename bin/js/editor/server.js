@@ -22,11 +22,11 @@ switch (environment) {
         break;
 }
 // Access the configuration for the microservices
-const DEFAULT_API_RECIPE = prodConfig.DEFAULT_API_RECIPE;
-const DEFAULT_API_TAG = prodConfig.DEFAULT_API_TAG;
-const DEFAULT_API_INGREDIENT = prodConfig.DEFAULT_API_INGREDIENT;
-const DEFAULT_API_TASK = prodConfig.DEFAULT_API_TASK;
-const DEFAULT_API_IMAGES = prodConfig.DEFAULT_API_IMAGES;
+const DEFAULT_API_RECIPE = config.DEFAULT_API_RECIPE;
+const DEFAULT_API_TAG = config.DEFAULT_API_TAG;
+const DEFAULT_API_INGREDIENT = config.DEFAULT_API_INGREDIENT;
+const DEFAULT_API_TASK = config.DEFAULT_API_TASK;
+const DEFAULT_API_IMAGES = config.DEFAULT_API_IMAGES;
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -56,6 +56,12 @@ class Server {
         // icon
         html.search.load_icon.classList.add("fa-circle-notch", "fa-spin");
         html.search.load_icon.classList.remove("fa-magnifying-glass");
+        console.log("DATABASE LOADING");
+        const newTextElement = document.createElement('p');
+        newTextElement.className = "loader-text"; // Set the class attribute
+        newTextElement.id = "loader-text"; // Set the id attribute
+        newTextElement.textContent = "Fecthing our delecious recipes...";
+        html.loader.appendChild(newTextElement);
     }
     onload() {
         // icon
@@ -63,6 +69,11 @@ class Server {
         html.search.load_icon.classList.add("fa-magnifying-glass");
         this.updateSearchResult();
         console.log("DATABASE LOAD DONE");
+        const textelemnt = document.getElementById("loader-text");
+        textelemnt.textContent = "Thank you for waiting";
+        setTimeout(() => {
+            html.loader.style.display = "none";
+        }, 1000);
     }
     loadRecipes() {
         // preload
@@ -347,8 +358,20 @@ class Server {
                     recipe.image_flowChart = imageUrls.shift();
                     recipe.image_list = imageUrls; // Set image URLs after all images are uploaded
                     const json = this.encodeRecipeData(recipe);
-                    this.httpReq("POST", DEFAULT_API_RECIPE + "/recipe/full", () => { }, json);
+                    /* this.httpReq(
+                       "POST",
+                       DEFAULT_API_RECIPE + "/recipe/full",
+                       () => {},
+                       json
+                     );*/
                     console.log("FINISHED UPLOADing ^_^");
+                    const textelemnt = document.getElementById("loader-text");
+                    textelemnt.textContent = "Recipe uploaded";
+                    const icon = document.getElementById("loader");
+                    icon.className = "loader-icon fa-solid fa-circle-check";
+                    setTimeout(() => {
+                        html.loader.style.display = "none";
+                    }, 1000);
                 })
                     .catch((error) => {
                     // Handle any errors in the image upload process

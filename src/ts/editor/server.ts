@@ -32,11 +32,11 @@ switch (environment) {
 }
 
 // Access the configuration for the microservices
-const DEFAULT_API_RECIPE = prodConfig.DEFAULT_API_RECIPE;
-const DEFAULT_API_TAG = prodConfig.DEFAULT_API_TAG;
-const DEFAULT_API_INGREDIENT = prodConfig.DEFAULT_API_INGREDIENT;
-const DEFAULT_API_TASK = prodConfig.DEFAULT_API_TASK;
-const DEFAULT_API_IMAGES = prodConfig.DEFAULT_API_IMAGES;
+const DEFAULT_API_RECIPE = config.DEFAULT_API_RECIPE;
+const DEFAULT_API_TAG = config.DEFAULT_API_TAG;
+const DEFAULT_API_INGREDIENT = config.DEFAULT_API_INGREDIENT;
+const DEFAULT_API_TASK = config.DEFAULT_API_TASK;
+const DEFAULT_API_IMAGES = config.DEFAULT_API_IMAGES;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -75,6 +75,12 @@ class Server {
     // icon
     html.search.load_icon.classList.add("fa-circle-notch", "fa-spin");
     html.search.load_icon.classList.remove("fa-magnifying-glass");
+    console.log("DATABASE LOADING");
+    const newTextElement = document.createElement('p');
+    newTextElement.className = "loader-text"; // Set the class attribute
+    newTextElement.id = "loader-text"; // Set the id attribute
+    newTextElement.textContent = "Fecthing our delecious recipes..."
+    html.loader.appendChild(newTextElement)
   }
   private onload(): void {
     // icon
@@ -82,6 +88,11 @@ class Server {
     html.search.load_icon.classList.add("fa-magnifying-glass");
     this.updateSearchResult();
     console.log("DATABASE LOAD DONE");
+    const textelemnt = document.getElementById("loader-text")
+    textelemnt.textContent = "Thank you for waiting"
+    setTimeout(() => {
+      html.loader.style.display = "none"
+    }, 1000);
   }
 
   loadRecipes(): void {
@@ -425,11 +436,18 @@ class Server {
             this.httpReq(
               "POST",
               DEFAULT_API_RECIPE + "/recipe/full",
-              () => {},
+              () => {
+                console.log("FINISHED UPLOADing ^_^");
+                const textelemnt = document.getElementById("loader-text")
+                textelemnt.textContent = "Recipe uploaded"
+                const icon = document.getElementById("loader")
+                icon.className = "loader-icon fa-solid fa-circle-check"
+                setTimeout(() => {
+                  html.loader.style.display = "none"
+                }, 1000);
+              },
               json
             );
-            console.log("FINISHED UPLOADing ^_^");
-            
           })
           .catch((error) => {
             // Handle any errors in the image upload process

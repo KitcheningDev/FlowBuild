@@ -38,6 +38,7 @@ export namespace html {
     }    
     // create
     export const create_recipe_btn = document.getElementById('create-btn');
+    export const loader = document.getElementById('loader-container') as HTMLElement;
     export namespace search {
         export const input = document.getElementById('search-input') as HTMLInputElement;
         export const result = document.getElementById('search-result-list') as HTMLInputElement;
