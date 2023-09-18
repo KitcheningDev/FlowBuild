@@ -22,11 +22,11 @@ switch (environment) {
         break;
 }
 // Access the configuration for the microservices
-const DEFAULT_API_RECIPE = config.DEFAULT_API_RECIPE;
-const DEFAULT_API_TAG = config.DEFAULT_API_TAG;
-const DEFAULT_API_INGREDIENT = config.DEFAULT_API_INGREDIENT;
-const DEFAULT_API_TASK = config.DEFAULT_API_TASK;
-const DEFAULT_API_IMAGES = config.DEFAULT_API_IMAGES;
+const DEFAULT_API_RECIPE = prodConfig.DEFAULT_API_RECIPE;
+const DEFAULT_API_TAG = prodConfig.DEFAULT_API_TAG;
+const DEFAULT_API_INGREDIENT = prodConfig.DEFAULT_API_INGREDIENT;
+const DEFAULT_API_TASK = prodConfig.DEFAULT_API_TASK;
+const DEFAULT_API_IMAGES = prodConfig.DEFAULT_API_IMAGES;
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
