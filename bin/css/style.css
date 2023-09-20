@@ -676,7 +676,7 @@ video {
 body {
   height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  overflow: scroll;
   --tw-bg-opacity: 1;
   background-color: rgb(250 250 250 / var(--tw-bg-opacity));
 }
@@ -723,16 +723,22 @@ input[type="text"] {
   width: 100%;
   display: flex;
   flex-direction: column;
+  min-width: 750px;
 }
 
 .main {
   margin-top: 2rem;
   margin-left: 2rem;
   width: 100%;
-  flex-grow: 1;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
+  @media (max-width: 1400px) {
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 750px;
+  }
 }
 
 /* header */
@@ -744,6 +750,9 @@ input[type="text"] {
   padding: 1.5rem;
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+  @media (max-width: 1400px) {
+    flex-direction: column;
+  }
 }
 
 /* title */
@@ -846,6 +855,9 @@ div[role="textbox"].search-input {
 
 .search:hover .search-input, .search:focus-within .search-input {
   min-width: 32rem;
+  @media (max-width: 1400px) {
+    min-width: 16rem;
+  }
 }
 
 .search-icon {
@@ -941,6 +953,22 @@ div[role="textbox"].search-input {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+  @media (max-width: 1400px) {
+    margin-bottom: 5%;
+    align-items: center;
+    justify-content: center;  
+  }
+}
+
+@media (max-width: 1400px) {
+  #flowchart-card {
+    padding: 0;
+  }
+}
+@media (max-width: 1400px) {
+  #flowchart-card-section-body {
+    padding: 0;
+  }
 }
 
 .section-head {
@@ -1086,6 +1114,12 @@ table {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+  @media (max-width: 1400px) {
+    margin-bottom: 5%;
+    width: 90%;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .pop-up.hide {
@@ -1102,6 +1136,8 @@ table {
      object-fit: cover;
   opacity: 0.5;
   z-index: -10;
+  height: 100%;
+  width: 100%;
 }
 
 /* scroll */

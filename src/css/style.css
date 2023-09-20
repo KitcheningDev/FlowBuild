@@ -52,7 +52,7 @@
 
 /* body */
 body {
-    @apply w-screen h-screen overflow-hidden;
+    @apply w-screen h-screen overflow-auto;
     @apply semi-light-bg;
 }
 
@@ -75,12 +75,15 @@ input[type="text"] {
 
 /* content */
 .content {
-    @apply w-full h-full;
+    @apply w-full h-full min-w-750;
     @apply flex flex-col;
 }
 .main {
     @apply w-full grow mt-8 ml-8;
     @apply flex justify-start items-start;
+    @media (max-width: 1400px) {
+        @apply flex-col justify-space-between items-center min-w-750;
+    }
 }
 
 /* header */
@@ -88,6 +91,9 @@ input[type="text"] {
     @apply flex justify-between items-center;
     @apply p-6;
     @apply light-bg;
+    @media (max-width: 1400px) {
+        @apply flex-col;
+    }
 }
 
 /* title */
@@ -144,6 +150,9 @@ div[role="textbox"].search-input {
 }
 .search:hover .search-input, .search:focus-within .search-input {
     @apply min-w-[32rem];
+    @media (max-width: 1400px) {
+        @apply min-w-[16rem];
+    }
 }
 .search-icon {
     @apply text-2xl;
@@ -185,7 +194,23 @@ div[role="textbox"].search-input {
     @apply rounded-xl p-4 light-bg;
     @apply mr-24;
     @apply transition-all;
+    @media (max-width: 1400px) {
+        @apply flex-col justify-space-between items-center overflow-auto;
+    }
 }
+
+#flowchart-card {
+    @media (max-width: 1400px) {
+      @apply p-0; /* override padding on screens with a max-width of 1400px */
+    }
+}
+  
+#flowchart-card-section-body {  
+    @media (max-width: 1400px) {
+      @apply p-0; /* override padding on screens with a max-width of 1400px */
+    }
+}
+
 .section-head {
     @apply text-2xl font-bold highlight-text;
     @apply m-1;
@@ -270,6 +295,9 @@ table {
 .pop-up {
     @apply hor-align;
     @apply transition-all;
+    @media (max-width: 1400px) {
+        @apply justify-center mb-5 w-90;
+    }
 }
 .pop-up.hide {
     @apply scale-0 opacity-0;
@@ -279,6 +307,7 @@ table {
     @apply fixed object-cover top-0;
     @apply opacity-50;
     @apply -z-10;
+    @apply w-100 h-100
 }
 
 /* scroll */
