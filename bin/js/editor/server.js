@@ -57,7 +57,7 @@ class Server {
         html.search.load_icon.classList.add("fa-circle-notch", "fa-spin");
         html.search.load_icon.classList.remove("fa-magnifying-glass");
         console.log("DATABASE LOADING");
-        const newTextElement = document.createElement('p');
+        const newTextElement = document.createElement("p");
         newTextElement.className = "loader-text"; // Set the class attribute
         newTextElement.id = "loader-text"; // Set the id attribute
         newTextElement.textContent = "Fecthing our delecious recipes...";
@@ -422,7 +422,7 @@ class Server {
         for (const tag of recipe.tags) {
             const tagData = this.encodeTag(tag.id, tag);
             tagData["PK"] = "RECIPE#" + recipe.id;
-            recipeData["tags"].push(tagData);
+            recipeData["tags"].push(tag.name);
         }
         // Encode and append conns
         for (const [parent, childs] of recipe.conns) {

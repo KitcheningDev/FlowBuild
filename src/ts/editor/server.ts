@@ -76,11 +76,11 @@ class Server {
     html.search.load_icon.classList.add("fa-circle-notch", "fa-spin");
     html.search.load_icon.classList.remove("fa-magnifying-glass");
     console.log("DATABASE LOADING");
-    const newTextElement = document.createElement('p');
+    const newTextElement = document.createElement("p");
     newTextElement.className = "loader-text"; // Set the class attribute
     newTextElement.id = "loader-text"; // Set the id attribute
-    newTextElement.textContent = "Fecthing our delecious recipes..."
-    html.loader.appendChild(newTextElement)
+    newTextElement.textContent = "Fecthing our delecious recipes...";
+    html.loader.appendChild(newTextElement);
   }
   private onload(): void {
     // icon
@@ -88,10 +88,10 @@ class Server {
     html.search.load_icon.classList.add("fa-magnifying-glass");
     this.updateSearchResult();
     console.log("DATABASE LOAD DONE");
-    const textelemnt = document.getElementById("loader-text")
-    textelemnt.textContent = "Thank you for waiting"
+    const textelemnt = document.getElementById("loader-text");
+    textelemnt.textContent = "Thank you for waiting";
     setTimeout(() => {
-      html.loader.style.display = "none"
+      html.loader.style.display = "none";
     }, 1000);
   }
 
@@ -438,12 +438,12 @@ class Server {
               DEFAULT_API_RECIPE + "/recipe/full",
               () => {
                 console.log("FINISHED UPLOADing ^_^");
-                const textelemnt = document.getElementById("loader-text")
-                textelemnt.textContent = "Recipe uploaded"
-                const icon = document.getElementById("loader")
-                icon.className = "loader-icon fa-solid fa-circle-check"
+                const textelemnt = document.getElementById("loader-text");
+                textelemnt.textContent = "Recipe uploaded";
+                const icon = document.getElementById("loader");
+                icon.className = "loader-icon fa-solid fa-circle-check";
                 setTimeout(() => {
-                  html.loader.style.display = "none"
+                  html.loader.style.display = "none";
                 }, 1000);
               },
               json
@@ -512,7 +512,7 @@ class Server {
     for (const tag of recipe.tags) {
       const tagData = this.encodeTag(tag.id, tag);
       tagData["PK"] = "RECIPE#" + recipe.id;
-      recipeData["tags"].push(tagData);
+      recipeData["tags"].push(tag.name);
     }
 
     // Encode and append conns
