@@ -455,6 +455,13 @@ class Server {
               "Oops, something went wrong with uploading images!",
               error
             );
+            const textelemnt = document.getElementById("loader-text");
+            textelemnt.textContent = "Error occured please try again";
+            const icon = document.getElementById("loader");
+            icon.className = "fail-icon fa-solid fa-xmark";
+            setTimeout(() => {
+              html.loader.style.display = "none";
+            }, 1000);
           });
       });
     } catch (error) {

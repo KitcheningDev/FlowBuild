@@ -1300,6 +1300,10 @@ table {
 color: #16a34a;
 font-size: 100px;
 }
+.fail-icon{
+  color: #e92a08;
+  font-size: 100px;
+}
 
 .loader-text{
   color: #16a34a;
