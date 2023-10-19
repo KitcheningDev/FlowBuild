@@ -435,7 +435,7 @@ class Server {
             const json = this.encodeRecipeData(recipe);
             console.log(json);
             
-            /*this.httpReq(
+            this.httpReq(
               "POST",
               DEFAULT_API_RECIPE + "/recipe/full",
               () => {
@@ -449,7 +449,7 @@ class Server {
                 }, 1000);
               },
               json
-            );*/
+            );
           })
           .catch((error) => {
             // Handle any errors in the image upload process

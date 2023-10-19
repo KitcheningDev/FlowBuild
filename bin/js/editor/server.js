@@ -359,21 +359,16 @@ class Server {
                     recipe.image_list = imageUrls; // Set image URLs after all images are uploaded
                     const json = this.encodeRecipeData(recipe);
                     console.log(json);
-                    /*this.httpReq(
-                      "POST",
-                      DEFAULT_API_RECIPE + "/recipe/full",
-                      () => {
+                    this.httpReq("POST", DEFAULT_API_RECIPE + "/recipe/full", () => {
                         console.log("FINISHED UPLOADing ^_^");
                         const textelemnt = document.getElementById("loader-text");
                         textelemnt.textContent = "Recipe uploaded";
                         const icon = document.getElementById("loader");
                         icon.className = "loader-icon fa-solid fa-circle-check";
                         setTimeout(() => {
-                          html.loader.style.display = "none";
+                            html.loader.style.display = "none";
                         }, 1000);
-                      },
-                      json
-                    );*/
+                    }, json);
                 })
                     .catch((error) => {
                     // Handle any errors in the image upload process
