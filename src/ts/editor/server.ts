@@ -300,7 +300,7 @@ class Server {
     return json;
   }
   private encodeIngredient(id: number, ingredient: Ingredient): any {
-    const json = { PK: "PROD#" + id, SK: "PROD#" + id };
+    const json = { PK: ingredient.cat + id, SK: "PROD#" + id };
     json["grocerie"] = ingredient.product.name;
     json["quantity"] = ingredient.amount;
     json["unit"] = ingredient.unit.name;
@@ -433,7 +433,9 @@ class Server {
             recipe.image_flowChart = imageUrls.shift();
             recipe.image_list = imageUrls; // Set image URLs after all images are uploaded
             const json = this.encodeRecipeData(recipe);
-            this.httpReq(
+            console.log(json);
+            
+            /*this.httpReq(
               "POST",
               DEFAULT_API_RECIPE + "/recipe/full",
               () => {
@@ -447,7 +449,7 @@ class Server {
                 }, 1000);
               },
               json
-            );
+            );*/
           })
           .catch((error) => {
             // Handle any errors in the image upload process
@@ -503,6 +505,7 @@ class Server {
 
     // Encode and append ingredients
     for (const ingredient of recipe.ingredients) {
+      console.log(ingredient);
       const ingredientData = this.encodeIngredient(ingredient.id, ingredient);
       ingredientData["PK"] = "RECIPE#" + recipe.id;
       recipeData["ingredients"].push(ingredientData);
