@@ -8,7 +8,6 @@ import { addLines } from "./collapse/post_process/add_lines.js";
 import { center } from "./collapse/post_process/center.js";
 import { addCookLines } from "./collapse/post_process/add_cook_lines.js";
 export function drawRecipe(recipe) {
-    console.log("RECIPE");
     for (const [from, to] of recipe.conns) {
         // console.log(from.description, ...to);
     }

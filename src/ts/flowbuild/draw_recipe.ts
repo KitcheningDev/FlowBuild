@@ -11,7 +11,6 @@ import { addCookLines } from "./collapse/post_process/add_cook_lines.js";
 import { createGrid, createGridNew } from "./align.js";
 
 export function drawRecipe(recipe: Recipe): void {
-    console.log("RECIPE");
     for (const [from, to] of recipe.conns) {
         // console.log(from.description, ...to);
     }

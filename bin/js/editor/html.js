@@ -101,5 +101,13 @@ export var html;
         upload.tags_input = document.getElementById('recipe-tags-input');
         upload.chosen_tags = document.getElementById('chosen-tags');
     })(upload = html.upload || (html.upload = {}));
+    let recipeBot;
+    (function (recipeBot) {
+        recipeBot.popupButton = document.getElementById('chat-popupButton');
+        recipeBot.popup = document.getElementById('chat-popup');
+        recipeBot.closeButton = document.getElementById('chat-closeButton');
+        recipeBot.messageInput = document.getElementById('messageInput');
+        recipeBot.sendMessageButton = document.getElementById('sendMessageButton');
+    })(recipeBot = html.recipeBot || (html.recipeBot = {}));
 })(html || (html = {}));
 //# sourceMappingURL=html.js.map

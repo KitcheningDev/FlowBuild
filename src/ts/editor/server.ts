@@ -37,6 +37,7 @@ const DEFAULT_API_TAG = prodConfig.DEFAULT_API_TAG;
 const DEFAULT_API_INGREDIENT = prodConfig.DEFAULT_API_INGREDIENT;
 const DEFAULT_API_TASK = prodConfig.DEFAULT_API_TASK;
 const DEFAULT_API_IMAGES = prodConfig.DEFAULT_API_IMAGES;
+const DEFAULT_API_RECIPE_Ai = devConfig.DEFAULT_API_RECIPE;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -65,6 +66,31 @@ class Server {
       undefined,
       true
     );
+  }
+
+  askRecipeBot(message:string):any {
+    console.log(message);
+    return new Promise((resolve, reject) => {
+      this.httpReq(
+        "POST",
+        DEFAULT_API_RECIPE_Ai+"/recipe/airecipe",
+        (recipe: any) => {
+          console.log(recipe);
+          resolve(recipe);
+        },
+        { recipeName: message }
+      );
+    });
+  }
+
+   encodeBotIngredient(ingredient: any): any {
+    const json = {product:{name:ingredient.ingredient},amount:ingredient.amount,unit: {name:ingredient.unit} };
+    return json;
+  }
+
+  encodeBotInstruction(ingredient: any): any {
+    const json = {product:{name:ingredient.ingredient},amount:ingredient.amount,unit: {name:ingredient.unit} };
+    return json;
   }
 
   // load
@@ -722,6 +748,8 @@ class Server {
           console.error("Oops, something went wrong!", error);
           throw error; // Rethrow the error to propagate it
         }
+        console.log(recipe);
+        
         editor.loadRecipe(recipe);
       };
       // add

@@ -90,4 +90,11 @@ export namespace html {
         export const tags_input = document.getElementById('recipe-tags-input') as HTMLSelectElement;
         export const chosen_tags = document.getElementById('chosen-tags') as HTMLElement;
     }
+    export namespace recipeBot {
+        export const popupButton = document.getElementById('chat-popupButton');
+        export const popup = document.getElementById('chat-popup');
+        export const closeButton = document.getElementById('chat-closeButton');
+        export const messageInput = document.getElementById('messageInput') as HTMLInputElement;
+        export const sendMessageButton = document.getElementById('sendMessageButton');
+      }
 }

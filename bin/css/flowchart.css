@@ -551,6 +551,7 @@ video {
   /* @apply border border-black; */
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+  overflow: auto;
 }
 
 /* container */
@@ -599,6 +600,11 @@ video {
      -moz-user-select: none;
           user-select: none;
   z-index: 10;
+  max-height: 150px;
+  max-width: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 /* sync-line */

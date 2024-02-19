@@ -152,6 +152,66 @@ export class Recipe extends RecipeData {
         this.addConn(this.start, t3, t4, this.end);
         this.addConn(this.start, t3, t5, this.end);
     }
+    loadFromData(recipeData) {
+        var _a, _b;
+        this.clear();
+        const tasksMap = new Map();
+        // Create START and END tasks
+        const startTask = new Task('START');
+        const endTask = new Task('END');
+        tasksMap.set(0, startTask); // Assign ID 0 to START task
+        tasksMap.set(-1, endTask); // Assign ID -1 to END task
+        // Create tasks
+        recipeData.instructions.forEach((instruction) => {
+            const taskId = instruction.id;
+            const task = new Task(`task${taskId}`, Cook1);
+            task.description = instruction.body;
+            tasksMap.set(taskId, task);
+        });
+        // Connect tasks directly to START and END
+        recipeData.conns.forEach((connection) => {
+            const fromTaskIds = connection.from.map((taskId) => tasksMap.get(taskId));
+            const toTaskIds = connection.to.map((taskId) => tasksMap.get(taskId));
+            if (fromTaskIds.some((fromTask) => !fromTask)) {
+                console.error('One or more from-tasks not found.');
+                return;
+            }
+            if (toTaskIds.some((toTask) => !toTask)) {
+                console.error('One or more to-tasks not found.');
+                return;
+            }
+            // Connect tasks directly to START
+            if (connection.from.includes(0)) {
+                fromTaskIds.forEach((fromTask) => {
+                    this.addConn(startTask, fromTask);
+                });
+            }
+            // Connect tasks directly to END
+            if (connection.to.includes(-1)) {
+                toTaskIds.forEach((toTask) => {
+                    this.addConn(toTask, endTask);
+                });
+            }
+            // Connect other tasks
+            fromTaskIds.forEach((fromTask) => {
+                toTaskIds.forEach((toTask) => {
+                    if (!connection.from.includes(0) && !connection.to.includes(-1)) {
+                        this.addConn(fromTask, toTask);
+                    }
+                });
+            });
+        });
+        // Connect the first task to START
+        const firstTask = tasksMap.get((_a = recipeData.conns[0]) === null || _a === void 0 ? void 0 : _a.from[0]);
+        if (firstTask) {
+            this.addConn(startTask, firstTask);
+        }
+        // Connect the last task to END
+        const lastTask = tasksMap.get((_b = recipeData.conns.slice(-1)[0]) === null || _b === void 0 ? void 0 : _b.to[0]);
+        if (lastTask) {
+            this.addConn(lastTask, endTask);
+        }
+    }
     // graph
     createGraph() {
         return new Graph(__classPrivateFieldGet(this, _Recipe_connections, "f"));
