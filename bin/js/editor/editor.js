@@ -6,7 +6,7 @@ import { html } from "./html.js";
 import { server } from "./server.js";
 const fakeData = {
     recipeTitle: "Pasta Carbonara",
-    difficultyLevel: "Intermediate",
+    difficulty: 1,
     ingredients: [
         {
             amount: 8,
