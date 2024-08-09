@@ -418,6 +418,7 @@ class RecipeEditor {
                 try {
                     //const recipe = fakeData;
                     const recipe = await server.askRecipeBot(message);
+                    console.log("🚀 ~ RecipeEditor ~ setTimeout ~ recipe:", recipe);
                     recipe.ingredients.forEach((element, index) => {
                         const newIngredient = server.encodeBotIngredient(element);
                         recipe.ingredients[index] = newIngredient;
@@ -428,12 +429,15 @@ class RecipeEditor {
                     tempRecipe.ingredients = recipe.ingredients;
                     tempRecipe.loadFromData(recipe);
                     console.log(tempRecipe);
+                    console.log("🚀 ~ RecipeEditor ~ setTimeout ~ tempRecipe:", tempRecipe);
                     this.loadRecipe(tempRecipe);
                     this.hideSearchingMessage();
                     this.appendMessage("what do you think about the recipe : \n" + recipe.recipeTitle, true);
                 }
                 catch (error) {
+                    console.log("🚀 ~ RecipeEditor ~ setTimeout ~ error:", error);
                     this.hideSearchingMessage();
+                    this.appendMessage("i'm sorry but something went wrong can you please try again", true);
                 }
             }, 1000);
         }

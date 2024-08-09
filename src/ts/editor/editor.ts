@@ -284,7 +284,8 @@ class RecipeEditor {
     html.upload.tags_input.onclick = () => this.updateRecipetags();
     html.recipeBot.popupButton.onclick = () => this.openRecipeBot();
     html.recipeBot.closeButton.onclick = () => this.closeRecipeBot();
-    html.recipeBot.sendMessageButton.onclick = (event) => this.sendMessageBot(event);
+    html.recipeBot.sendMessageButton.onclick = (event) =>
+      this.sendMessageBot(event);
 
     // flowchart editor
     html.flowchart.canvas.onpointerdown = (ev: PointerEvent) => {
@@ -433,58 +434,74 @@ class RecipeEditor {
     chatMessages.appendChild(messageElement);
   }
 
-  async sendMessageBot(event:Event): Promise<void> {
+  async sendMessageBot(event: Event): Promise<void> {
     event.preventDefault();
     let message = html.recipeBot.messageInput.value.trim();
-    var selectedRadio = document.querySelector('input[name="chat-category"]:checked') as any;
+    var selectedRadio = document.querySelector(
+      'input[name="chat-category"]:checked'
+    ) as any;
     if (message !== "") {
       this.appendMessage(message);
       html.recipeBot.messageInput.value = "";
-      this.showSearchingMessage();     
+      this.showSearchingMessage();
       console.log("Selected category: " + selectedRadio?.value);
-      if(selectedRadio){
-        message = selectedRadio.value + " " + message 
+      if (selectedRadio) {
+        message = selectedRadio.value + " " + message;
       }
       setTimeout(async () => {
         try {
           //const recipe = fakeData;
-          const recipe = await server.askRecipeBot(message)
-          recipe.ingredients.forEach((element:any, index:number) => {
+          const recipe = await server.askRecipeBot(message);
+          console.log("🚀 ~ RecipeEditor ~ setTimeout ~ recipe:", recipe);
+          recipe.ingredients.forEach((element: any, index: number) => {
             const newIngredient = server.encodeBotIngredient(element);
             recipe.ingredients[index] = newIngredient;
           });
           const tempRecipe = new Recipe();
-          tempRecipe.title = recipe.recipeTitle
-          tempRecipe.difficulty = recipe.difficulty
-          tempRecipe.ingredients = recipe.ingredients
+          tempRecipe.title = recipe.recipeTitle;
+          tempRecipe.difficulty = recipe.difficulty;
+          tempRecipe.ingredients = recipe.ingredients;
           tempRecipe.loadFromData(recipe);
           console.log(tempRecipe);
+          console.log(
+            "🚀 ~ RecipeEditor ~ setTimeout ~ tempRecipe:",
+            tempRecipe
+          );
+
           this.loadRecipe(tempRecipe);
           this.hideSearchingMessage();
-          this.appendMessage("what do you think about the recipe : \n"+ recipe.recipeTitle,true);
+          this.appendMessage(
+            "what do you think about the recipe : \n" + recipe.recipeTitle,
+            true
+          );
         } catch (error) {
+          console.log("🚀 ~ RecipeEditor ~ setTimeout ~ error:", error)          
           this.hideSearchingMessage();
+          this.appendMessage(
+            "i'm sorry but something went wrong can you please try again",
+            true
+          );
         }
       }, 1000);
     }
   }
 
-  appendMessage(message: string, bot?:boolean): void {
+  appendMessage(message: string, bot?: boolean): void {
     const messagesContainer = document.getElementById("chat-messages");
     if (messagesContainer) {
       const messageElement = document.createElement("div");
       messageElement.className = "chat-message";
       messageElement.innerText = message;
-      if(bot){
+      if (bot) {
         messageElement.classList.add("bot-message");
-      }else{
+      } else {
         messageElement.classList.add("user-message");
       }
       messagesContainer.appendChild(messageElement);
     }
   }
 
-  loadRecipe(recipe: Recipe): void {    
+  loadRecipe(recipe: Recipe): void {
     this.recipe = recipe;
     this.task = null;
     this.from = null;
@@ -530,7 +547,7 @@ class RecipeEditor {
   }
   // ingredient editor
   private loadIngredientEditor(): void {
-    html.ingredient.container.innerHTML = "";    
+    html.ingredient.container.innerHTML = "";
     for (const ingredient of this.recipe.ingredients) {
       this.addIngredientRow(ingredient);
     }

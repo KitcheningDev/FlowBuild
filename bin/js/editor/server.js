@@ -27,7 +27,7 @@ const DEFAULT_API_TAG = devConfig.DEFAULT_API_TAG;
 const DEFAULT_API_INGREDIENT = devConfig.DEFAULT_API_INGREDIENT;
 const DEFAULT_API_TASK = devConfig.DEFAULT_API_TASK;
 const DEFAULT_API_IMAGES = devConfig.DEFAULT_API_IMAGES;
-const DEFAULT_API_RECIPE_Ai = devConfig.DEFAULT_API_RECIPE;
+const DEFAULT_API_RECIPE_Ai = "http://localhost:3000/getRecipeDetails";
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -52,18 +52,27 @@ class Server {
     askRecipeBot(message) {
         console.log(message);
         return new Promise((resolve, reject) => {
-            this.httpReq("POST", DEFAULT_API_RECIPE_Ai + "/recipe/airecipe", (recipe) => {
+            this.httpReq("POST", DEFAULT_API_RECIPE_Ai, //+"/recipe/airecipe",
+            (recipe) => {
                 console.log(recipe);
                 resolve(recipe);
             }, { recipeName: message });
         });
     }
     encodeBotIngredient(ingredient) {
-        const json = { product: { name: ingredient.ingredient }, amount: ingredient.amount, unit: { name: ingredient.unit } };
+        const json = {
+            product: { name: ingredient.ingredient },
+            amount: ingredient.amount,
+            unit: { name: ingredient.unit },
+        };
         return json;
     }
     encodeBotInstruction(ingredient) {
-        const json = { product: { name: ingredient.ingredient }, amount: ingredient.amount, unit: { name: ingredient.unit } };
+        const json = {
+            product: { name: ingredient.ingredient },
+            amount: ingredient.amount,
+            unit: { name: ingredient.unit },
+        };
         return json;
     }
     // load
@@ -159,7 +168,7 @@ class Server {
         return [id, ingredient];
     }
     decodeOwner(json) {
-        const id = parseInt(json["SK"].slice("OWNER#".length));
+        const id = parseInt(json["SK"].slice("USER#".length));
         const owner = new Owner(json["username"], json["avatar"]);
         return [id, owner];
     }
@@ -238,7 +247,7 @@ class Server {
             this.ingredients.set(id, ingredient);
             return [id, ingredient];
         }
-        else if (json["SK"].startsWith("OWNER")) {
+        else if (json["SK"].startsWith("USER")) {
             const [id, owner] = this.decodeOwner(json);
             this.owner.set(id, owner);
             return [id, owner];
@@ -273,7 +282,7 @@ class Server {
         return json;
     }
     encodeOwner(id, owner) {
-        const json = { PK: "OWNER#" + id, SK: "OWNER#" + id };
+        const json = { PK: "USER#" + id, SK: "USER#" + id };
         json["username"] = owner.name;
         json["avatar"] = owner.avatar;
         return json;

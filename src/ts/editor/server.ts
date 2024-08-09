@@ -37,7 +37,7 @@ const DEFAULT_API_TAG = devConfig.DEFAULT_API_TAG;
 const DEFAULT_API_INGREDIENT = devConfig.DEFAULT_API_INGREDIENT;
 const DEFAULT_API_TASK = devConfig.DEFAULT_API_TASK;
 const DEFAULT_API_IMAGES = devConfig.DEFAULT_API_IMAGES;
-const DEFAULT_API_RECIPE_Ai = devConfig.DEFAULT_API_RECIPE;
+const DEFAULT_API_RECIPE_Ai = "http://localhost:3000/getRecipeDetails";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -68,12 +68,12 @@ class Server {
     );
   }
 
-  askRecipeBot(message:string):any {
+  askRecipeBot(message: string): any {
     console.log(message);
     return new Promise((resolve, reject) => {
       this.httpReq(
         "POST",
-        DEFAULT_API_RECIPE_Ai+"/recipe/airecipe",
+        DEFAULT_API_RECIPE_Ai, //+"/recipe/airecipe",
         (recipe: any) => {
           console.log(recipe);
           resolve(recipe);
@@ -83,13 +83,21 @@ class Server {
     });
   }
 
-   encodeBotIngredient(ingredient: any): any {
-    const json = {product:{name:ingredient.ingredient},amount:ingredient.amount,unit: {name:ingredient.unit} };
+  encodeBotIngredient(ingredient: any): any {
+    const json = {
+      product: { name: ingredient.ingredient },
+      amount: ingredient.amount,
+      unit: { name: ingredient.unit },
+    };
     return json;
   }
 
   encodeBotInstruction(ingredient: any): any {
-    const json = {product:{name:ingredient.ingredient},amount:ingredient.amount,unit: {name:ingredient.unit} };
+    const json = {
+      product: { name: ingredient.ingredient },
+      amount: ingredient.amount,
+      unit: { name: ingredient.unit },
+    };
     return json;
   }
 
@@ -220,7 +228,7 @@ class Server {
     return [id, ingredient];
   }
   private decodeOwner(json: any): [number, Owner] {
-    const id = parseInt(json["SK"].slice("OWNER#".length));
+    const id = parseInt(json["SK"].slice("USER#".length));
     const owner = new Owner(json["username"], json["avatar"]);
     return [id, owner];
   }
@@ -301,7 +309,7 @@ class Server {
       const [id, ingredient] = this.decodeIngredient(json);
       this.ingredients.set(id, ingredient);
       return [id, ingredient];
-    } else if (json["SK"].startsWith("OWNER")) {
+    } else if (json["SK"].startsWith("USER")) {
       const [id, owner] = this.decodeOwner(json);
       this.owner.set(id, owner);
       return [id, owner];
@@ -333,7 +341,7 @@ class Server {
     return json;
   }
   private encodeOwner(id: number, owner: Owner): any {
-    const json = { PK: "OWNER#" + id, SK: "OWNER#" + id };
+    const json = { PK: "USER#" + id, SK: "USER#" + id };
     json["username"] = owner.name;
     json["avatar"] = owner.avatar;
     return json;
@@ -460,7 +468,7 @@ class Server {
             recipe.image_list = imageUrls; // Set image URLs after all images are uploaded
             const json = this.encodeRecipeData(recipe);
             console.log(json);
-            
+
             this.httpReq(
               "POST",
               DEFAULT_API_RECIPE + "/recipe/full",
@@ -749,7 +757,7 @@ class Server {
           throw error; // Rethrow the error to propagate it
         }
         console.log(recipe);
-        
+
         editor.loadRecipe(recipe);
       };
       // add

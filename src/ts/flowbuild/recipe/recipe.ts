@@ -141,7 +141,7 @@ export class Recipe extends RecipeData {
         this.addConn(this.start, t3, t5, this.end);
     }
 
-    loadFromData(recipeData:any) {
+    loadFromData(recipeData:any) {        
         this.clear();
         const tasksMap = new Map();
     
